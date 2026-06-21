@@ -1,37 +1,26 @@
-# Intelcom Broker Pay v17 — Super Admin
+# Intelcom Broker Pay v18 — Invitations
 
-Version Firebase sans Storage avec 3 rôles :
+Version avec 3 rôles : superadmin, broker, chauffeur.
 
-- `superadmin` : contrôle tous les brokers
-- `broker` : contrôle seulement son entreprise
-- `driver` : voit seulement ses relevés et véhicules
-
-## Installation rapide
-
-1. Mets `firestore.rules` dans Firebase > Firestore Database > Rules.
-2. Active Firebase Authentication > Email/Password.
-3. Crée ton compte dans Authentication.
-4. Dans Firestore, crée un document :
-
-Collection: `users`
-Document ID: UID de ton compte Firebase
-
+## Première configuration
+1. Crée ton compte dans Firebase Authentication.
+2. Copie son UID.
+3. Dans Firestore, crée `users/{UID}` :
 ```json
 {
   "name": "Allaoua Boucheneb",
   "email": "allaouaboucheneb06@gmail.com",
-  "role": "superadmin"
+  "role": "superadmin",
+  "active": true
 }
 ```
+4. Colle les règles `firestore.rules` dans Firebase > Firestore > Rules.
 
-5. Ouvre `index.html`.
+## Invitations
+- Le superadmin crée une invitation broker.
+- Le broker se connecte ou crée son compte avec le même email.
+- Le broker clique sur "Accepter invitation".
+- Le broker invite ses chauffeurs.
+- Le chauffeur accepte l'invitation avec son email.
 
-## Collections utilisées
-
-- `users`
-- `brokers`
-- `drivers`
-- `weeks`
-- `settings`
-
-Les PDF sont générés à la demande dans le navigateur, donc pas besoin de Firebase Storage.
+Aucun Firebase Storage requis. Les PDF sont générés à la demande.

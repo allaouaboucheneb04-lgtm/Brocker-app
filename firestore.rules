@@ -1,95 +1,68 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function signedIn() { return request.auth != null; }
-
-    function userDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    function role() {
-      return signedIn() && userDoc().exists() ? userDoc().data.role : null;
-    }
-
-    function isSuperAdmin() { return role() == 'superadmin'; }
-    function isBroker() { return role() == 'broker'; }
-    function isDriver() { return role() == 'driver'; }
-
-    function myBrokerId() {
-      return userDoc().data.brokerId;
-    }
-
-    function sameBrokerResource() {
-      return signedIn() && resource.data.brokerId == myBrokerId();
-    }
-
-    function sameBrokerRequest() {
-      return signedIn() && request.resource.data.brokerId == myBrokerId();
-    }
+    function signedIn(){ return request.auth != null; }
+    function userDoc(){ return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function role(){ return signedIn() && userDoc().exists() ? userDoc().data.role : ''; }
+    function brokerId(){ return signedIn() && userDoc().exists() ? userDoc().data.brokerId : ''; }
+    function isSuperAdmin(){ return signedIn() && role() == 'superadmin'; }
+    function isBroker(){ return signedIn() && role() == 'broker'; }
+    function isDriver(){ return signedIn() && role() == 'driver'; }
+    function sameBroker(id){ return signedIn() && brokerId() == id; }
 
     match /users/{userId} {
-      allow read: if isSuperAdmin()
-        || request.auth.uid == userId
-        || (isBroker() && resource.data.brokerId == myBrokerId());
-
-      allow create: if isSuperAdmin()
-        || (isBroker() && request.resource.data.role == 'driver' && request.resource.data.brokerId == myBrokerId());
-
-      allow update: if isSuperAdmin()
-        || request.auth.uid == userId
-        || (isBroker() && resource.data.role == 'driver' && resource.data.brokerId == myBrokerId());
-
-      allow delete: if isSuperAdmin();
+      allow read, write: if isSuperAdmin();
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow create: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn() && request.auth.uid == userId;
+      allow read: if isBroker() && resource.data.brokerId == brokerId();
     }
 
-    match /brokers/{brokerId} {
-      allow read: if isSuperAdmin() || (isBroker() && brokerId == myBrokerId());
-      allow write: if isSuperAdmin();
+    match /brokers/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, update: if isBroker() && id == brokerId();
     }
 
-    match /drivers/{driverId} {
-      allow read: if isSuperAdmin()
-        || (isBroker() && sameBrokerResource())
-        || (isDriver() && resource.data.uid == request.auth.uid);
-      allow create: if isSuperAdmin() || (isBroker() && sameBrokerRequest());
-      allow update: if isSuperAdmin() || (isBroker() && sameBrokerResource());
-      allow delete: if isSuperAdmin() || (isBroker() && sameBrokerResource());
+    match /invitations/{id} {
+      allow read: if isSuperAdmin();
+      allow read: if signedIn() && resource.data.email == request.auth.token.email;
+      allow create, update, delete: if isSuperAdmin();
+      allow create, update: if isBroker() && request.resource.data.brokerId == brokerId();
     }
 
-    match /weeks/{weekId} {
-      allow read: if isSuperAdmin()
-        || (isBroker() && sameBrokerResource())
-        || (isDriver() && resource.data.driverId == request.auth.uid);
-      allow create: if isSuperAdmin() || (isBroker() && sameBrokerRequest());
-      allow update: if isSuperAdmin() || (isBroker() && sameBrokerResource());
-      allow delete: if isSuperAdmin() || (isBroker() && sameBrokerResource());
+    match /drivers/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, write: if isBroker() && resource.data.brokerId == brokerId();
+      allow create: if isBroker() && request.resource.data.brokerId == brokerId();
+      allow read: if isDriver() && request.auth.uid == id;
     }
 
-    match /dailyVehicles/{docId} {
-      allow read: if isSuperAdmin()
-        || (isBroker() && sameBrokerResource())
-        || (isDriver() && resource.data.driverId == request.auth.uid);
-      allow create: if isSuperAdmin()
-        || (isBroker() && sameBrokerRequest())
-        || (isDriver() && request.resource.data.driverId == request.auth.uid);
-      allow update: if isSuperAdmin()
-        || (isBroker() && sameBrokerResource())
-        || (isDriver() && resource.data.driverId == request.auth.uid);
-      allow delete: if isSuperAdmin() || (isBroker() && sameBrokerResource());
+    match /weeks/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, write: if isBroker() && resource.data.brokerId == brokerId();
+      allow create: if isBroker() && request.resource.data.brokerId == brokerId();
+      allow read: if isDriver() && resource.data.driverId == request.auth.uid;
     }
 
-    match /parcelDetails/{docId} {
-      allow read: if isSuperAdmin()
-        || (isBroker() && sameBrokerResource())
-        || (isDriver() && resource.data.driverId == request.auth.uid);
-      allow write: if isSuperAdmin() || (isBroker() && sameBrokerRequest());
+    match /dailyVehicles/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, write: if isBroker() && resource.data.brokerId == brokerId();
+      allow create: if isBroker() && request.resource.data.brokerId == brokerId();
+      allow read, update: if isDriver() && resource.data.driverId == request.auth.uid;
+      allow create: if isDriver() && request.resource.data.driverId == request.auth.uid;
     }
 
-    match /settings/{brokerId} {
-      allow read: if isSuperAdmin() || (isBroker() && brokerId == myBrokerId()) || isDriver();
-      allow write: if isSuperAdmin() || (isBroker() && brokerId == myBrokerId());
+    match /settings/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, write: if isBroker() && resource.data.brokerId == brokerId();
+      allow create: if isBroker() && request.resource.data.brokerId == brokerId();
+    }
+
+    match /parcelDetails/{id} {
+      allow read, write: if isSuperAdmin();
+      allow read, write: if isBroker() && resource.data.brokerId == brokerId();
+      allow create: if isBroker() && request.resource.data.brokerId == brokerId();
+      allow read: if isDriver() && resource.data.driverId == request.auth.uid;
     }
 
     match /{document=**} { allow read, write: if false; }
