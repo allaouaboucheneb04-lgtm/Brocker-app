@@ -1,26 +1,33 @@
-# Intelcom Broker Pay v18 — Invitations
+# Intelcom Broker Pay v18.1 — Google + Invitations
 
-Version avec 3 rôles : superadmin, broker, chauffeur.
+## Nouveautés
+- Bouton **Continuer avec Google**.
+- Le compte Google est accepté seulement si :
+  - l’email est le superadmin configuré dans `index.html`, ou
+  - une invitation existe dans `invitations/{email}`.
+- Le profil `users/{uid}` est créé automatiquement au premier login.
+- Les chauffeurs sont créés automatiquement après invitation.
+- Aucun Firebase Storage : les PDF sont générés à la demande.
 
-## Première configuration
-1. Crée ton compte dans Firebase Authentication.
-2. Copie son UID.
-3. Dans Firestore, crée `users/{UID}` :
+## À activer dans Firebase
+1. Authentication > Méthodes de connexion > Google : activé.
+2. Optionnel : Email / mot de passe : activé.
+3. Firestore Database : créer la base.
+4. Copier `firestore.rules` dans Firestore Rules.
+
+## Superadmin
+Le premier login Google avec :
+`allaouaboucheneb06@gmail.com`
+créera automatiquement :
 ```json
 {
-  "name": "Allaoua Boucheneb",
-  "email": "allaouaboucheneb06@gmail.com",
   "role": "superadmin",
-  "active": true
+  "email": "allaouaboucheneb06@gmail.com"
 }
 ```
-4. Colle les règles `firestore.rules` dans Firebase > Firestore > Rules.
 
 ## Invitations
-- Le superadmin crée une invitation broker.
-- Le broker se connecte ou crée son compte avec le même email.
-- Le broker clique sur "Accepter invitation".
-- Le broker invite ses chauffeurs.
-- Le chauffeur accepte l'invitation avec son email.
+Les invitations sont sauvegardées avec l’email comme ID de document :
+`invitations/email@gmail.com`
 
-Aucun Firebase Storage requis. Les PDF sont générés à la demande.
+Le broker ou chauffeur clique ensuite sur Google et l’app crée son accès automatiquement.
