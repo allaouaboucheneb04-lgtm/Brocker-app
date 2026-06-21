@@ -1,31 +1,17 @@
-# Intelcom Pay App V15 Firebase
+# Intelcom Broker Pay - v15 Working Static
 
-Projet complet React + Firebase pour broker Intelcom.
+Cette version fonctionne directement avec `index.html`.
 
-## Installation
-```bash
-npm install
-cp .env.example .env
-npm run dev
-```
+## Utilisation rapide
+1. Ouvre `index.html` dans Chrome.
+2. Clique `Créer admin local`.
+3. Connecte-toi avec `admin / admin123`.
+4. Ajoute les chauffeurs.
+5. Importe les PDF Intelcom.
+6. Génère les relevés PDF.
 
-## Firebase à activer
-1. Authentication > Email/Password
-2. Firestore Database
-3. Publier les règles dans `firebase.rules`
+## Firebase
+La configuration Firebase est déjà dans le fichier. Pour utiliser Firebase Auth, connecte-toi avec un compte email/mot de passe créé dans Firebase Authentication.
 
-## Premier admin
-Crée un compte dans l'app, puis dans Firestore change son document `users/{uid}` :
-```json
-{ "role": "admin" }
-```
-
-## Fonctionnalités
-- Connexion admin/chauffeur
-- Gestion chauffeurs
-- Import jusqu'à 40 PDF Intelcom
-- Extraction chauffeur, semaine, période, jours, colis, total, détails colis
-- Barèmes par colis ou frais fixe par jour travaillé
-- Véhicule par journée
-- Relevés visibles par chauffeur
-- PDF généré à la demande, sans Firebase Storage
+## Mode local
+Le mode `admin / admin123` utilise localStorage, donc aucun serveur requis.
