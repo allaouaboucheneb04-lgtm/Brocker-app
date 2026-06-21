@@ -1,17 +1,16 @@
-# Intelcom Broker Pay - v15 Working Static
+# Intelcom Broker Pay v16 Firebase
 
-Cette version fonctionne directement avec `index.html`.
+Application web statique Firebase Auth + Firestore. Aucun Firebase Storage: les PDF sont générés à la demande.
 
-## Utilisation rapide
-1. Ouvre `index.html` dans Chrome.
-2. Clique `Créer admin local`.
-3. Connecte-toi avec `admin / admin123`.
-4. Ajoute les chauffeurs.
-5. Importe les PDF Intelcom.
-6. Génère les relevés PDF.
+## Installation rapide
+1. Active Authentication > Email/Password dans Firebase.
+2. Crée ton compte admin dans Authentication.
+3. Dans Firestore, crée `users/{UID_ADMIN}` avec: `{ "role": "admin" }`.
+4. Colle `firestore.rules` dans Firestore Rules puis Publish.
+5. Ouvre `index.html` ou héberge-le sur Firebase Hosting/Netlify.
 
-## Firebase
-La configuration Firebase est déjà dans le fichier. Pour utiliser Firebase Auth, connecte-toi avec un compte email/mot de passe créé dans Firebase Authentication.
-
-## Mode local
-Le mode `admin / admin123` utilise localStorage, donc aucun serveur requis.
+## Collections
+- users
+- drivers
+- weeks
+- settings
