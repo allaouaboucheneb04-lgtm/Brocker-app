@@ -1,25 +1,13 @@
-# Intelcom Broker Pay v18.3 Auth Fixed
+# Broker Intelcom Pay v19 simple stable
 
-Correction:
-- Google Sign-In sur iPhone utilise Redirect.
-- Plus de création automatique du superadmin par le code. Crée le document users/{uid} une seule fois dans Firebase.
-- Invitations par email Google.
-- Règles Firestore renforcées.
+Version volontairement simple : email/mot de passe seulement, sans Google, sans Storage.
 
-## Étape obligatoire Super Admin
-1. Connecte-toi une fois avec Google.
-2. Si l'app donne le UID dans l'erreur ou dans Firebase Auth, copie le UID.
-3. Dans Firestore, crée:
+## Installation
+1. Mets `index.html` dans ton GitHub Pages.
+2. Active Firebase Authentication > Email/Password.
+3. Colle les règles Firestore ci-dessous.
+4. Ouvre l'app et crée ton Super Admin une seule fois.
 
-Collection: users
-Document ID: UID Firebase
-
-{
-  "name": "Allaoua Boucheneb",
-  "email": "allaouaboucheneb06@gmail.com",
-  "role": "superadmin"
-}
-
-## Domaine autorisé Firebase
-Authentication > Settings > Authorized domains:
-allaouaboucheneb04-lgtm.github.io
+## Notes
+- Pour un broker créé par le super admin, crée son compte dans Firebase Auth, puis crée `users/{UID}` avec `{ role: 'broker', brokerId: 'broker_xxx' }`.
+- Pour un chauffeur, même logique avec `{ role: 'driver', brokerId: 'broker_xxx' }`.

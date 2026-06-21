@@ -1,86 +1,48 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function userPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
-    function userExists() { return signedIn() && exists(userPath()); }
-    function userData() { return get(userPath()).data; }
-    function isSuperAdmin() { return userExists() && userData().role == 'superadmin'; }
-    function isBroker() { return userExists() && userData().role == 'broker'; }
-    function isDriver() { return userExists() && userData().role == 'driver'; }
-    function myBrokerId() { return userData().brokerId; }
-    function myEmail() { return request.auth.token.email; }
-    function invitePath() { return /databases/$(database)/documents/invitations/$(myEmail()); }
-    function hasInvite() { return signedIn() && exists(invitePath()); }
-    function inviteData() { return get(invitePath()).data; }
+    function signedIn(){ return request.auth != null; }
+    function userExists(){ return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function userData(){ return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isSuperAdmin(){ return userExists() && userData().role == 'superadmin'; }
+    function isBroker(){ return userExists() && userData().role == 'broker'; }
+    function isDriver(){ return userExists() && userData().role == 'driver'; }
+    function myBrokerId(){ return userData().brokerId; }
 
     match /users/{uid} {
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow read, update: if signedIn() && request.auth.uid == uid;
       allow read, write: if isSuperAdmin();
-      allow read: if signedIn() && request.auth.uid == uid;
       allow read: if isBroker() && resource.data.brokerId == myBrokerId();
-
-      // Création automatique SEULEMENT si une invitation existe pour cet email Google.
-      allow create: if signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.email == myEmail()
-        && hasInvite()
-        && inviteData().used == false
-        && request.resource.data.role == inviteData().role
-        && request.resource.data.brokerId == inviteData().brokerId;
-
-      allow update: if signedIn()
-        && request.auth.uid == uid
-        && resource.data.role == request.resource.data.role
-        && resource.data.brokerId == request.resource.data.brokerId;
     }
-
     match /brokers/{brokerId} {
       allow read, write: if isSuperAdmin();
-      allow read: if isBroker() && brokerId == myBrokerId();
+      allow read, update: if isBroker() && brokerId == myBrokerId();
     }
-
     match /drivers/{driverId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
-      allow create: if isDriver() && request.auth.uid == driverId && request.resource.data.brokerId == myBrokerId();
-      allow read: if isDriver() && request.auth.uid == driverId;
+      allow read: if isDriver() && driverId == request.auth.uid;
     }
-
     match /weeks/{weekId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
       allow read: if isDriver() && resource.data.driverId == request.auth.uid;
     }
-
     match /dailyVehicles/{docId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
-      allow read: if isDriver() && resource.data.driverId == request.auth.uid;
-      allow create, update: if isDriver() && request.resource.data.driverId == request.auth.uid;
+      allow read, create, update: if isDriver() && request.resource.data.driverId == request.auth.uid;
     }
-
     match /parcelDetails/{docId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
       allow read: if isDriver() && resource.data.driverId == request.auth.uid;
     }
-
     match /settings/{docId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
     }
-
-    match /invitations/{email} {
-      allow read, write: if isSuperAdmin();
-      allow read, create, update: if isBroker() && request.resource.data.brokerId == myBrokerId();
-      allow read: if signedIn() && email == myEmail();
-      allow update: if signedIn()
-        && email == myEmail()
-        && resource.data.used == false
-        && request.resource.data.used == true
-        && request.resource.data.acceptedBy == request.auth.uid;
-    }
-
     match /{document=**} { allow read, write: if false; }
   }
 }
