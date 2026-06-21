@@ -96,7 +96,7 @@ $('googleBtn').onclick=async()=>{try{await signInWithPopup(auth,provider)}catch(
 $('loginBtn').onclick=async()=>{try{await signInWithEmailAndPassword(auth,$('loginEmail').value,$('loginPassword').value)}catch(e){$('loginMsg').textContent=e.message}};
 $('logoutBtn').onclick=()=>signOut(auth);
 
-onAuthStateChanged(auth,async user=>{ if(!user){$('loginView').classList.remove('hide');$('appView').classList.add('hide');$('logoutBtn').classList.add('hide');$('who').textContent='Non connecté';return} currentUser=user; try{await ensureUserProfile(user); await loadRole(); $('who').textContent=roleLabel(currentRole)+' — '+user.email; $('loginView').classList.add('hide');$('appView').classList.remove('hide');$('logoutBtn').classList.remove('hide'); applyRoleUI(); await loadAll();}catch(e){$('loginMsg').textContent=e.message; await signOut(auth);} });
+onAuthStateChanged(auth,async user=>{ if(!user){$('loginView').classList.remove('hide');$('appView').classList.add('hide');$('logoutBtn').classList.add('hide');$('who').textContent='Non connecté';return} currentUser=user; try{await ensureUserProfile(user); await loadRole(); $('who').textContent=roleLabel(currentRole)+' — '+user.email; $('loginView').classList.add('hide');$('appView').classList.remove('hide');$('logoutBtn').classList.remove('hide'); applyRoleUI(); openFirstAllowedPage(); await loadAll();}catch(e){$('loginMsg').textContent=e.message; await signOut(auth);} });
 
 async function ensureUserProfile(user){
   const email=cleanEmail(user.email), userRef=doc(db,'users',user.uid), snap=await getDoc(userRef);
@@ -111,7 +111,21 @@ async function ensureUserProfile(user){
 }
 async function loadRole(){const s=await getDoc(doc(db,'users',currentUser.uid)); userProfile=s.data(); currentRole=userProfile.role; currentBrokerId=userProfile.brokerId||'';}
 function roleLabel(r){return r==='superadmin'?'Super Admin':r==='broker'?'Broker':'Chauffeur'}
-function applyRoleUI(){document.querySelectorAll('.superOnly').forEach(e=>e.style.display=currentRole==='superadmin'?'block':'none');document.querySelectorAll('.brokerOnly').forEach(e=>e.style.display=currentRole==='broker'?'block':'none');document.querySelectorAll('.driverOnly').forEach(e=>e.style.display=currentRole==='driver'?'block':'none'); if(currentRole==='broker') $('iRole').value='driver';}
+function applyRoleUI(){
+  document.querySelectorAll('.nav button').forEach(e=>{
+    const show = e.classList.contains('allRole') ||
+      (currentRole==='superadmin' && e.classList.contains('superOnly')) ||
+      (currentRole==='broker' && e.classList.contains('brokerOnly')) ||
+      (currentRole==='driver' && e.classList.contains('driverOnly'));
+    e.style.display = show ? 'block' : 'none';
+  });
+  if(currentRole==='broker') $('iRole').value='driver';
+  if(currentRole==='broker') $('iRole').querySelector('option[value="broker"]').disabled=true;
+}
+function openFirstAllowedPage(){
+  const first=[...document.querySelectorAll('.nav button')].find(b=>b.style.display!=='none');
+  if(first) first.click();
+}
 document.querySelectorAll('.nav button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.page').forEach(p=>p.classList.add('hide'));$('page-'+btn.dataset.page).classList.remove('hide')});
 async function loadAll(){await Promise.all([loadBrokers(),loadInvites(),loadDrivers(),loadWeeks(),loadSettings()]); renderAll();}
 function renderAll(){renderDashboard();renderBrokers();renderInviteBrokerOptions();renderInvites();renderDrivers();renderWeeks();renderVehicleEditor();}
@@ -123,7 +137,15 @@ async function loadWeeks(){ let qRef=collection(db,'weeks'); if(currentRole==='b
 async function loadSettings(){ const id=currentBrokerId||'global'; const s=await getDoc(doc(db,'settings',id)); if(s.exists()) settings={...settings,...s.data()}; $('commissionInput').value=settings.commission; $('feeMode').value=settings.feeMode; $('fixedDayFee').value=settings.fixedDayFee; $('scalesJson').value=JSON.stringify(settings.scales,null,2);}
 
 $('addBrokerBtn').onclick=async()=>{const id='broker_'+Date.now(); await setDoc(doc(db,'brokers',id),{companyName:$('bCompany').value,ownerName:$('bOwner').value,email:cleanEmail($('bEmail').value),plan:'pro',maxDrivers:Number($('bMax').value||50),active:true,createdAt:serverTimestamp()}); await loadAll();};
-$('createInviteBtn').onclick=async()=>{const email=cleanEmail($('iEmail').value); const role=$('iRole').value; const brokerId=currentRole==='broker'?currentBrokerId:$('iBroker').value; await setDoc(doc(db,'invitations',email),{email,role,brokerId,name:$('iName').value,code:$('iCode').value,used:false,createdBy:currentUser.uid,createdAt:serverTimestamp()}); await loadAll();};
+$('createInviteBtn').onclick=async()=>{
+  const email=cleanEmail($('iEmail').value);
+  if(!email) return alert('Email obligatoire');
+  const role=currentRole==='broker'?'driver':$('iRole').value;
+  const brokerId=currentRole==='broker'?currentBrokerId:$('iBroker').value;
+  if(!brokerId) return alert('Choisir un broker');
+  await setDoc(doc(db,'invitations',email),{email,role,brokerId,name:$('iName').value,code:$('iCode').value,used:false,createdBy:currentUser.uid,createdAt:serverTimestamp()});
+  await loadAll();
+};
 $('saveSettingsBtn').onclick=async()=>{try{settings={commission:Number($('commissionInput').value||25),feeMode:$('feeMode').value,fixedDayFee:Number($('fixedDayFee').value||0),scales:JSON.parse($('scalesJson').value||'{}'),brokerId:currentBrokerId}; await setDoc(doc(db,'settings',currentBrokerId||'global'),settings,{merge:true}); $('settingsMsg').textContent='Paramètres enregistrés';$('settingsMsg').className='success'}catch(e){$('settingsMsg').textContent=e.message;$('settingsMsg').className='error'}};
 
 function renderDashboard(){$('statBrokers').textContent=brokers.length;$('statDrivers').textContent=drivers.length;$('statWeeks').textContent=weeks.length;$('statTotal').textContent=money(weeks.reduce((s,w)=>s+(Number(w.net)||0),0));}
@@ -135,7 +157,19 @@ function renderWeeks(){$('weeksTable').innerHTML=weeks.map(w=>`<tr><td>${w.drive
 function renderVehicleEditor(){if(currentRole!=='driver')return;const box=$('driverVehicleWeeks');box.innerHTML=weeks.map(w=>`<div class="card" style="box-shadow:none;margin:12px 0"><h3>${w.week}</h3>${(w.days||[]).map(day=>`<div class="field"><label>${day.date} — ${day.parcels} colis</label><select data-week="${w.id}" data-date="${day.date}"><option ${day.vehicle==='Essence'?'selected':''}>Essence</option><option ${day.vehicle==='Electrique'?'selected':''}>Electrique</option><option ${day.vehicle==='Diesel'?'selected':''}>Diesel</option><option ${day.vehicle==='Hybride'?'selected':''}>Hybride</option></select></div>`).join('')}<button class="btn ok" data-saveveh="${w.id}">Enregistrer</button></div>`).join('');document.querySelectorAll('[data-saveveh]').forEach(btn=>btn.onclick=async()=>{const id=btn.dataset.saveveh,w=weeks.find(x=>x.id===id);const days=w.days.map(day=>({...day,vehicle:document.querySelector(`select[data-week="${id}"][data-date="${day.date}"]`).value}));const fees=calcFees(days);await updateDoc(doc(db,'weeks',id),{days,brokerFees:fees.total,feeDetails:fees.details,net:round((Number(w.subtotal)||0)-(Number(w.commission)||0)-fees.total-(Number(w.deduction)||0)-(Number(w.advance)||0))});await loadAll();});}
 
 $('parseBtn').onclick=async()=>{parsedWeeks=[];const files=[...$('pdfFiles').files].slice(0,40);for(const f of files) parsedWeeks.push(await parseIntelcomPDF(f));renderPreview();};
-$('saveWeeksBtn').onclick=async()=>{for(const w of parsedWeeks){const driver=drivers.find(d=>d.code===w.driverCode)||{};const id=`${currentBrokerId}_${w.driverCode}_${w.week}`;const fees=calcFees(w.days), commission=round(w.subtotal*(settings.commission/100));await setDoc(doc(db,'weeks',id),{...w,brokerId:currentBrokerId,driverId:driver.uid||driver.id||'',commission,brokerFees:fees.total,feeDetails:fees.details,net:round(w.subtotal-commission-fees.total),createdAt:serverTimestamp()},{merge:true});}$('importMsg').textContent='Relevés sauvegardés dans Firestore';await loadAll();};
+$('saveWeeksBtn').onclick=async()=>{
+  if(currentRole!=='broker') return alert('Seulement le broker peut sauvegarder les relevés.');
+  let missing=[];
+  for(const w of parsedWeeks){
+    const driver=drivers.find(d=>String(d.code||'').toUpperCase()===String(w.driverCode||'').toUpperCase());
+    if(!driver){ missing.push(`${w.driverName} (${w.driverCode})`); continue; }
+    const id=`${currentBrokerId}_${w.driverCode}_${w.week}`;
+    const fees=calcFees(w.days), commission=round(w.subtotal*(settings.commission/100));
+    await setDoc(doc(db,'weeks',id),{...w,brokerId:currentBrokerId,driverId:driver.uid||driver.id||'',commission,brokerFees:fees.total,feeDetails:fees.details,net:round(w.subtotal-commission-fees.total),createdAt:serverTimestamp()},{merge:true});
+  }
+  $('importMsg').textContent= missing.length ? 'Relevés sauvegardés, mais chauffeurs introuvables: '+missing.join(', ') : 'Relevés sauvegardés dans Firestore';
+  await loadAll();
+};
 function renderPreview(){$('preview').innerHTML=parsedWeeks.map(w=>`<div class="card" style="box-shadow:none;margin:12px 0"><b>${w.driverName} - ${w.week}</b><br>${w.from} au ${w.to}<br>${w.totalParcels} colis — ${money(w.subtotal)}</div>`).join('');}
 async function parseIntelcomPDF(file){const buf=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:buf}).promise;let text='';for(let p=1;p<=pdf.numPages;p++){const page=await pdf.getPage(p),content=await page.getTextContent();text+=content.items.map(i=>i.str).join(' ')+'\n';}return parseText(text,file.name);}
 function parseText(text,filename){const codeMatch=text.match(/(C0[A-Z0-9]{5})\s+([A-Za-zÀ-ÿ' -]+?)\s+Invoice To/i)||filename.match(/(C0[A-Z0-9]{5})/i),driverCode=codeMatch?codeMatch[1]:'',driverName=codeMatch&&codeMatch[2]?codeMatch[2].trim():'Chauffeur',week=(text.match(/Week reference:\s*(20\d{2}-\d{1,2})/i)||text.match(/\b(20\d{2}-\d{1,2})\b/)||[])[1]||'',from=(text.match(/From:\s*(20\d{2}-\d{2}-\d{2})/i)||text.match(/\b(20\d{2}-\d{2}-\d{2})\b/)||[])[1]||'',to=(text.match(/To:\s*(20\d{2}-\d{2}-\d{2})/i)||[])[1]||'',totalInvoice=Number(((text.match(/Total invoice\s*\$?([0-9,.]+)/i)||[])[1]||'0').replace(',',''));const days=[],re=/(20\d{2}-\d{2}-\d{2})\s+0\s+(\d+)\s+\$([0-9,.]+)\s+\$([0-9,.]+)\s+\$([0-9,.]+)\s+\$([0-9,.]+)/g;let m;while((m=re.exec(text)))days.push({date:m[1],parcels:Number(m[2]),amount:round(Number(m[6].replace(',','))),vehicle:'Essence'});return{driverCode,driverName,week,from,to,days,totalParcels:days.reduce((s,d)=>s+d.parcels,0),subtotal:totalInvoice||round(days.reduce((s,d)=>s+d.amount,0)),deduction:0,advance:0,parcelDetails:extractParcelDetails(text)}}
