@@ -3,18 +3,35 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Broker Intelcom Pay - v22.1 Factures Pro</title>
+  <title>Broker Intelcom Pay - v23 Factures Pro</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <style>
-    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;color:#111}.wrap{max-width:1250px;margin:auto;padding:22px}h1{margin:0 0 10px}.card{background:#fff;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 2px 10px #0001}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#111;color:white;border-radius:12px;padding:14px}.stat b{font-size:22px;display:block;margin-top:6px}label{font-weight:bold;font-size:13px}input,select,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}textarea{min-height:70px}button{background:#111;color:white;border:0;border-radius:10px;padding:11px 14px;cursor:pointer;margin:5px 5px 5px 0}button.secondary{background:#555}button.danger{background:#a11}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left;font-size:13px;vertical-align:top}th{background:#111;color:white}.small{font-size:12px;color:#666}.mini{width:90px}.nameinput{min-width:190px}.warn{color:#b36b00;font-weight:bold}.bracketBox{border:1px solid #ddd;border-radius:12px;padding:10px;margin:10px 0;background:#fafafa}.bracketTitle{font-weight:bold;margin-bottom:6px}.bracketRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:6px 0}.pill{display:inline-block;background:#eee;border-radius:20px;padding:4px 8px;font-size:12px;margin-top:4px}.feeTop{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.feeSummary{background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}.hidden{display:none!important}.softBtn{background:#eee;color:#111;border:1px solid #ccc}@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}table{font-size:12px;display:block;overflow:auto}th,td{padding:6px}}
+    body{font-family:Arial,sans-serif;background:#eef2f7;margin:0;color:#111}.wrap{max-width:1250px;margin:auto;padding:22px}h1{margin:0 0 10px}.card{background:#fff;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 2px 10px #0001}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:linear-gradient(135deg,#111827,#1f2937);color:white;border-radius:12px;padding:14px}.stat b{font-size:22px;display:block;margin-top:6px}label{font-weight:bold;font-size:13px}input,select,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}textarea{min-height:70px}button{background:#111827;color:white;border:0;border-radius:10px;padding:11px 14px;cursor:pointer;margin:5px 5px 5px 0;font-weight:700}button.secondary{background:#475569}button.danger{background:#b91c1c}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left;font-size:13px;vertical-align:top}th{background:#111;color:white}.small{font-size:12px;color:#666}.mini{width:90px}.nameinput{min-width:190px}.warn{color:#b36b00;font-weight:bold}.bracketBox{border:1px solid #ddd;border-radius:12px;padding:10px;margin:10px 0;background:#fafafa}.bracketTitle{font-weight:bold;margin-bottom:6px}.bracketRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:6px 0}.pill{display:inline-block;background:#eee;border-radius:20px;padding:4px 8px;font-size:12px;margin-top:4px}.feeTop{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.feeSummary{background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}.hidden{display:none!important}.softBtn{background:#eee;color:#111;border:1px solid #ccc}@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}table{font-size:12px;display:block;overflow:auto}th,td{padding:6px}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Relevés chauffeurs Intelcom</h1>
-  <div class="small">Importe plusieurs PDF Intelcom. L’app détecte le chauffeur, la période, les montants, puis génère un relevé par chauffeur. V13.1 : PDF compact corrigé, le bloc paiement reste sur la première page, frais broker détaillés et détails colis à la fin.</div>
+  <h1>Broker Intelcom Pay — V23 Factures Pro</h1>
+  <div class="small">Page principale : FACTURES. Importe les PDF Intelcom, calcule les commissions/frais, génère les relevés PDF, ZIP global et sauvegarde l’historique dans Firebase.</div>
+
+  <div class="card" id="firebaseCard">
+    <h3>Connexion Firebase / Historique</h3>
+    <div class="grid3">
+      <div><label>Email</label><input id="fbEmail" type="email" placeholder="email broker ou superadmin"></div>
+      <div><label>Mot de passe</label><input id="fbPass" type="password" placeholder="mot de passe"></div>
+      <div><label>État</label><div id="fbState" class="pill">Non connecté</div></div>
+    </div>
+    <button onclick="loginFirebaseV23()">Se connecter</button>
+    <button class="secondary" onclick="logoutFirebaseV23()">Déconnexion</button>
+    <button class="secondary" onclick="loadInvoiceHistory()">Actualiser historique</button>
+    <div id="fbMsg" class="small"></div>
+  </div>
+
 
   <div class="card">
     <h3>Informations broker / compagnie</h3>
@@ -64,17 +81,47 @@ G2G 1B8</textarea>
 
   <div class="card">
     <h3>Chauffeurs détectés</h3>
-    <button onclick="generateAllZip()">Télécharger ZIP de toutes les factures</button>
-    <button onclick="saveHistoryLocal()" style="background:#0f766e">Sauvegarder historique local</button>
+    <button onclick="generateAllZip()">Télécharger ZIP de tous les relevés</button>
     <button class="secondary" onclick="exportCSV()">Exporter résumé CSV</button>
+    <button class="secondary" onclick="saveInvoicesToFirebase()">Sauvegarder dans Firebase</button>
     <table>
       <thead><tr><th>Infos chauffeur</th><th>Période</th><th>Colis</th><th>Total Intelcom</th><th>Commission</th><th>Frais</th><th>Déduction</th><th>Avance</th><th>Net</th><th>Action</th></tr></thead>
       <tbody id="driversBody"></tbody>
     </table>
   </div>
+
+
+  <div class="card">
+    <h3>Historique Firebase des factures</h3>
+    <div class="small">Après sauvegarde, les factures apparaissent ici pour le broker connecté. Le PDF est régénéré à la demande, sans Firebase Storage.</div>
+    <table>
+      <thead><tr><th>Semaine</th><th>Chauffeur</th><th>Colis</th><th>Total Intelcom</th><th>Net chauffeur</th><th>Date sauvegarde</th></tr></thead>
+      <tbody id="historyBody"><tr><td colspan="6" class="small">Connecte-toi puis clique Actualiser historique.</td></tr></tbody>
+    </table>
+  </div>
 </div>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const firebaseConfig = {
+  apiKey: 'AIzaSyC8N0FYmFplqOdaZGzk-fxbqxX3kr3mmDQ',
+  authDomain: 'brocker-intel.firebaseapp.com',
+  projectId: 'brocker-intel',
+  storageBucket: 'brocker-intel.firebasestorage.app',
+  messagingSenderId: '641968934387',
+  appId: '1:641968934387:web:be779857dc0eb93a7bd686',
+  measurementId: 'G-L0MKXG2MS6'
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser=null;
+let currentProfile=null;
+function fbMsg(t,cls=''){ const el=document.getElementById('fbMsg'); if(el) el.innerHTML='<span class=+cls+>'+String(t||'')+'</span>'; }
+function setFbState(){ const el=document.getElementById('fbState'); if(!el) return; if(currentUser){ el.textContent=(currentProfile?.role||'connecté')+' — '+(currentUser.email||''); } else el.textContent='Non connecté'; }
+function normEmail(e){return String(e||'').trim().toLowerCase();}
+async function loginFirebaseV23(){ try{ const email=normEmail(byId('fbEmail').value); const pass=byId('fbPass').value; if(!email||!pass) return fbMsg('Email et mot de passe obligatoires'); await auth.signInWithEmailAndPassword(email,pass); fbMsg('Connexion réussie'); }catch(e){ fbMsg('Erreur connexion : '+(e.message||e)); } }
+async function logoutFirebaseV23(){ await auth.signOut(); fbMsg('Déconnecté'); }
+auth.onAuthStateChanged(async (u)=>{ currentUser=u; currentProfile=null; if(u){ const doc=await db.collection('users').doc(u.uid).get().catch(()=>null); if(doc && doc.exists) currentProfile=doc.data(); } setFbState(); loadInvoiceHistory().catch(()=>{}); });
 let drivers = JSON.parse(localStorage.getItem('intelcomDriversBatchV2') || '[]');
 let broker = JSON.parse(localStorage.getItem('intelcomBrokerV2') || '{}');
 const money = n => (Number(n)||0).toFixed(2)+' $';
@@ -102,8 +149,80 @@ function feeModeLabel(mode){ return ({daily_fixed:'Frais fixe par jour travaill�
 
 function parseMoney(s){return Number(String(s||'').replace(/[^0-9.-]/g,''))||0}
 function byId(id){return document.getElementById(id)}
-function loadBroker(){ if(broker.showBrackets===undefined) broker.showBrackets=false; ['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>{if(broker[id]!==undefined)byId(id).value=broker[id]})}
-function collectBroker(){['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>broker[id]=byId(id).value)}
+function loadBroker(){ if(broker.showBrackets===undefined) broker.showBrackets=false; 
+async function saveInvoicesToFirebase(){
+  if(!currentUser) return alert('Connecte-toi à Firebase avant de sauvegarder.');
+  if(!drivers.length) return alert('Aucune facture à sauvegarder.');
+  collectBroker();
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  const batch = db.batch();
+  drivers.forEach(d=>{
+    const c = calc(d);
+    const id = `${brokerId}_${(d.driverCode||d.driverName||'driver').replace(/[^a-zA-Z0-9_-]/g,'_')}_${(d.week||'week').replace(/[^a-zA-Z0-9_-]/g,'_')}`;
+    const ref = db.collection('weeks').doc(id);
+    batch.set(ref, {
+      brokerId,
+      driverCode:d.driverCode||'', driverName:d.driverName||'', driverId:d.driverId||'',
+      week:d.week||'', from:d.from||'', to:d.to||'', parcels:Number(d.parcels)||0,
+      totalIntelcom:Number(c.base)||0, commission:Number(c.commission)||0, brokerFees:Number(c.fee)||0,
+      deduction:Number(d.deduction)||0, advance:Number(d.advance)||0, net:Number(c.net)||0,
+      dayRows:d.dayRows||[], parcelDetails:(d.parcelDetails||[]).slice(0,2500), brokerSettings:broker,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid
+    }, {merge:true});
+  });
+  await batch.commit();
+  alert('Factures sauvegardées dans Firebase.');
+  await loadInvoiceHistory();
+}
+async function loadInvoiceHistory(){
+  const body=document.getElementById('historyBody'); if(!body) return;
+  if(!currentUser){ body.innerHTML='<tr><td colspan="6" class="small">Non connecté.</td></tr>'; return; }
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  let snap;
+  try{ snap = await db.collection('weeks').where('brokerId','==',brokerId).limit(100).get(); }
+  catch(e){ body.innerHTML='<tr><td colspan="6" class="small">Impossible de charger l’historique : '+String(e.message||e)+'</td></tr>'; return; }
+  if(snap.empty){ body.innerHTML='<tr><td colspan="6" class="small">Aucune facture sauvegardée.</td></tr>'; return; }
+  body.innerHTML=snap.docs.map(doc=>{ const x=doc.data(); const dt=x.updatedAt?.toDate ? x.updatedAt.toDate().toLocaleString('fr-CA') : ''; return `<tr><td>${x.week||''}</td><td>${x.driverName||x.driverCode||''}</td><td>${x.parcels||0}</td><td>${money(x.totalIntelcom||0)}</td><td>${money(x.net||0)}</td><td>${dt}</td></tr>`; }).join('');
+}
+
+['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>{if(broker[id]!==undefined)byId(id).value=broker[id]})}
+function collectBroker(){
+async function saveInvoicesToFirebase(){
+  if(!currentUser) return alert('Connecte-toi à Firebase avant de sauvegarder.');
+  if(!drivers.length) return alert('Aucune facture à sauvegarder.');
+  collectBroker();
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  const batch = db.batch();
+  drivers.forEach(d=>{
+    const c = calc(d);
+    const id = `${brokerId}_${(d.driverCode||d.driverName||'driver').replace(/[^a-zA-Z0-9_-]/g,'_')}_${(d.week||'week').replace(/[^a-zA-Z0-9_-]/g,'_')}`;
+    const ref = db.collection('weeks').doc(id);
+    batch.set(ref, {
+      brokerId,
+      driverCode:d.driverCode||'', driverName:d.driverName||'', driverId:d.driverId||'',
+      week:d.week||'', from:d.from||'', to:d.to||'', parcels:Number(d.parcels)||0,
+      totalIntelcom:Number(c.base)||0, commission:Number(c.commission)||0, brokerFees:Number(c.fee)||0,
+      deduction:Number(d.deduction)||0, advance:Number(d.advance)||0, net:Number(c.net)||0,
+      dayRows:d.dayRows||[], parcelDetails:(d.parcelDetails||[]).slice(0,2500), brokerSettings:broker,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid
+    }, {merge:true});
+  });
+  await batch.commit();
+  alert('Factures sauvegardées dans Firebase.');
+  await loadInvoiceHistory();
+}
+async function loadInvoiceHistory(){
+  const body=document.getElementById('historyBody'); if(!body) return;
+  if(!currentUser){ body.innerHTML='<tr><td colspan="6" class="small">Non connecté.</td></tr>'; return; }
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  let snap;
+  try{ snap = await db.collection('weeks').where('brokerId','==',brokerId).limit(100).get(); }
+  catch(e){ body.innerHTML='<tr><td colspan="6" class="small">Impossible de charger l’historique : '+String(e.message||e)+'</td></tr>'; return; }
+  if(snap.empty){ body.innerHTML='<tr><td colspan="6" class="small">Aucune facture sauvegardée.</td></tr>'; return; }
+  body.innerHTML=snap.docs.map(doc=>{ const x=doc.data(); const dt=x.updatedAt?.toDate ? x.updatedAt.toDate().toLocaleString('fr-CA') : ''; return `<tr><td>${x.week||''}</td><td>${x.driverName||x.driverCode||''}</td><td>${x.parcels||0}</td><td>${money(x.totalIntelcom||0)}</td><td>${money(x.net||0)}</td><td>${dt}</td></tr>`; }).join('');
+}
+
+['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>broker[id]=byId(id).value)}
 async function pdfText(file){
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({data:buf}).promise;
@@ -470,24 +589,6 @@ function buildPdf(d){
   }
   return doc;
 }
-
-function saveHistoryLocal(){
-  if(!drivers.length) return alert('Aucune facture à sauvegarder.');
-  const history = JSON.parse(localStorage.getItem('intelcomInvoiceHistoryV22')||'[]');
-  drivers.forEach(d=>{
-    const c=calc(d);
-    history.push({
-      savedAt:new Date().toISOString(),
-      driverCode:d.driverCode, driverName:d.driverName,
-      week:d.week, from:d.from, to:d.to,
-      parcels:d.parcels, subtotal:c.base, commission:c.commission,
-      fees:c.fee, deduction:Number(d.deduction||0), advance:Number(d.advance||0), net:c.net
-    });
-  });
-  localStorage.setItem('intelcomInvoiceHistoryV22', JSON.stringify(history));
-  alert('Historique local sauvegardé : '+drivers.length+' facture(s).');
-}
-
 function cleanFileName(x){return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 _-]/g,'').trim().replace(/\s+/g,' ')}
 function pdfFileName(d){const name=cleanFileName(d.driverName||d.driverCode||'Chauffeur'); const week=cleanFileName(d.week||'Semaine'); return `${name} - Semaine ${week}.pdf`; }
 function downloadOne(i){buildPdf(drivers[i]).save(pdfFileName(drivers[i]))}
@@ -496,6 +597,42 @@ function exportCSV(){let csv='Code,Chauffeur,Vehicule,Mode frais,ID,Adresse,Emai
 function saveAll(){collectBroker(); localStorage.setItem('intelcomDriversBatchV2',JSON.stringify(drivers)); localStorage.setItem('intelcomBrokerV2',JSON.stringify(broker));}
 function clearData(){if(confirm('Vider tous les chauffeurs?')){drivers=[];saveAll();render();}}
 function removeDriver(i){drivers.splice(i,1);saveAll();render();}
+
+async function saveInvoicesToFirebase(){
+  if(!currentUser) return alert('Connecte-toi à Firebase avant de sauvegarder.');
+  if(!drivers.length) return alert('Aucune facture à sauvegarder.');
+  collectBroker();
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  const batch = db.batch();
+  drivers.forEach(d=>{
+    const c = calc(d);
+    const id = `${brokerId}_${(d.driverCode||d.driverName||'driver').replace(/[^a-zA-Z0-9_-]/g,'_')}_${(d.week||'week').replace(/[^a-zA-Z0-9_-]/g,'_')}`;
+    const ref = db.collection('weeks').doc(id);
+    batch.set(ref, {
+      brokerId,
+      driverCode:d.driverCode||'', driverName:d.driverName||'', driverId:d.driverId||'',
+      week:d.week||'', from:d.from||'', to:d.to||'', parcels:Number(d.parcels)||0,
+      totalIntelcom:Number(c.base)||0, commission:Number(c.commission)||0, brokerFees:Number(c.fee)||0,
+      deduction:Number(d.deduction)||0, advance:Number(d.advance)||0, net:Number(c.net)||0,
+      dayRows:d.dayRows||[], parcelDetails:(d.parcelDetails||[]).slice(0,2500), brokerSettings:broker,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid
+    }, {merge:true});
+  });
+  await batch.commit();
+  alert('Factures sauvegardées dans Firebase.');
+  await loadInvoiceHistory();
+}
+async function loadInvoiceHistory(){
+  const body=document.getElementById('historyBody'); if(!body) return;
+  if(!currentUser){ body.innerHTML='<tr><td colspan="6" class="small">Non connecté.</td></tr>'; return; }
+  const brokerId = currentProfile?.brokerId || (currentProfile?.role==='superadmin' ? 'superadmin_local' : currentUser.uid);
+  let snap;
+  try{ snap = await db.collection('weeks').where('brokerId','==',brokerId).limit(100).get(); }
+  catch(e){ body.innerHTML='<tr><td colspan="6" class="small">Impossible de charger l’historique : '+String(e.message||e)+'</td></tr>'; return; }
+  if(snap.empty){ body.innerHTML='<tr><td colspan="6" class="small">Aucune facture sauvegardée.</td></tr>'; return; }
+  body.innerHTML=snap.docs.map(doc=>{ const x=doc.data(); const dt=x.updatedAt?.toDate ? x.updatedAt.toDate().toLocaleString('fr-CA') : ''; return `<tr><td>${x.week||''}</td><td>${x.driverName||x.driverCode||''}</td><td>${x.parcels||0}</td><td>${money(x.totalIntelcom||0)}</td><td>${money(x.net||0)}</td><td>${dt}</td></tr>`; }).join('');
+}
+
 ['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>{byId(id).onchange=()=>{saveAll(); if(id==='feeMode') renderFeeSettings(); render();}});
 loadBroker(); renderFeeSettings(); render();
 </script>

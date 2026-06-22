@@ -1,19 +1,7 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-
-    match /users/{docId} { allow read, write: if signedIn(); }
-    match /brokers/{docId} { allow read, write: if signedIn(); }
-    match /drivers/{docId} { allow read, write: if signedIn(); }
-    match /invitations/{docId} { allow read, write: if signedIn(); }
-    match /weeks/{docId} { allow read, write: if signedIn(); }
-    match /dailyVehicles/{docId} { allow read, write: if signedIn(); }
-    match /parcelDetails/{docId} { allow read, write: if signedIn(); }
-    match /settings/{docId} { allow read, write: if signedIn(); }
-    match /invoiceHistory/{docId} { allow read, write: if signedIn(); }
-
+    function signedIn(){ return request.auth != null; }
     match /{document=**} { allow read, write: if signedIn(); }
   }
 }
