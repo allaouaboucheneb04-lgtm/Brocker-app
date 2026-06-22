@@ -3,13 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v20</title>
+  <title>Broker Intelcom Pay - v21</title>
   <style>
-    :root{--bg:#0b1220;--card:#111827;--card2:#172033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#0b1220,#162136);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-size:25px;font-weight:900}.sub{color:var(--muted)}
-    .pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:#cbd5e1;font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.94);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.28)}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:850px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}.wide{overflow-x:auto}}
-    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:11px;outline:none} button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;color:white;background:var(--blue);cursor:pointer}button.secondary{background:#334155}button.green{background:var(--green)}button.red{background:var(--red)}button.orange{background:var(--orange);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;white-space:nowrap}th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.warn{background:#451a03;border-color:#c2410c;color:#ffedd5}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.big{font-size:30px;font-weight:900}.dangerline{border:1px solid #7f1d1d;background:#1f0b0b}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.linkbox{font-size:12px;color:#cbd5e1;background:#0b1220;border:1px dashed var(--border);padding:10px;border-radius:12px;word-break:break-all}.right{text-align:right}
+    :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}.brand{font-size:28px;font-weight:950;letter-spacing:-.5px}.sub{color:var(--muted);line-height:1.35}.pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:#cbd5e1;font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.28)}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:850px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}.wide{overflow-x:auto}.wrap{padding:18px 14px}.brand{font-size:24px}}
+    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:12px;outline:none;font-size:15px} button{border:0;border-radius:12px;padding:11px 14px;font-weight:850;color:white;background:var(--blue);cursor:pointer}button.secondary{background:#334155}button.green{background:var(--green)}button.red{background:var(--red)}button.orange{background:var(--orange);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;white-space:nowrap}th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.warn{background:#451a03;border-color:#c2410c;color:#ffedd5}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.big{font-size:30px;font-weight:950}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.linkbox{font-size:12px;color:#cbd5e1;background:#0b1220;border:1px dashed var(--border);padding:10px;border-radius:12px;word-break:break-all}.right{text-align:right}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}.disabled{opacity:.55}.kbd{background:#0b1220;border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:#e2e8f0}.bluebox{background:#062842;border-color:#0ea5e9;color:#e0f2fe}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -18,7 +17,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v20 — invitations Firebase + Gmail + désactiver/supprimer broker</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v21 — auth corrigée, invitations Firestore, désactiver/supprimer broker, Gmail pré-rempli</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -26,24 +25,25 @@
   <section id="authView" class="grid">
     <div class="card col-4">
       <h2>Connexion</h2>
-      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com">
-      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••">
+      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
+      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
       <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
-      <div class="notice">Utilise ce bloc si ton compte existe déjà.</div>
+      <div class="notice bluebox">Utilise ce bloc seulement si ton compte existe déjà dans Firebase Auth.</div>
     </div>
     <div class="card col-4">
       <h2>Créer compte avec invitation</h2>
-      <p class="muted">Pour broker ou chauffeur invité par email.</p>
-      <label>Nom</label><input id="invName" placeholder="Nom complet">
-      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité">
-      <label>Mot de passe</label><input id="invPass" type="password" placeholder="minimum 6 caractères">
+      <p class="muted">Pour broker ou chauffeur invité par email. L’invitation doit déjà exister.</p>
+      <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
+      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
+      <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
       <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
+      <div class="notice">Première connexion d’un broker/chauffeur : utiliser ce bloc, pas le bouton Se connecter.</div>
     </div>
     <div class="card col-4">
       <h2>Créer Super Admin</h2>
-      <p class="muted">À faire une seule fois.</p>
+      <p class="muted">À faire une seule fois. Autorisé seulement pour tes emails.</p>
       <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
-      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb06@gmail.com">
+      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
       <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
       <button id="createSuperBtn" class="green" style="margin-top:12px">Créer Super Admin</button>
     </div>
@@ -71,126 +71,99 @@ const db = firebase.firestore();
 let currentUser = null;
 let profile = null;
 let currentTab = 'dashboard';
+const SUPER_EMAILS = ['allaouaboucheneb04@gmail.com','allaouaboucheneb06@gmail.com'];
 const $ = id => document.getElementById(id);
-
-function showMsg(text, type='notice'){
-  $('msg').innerHTML = `<div class="notice ${type}">${text}</div>`;
-  setTimeout(()=>{$('msg').innerHTML=''}, 7000);
-}
-function safe(v){return String(v||'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function showMsg(text, type='notice'){$('msg').innerHTML = `<div class="notice ${type}">${safe(text)}</div>`; setTimeout(()=>{$('msg').innerHTML=''}, 9000)}
+function safe(v){return String(v??'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
 function normEmail(e){return String(e||'').trim().toLowerCase();}
 function appUrl(){ return 'https://allaouaboucheneb04-lgtm.github.io/Brocker-app/'; }
-function money(n){ n=Number(n||0); return n.toLocaleString('fr-CA',{minimumFractionDigits:2, maximumFractionDigits:2})+' $'; }
 function card(html, cls='col-12'){ return `<div class="card ${cls}">${html}</div>`; }
 function tempPass(){ return 'Temp' + Math.random().toString(36).slice(2,8).toUpperCase() + '!' + Math.floor(10+Math.random()*89); }
-
+function emailDocId(email){ return normEmail(email); }
+function now(){ return firebase.firestore.FieldValue.serverTimestamp(); }
+function cleanObj(obj){ Object.keys(obj).forEach(k=>{ if(obj[k]===undefined) delete obj[k]; }); return obj; }
+function humanError(e){
+  const code = e?.code || '';
+  if(code==='auth/invalid-credential') return 'Email ou mot de passe incorrect, ou compte non créé. Si c’est une première connexion, utilise “Créer compte avec invitation”.';
+  if(code==='auth/email-already-in-use') return 'Ce compte existe déjà. Utilise “Se connecter” ou “Mot de passe oublié”.';
+  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v21 fournies dans le dossier.';
+  return e?.message || String(e);
+}
 function gmailUrl(inv){
   const subject = inv.role === 'broker' ? 'Invitation à votre espace Broker Intelcom' : 'Invitation à votre espace Chauffeur Intelcom';
-  const body = `Bonjour ${inv.name || ''},\n\nVotre invitation est prête.\n\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire / suggestion : ${inv.tempPassword || 'à créer'}\n\nÉtapes :\n1. Ouvrir le lien.\n2. Cliquer sur "Créer compte avec invitation".\n3. Entrer cet email et créer un mot de passe.\n\nMerci.`;
+  const body = `Bonjour ${inv.name || ''},\n\nVotre invitation est prête.\n\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire / suggestion : ${inv.tempPassword || 'à créer'}\n\nIMPORTANT :\n1. Ouvrir le lien.\n2. Cliquer sur "Créer compte avec invitation".\n3. Entrer cet email et créer votre mot de passe.\n4. Ensuite seulement, utiliser "Se connecter".\n\nMerci.`;
   return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(inv.email) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
 }
 function openGmail(inv){ window.open(gmailUrl(inv), '_blank'); }
 function copyInvite(inv){
-  const txt = `Invitation ${inv.role}\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire : ${inv.tempPassword||''}`;
+  const txt = `Invitation ${inv.role}\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire : ${inv.tempPassword||''}\n\nPremière connexion : cliquer sur Créer compte avec invitation.`;
   navigator.clipboard?.writeText(txt).then(()=>showMsg('Invitation copiée','ok')).catch(()=>showMsg('Copie impossible','err'));
 }
-
-async function getProfile(uid){
-  const d = await db.collection('users').doc(uid).get();
-  return d.exists ? d.data() : null;
-}
-async function requireBrokerActive(p){
+async function getProfile(uid){ const d = await db.collection('users').doc(uid).get(); return d.exists ? d.data() : null; }
+async function ensureBrokerActive(p){
   if(p.role !== 'broker') return true;
   const b = await db.collection('brokers').doc(p.brokerId).get();
-  if(!b.exists || b.data().active === false){
-    showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err');
-    await auth.signOut();
-    return false;
-  }
+  if(!b.exists || b.data().active === false){ showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err'); await auth.signOut(); return false; }
   return true;
 }
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
-  if(!user){
-    profile = null;
-    $('authView').classList.remove('hidden');
-    $('appView').classList.add('hidden');
-    $('logoutBtn').classList.add('hidden');
-    $('userPill').textContent = 'Non connecté';
-    return;
-  }
-  profile = await getProfile(user.uid);
-  if(!profile){
-    showMsg('Compte Auth créé, mais aucun profil app trouvé. Utilise "Créer compte avec invitation" ou crée ton document Super Admin.', 'err');
-    await auth.signOut();
-    return;
-  }
-  if(!(await requireBrokerActive(profile))) return;
-  $('authView').classList.add('hidden');
-  $('appView').classList.remove('hidden');
-  $('logoutBtn').classList.remove('hidden');
-  $('userPill').textContent = `${profile.role} — ${user.email}`;
-  renderTabs();
-  render();
+  if(!user){ profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
+  try{
+    profile = await getProfile(user.uid);
+    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Pour un invité : utilise Créer compte avec invitation. Pour toi : crée le Super Admin.', 'err'); await auth.signOut(); return; }
+    if(!(await ensureBrokerActive(profile))) return;
+    $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
+  }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
 });
 $('logoutBtn').onclick = () => auth.signOut();
-$('loginBtn').onclick = async()=>{
-  try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }
-  catch(e){ showMsg(e.message, 'err'); }
-};
-$('resetBtn').onclick = async()=>{
-  try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }
-  catch(e){ showMsg(e.message,'err'); }
-};
+$('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
+$('resetBtn').onclick = async()=>{ try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 $('createSuperBtn').onclick = async()=>{
   try{
     const email=normEmail($('saEmail').value), pass=$('saPass').value, name=$('saName').value.trim();
+    if(!SUPER_EMAILS.includes(email)) return showMsg('Cet email n’est pas autorisé comme Super Admin dans cette version.', 'err');
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({name,email,role:'superadmin',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('users').doc(cred.user.uid).set({name,email,emailLower:email,role:'superadmin',active:true,createdAt:now()});
     showMsg('Super Admin créé','ok');
-  }catch(e){ showMsg(e.message,'err'); }
+  }catch(e){ showMsg(humanError(e),'err'); }
 };
 $('acceptInviteBtn').onclick = async()=>{
+  let cred = null;
   try{
     const email=normEmail($('invEmail').value), pass=$('invPass').value, name=$('invName').value.trim();
     if(!email || !pass) return showMsg('Email et mot de passe obligatoires','err');
-    const snap = await db.collection('invitations').where('emailLower','==',email).where('used','==',false).limit(1).get();
-    if(snap.empty) return showMsg('Aucune invitation active trouvée pour cet email','err');
-    const invDoc = snap.docs[0];
+    cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const invRef = db.collection('invitations').doc(emailDocId(email));
+    const invDoc = await invRef.get();
+    if(!invDoc.exists || invDoc.data().used === true){
+      await cred.user.delete().catch(()=>{});
+      await auth.signOut().catch(()=>{});
+      return showMsg('Aucune invitation active pour cet email. Demande au Super Admin/Broker de recréer l’invitation.', 'err');
+    }
     const inv = invDoc.data();
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    const userData = {name:name || inv.name || '', email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    if(normEmail(inv.email) !== email){ throw new Error('Invitation invalide pour cet email.'); }
+    const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
     await db.collection('users').doc(cred.user.uid).set(userData);
-    if(inv.role === 'driver' && inv.driverId){ await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, active:true}, {merge:true}); }
-    if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true}, {merge:true}); }
-    await invDoc.ref.set({used:true, usedBy:cred.user.uid, usedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+    if(inv.role === 'driver' && inv.driverId){ await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
+    if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
+    await invRef.set({used:true, usedBy:cred.user.uid, usedAt:now()}, {merge:true});
     showMsg('Compte créé avec invitation','ok');
-  }catch(e){ showMsg(e.message,'err'); }
+  }catch(e){ if(cred?.user && !profile){ await cred.user.delete().catch(()=>{}); await auth.signOut().catch(()=>{}); } showMsg(humanError(e),'err'); }
 };
-
-function tabsForRole(){
-  if(profile?.role==='superadmin') return [['dashboard','Dashboard'],['brokers','Brokers'],['invitations','Invitations']];
-  if(profile?.role==='broker') return [['dashboard','Dashboard'],['drivers','Chauffeurs'],['invitations','Invitations'],['settings','Paramètres']];
-  return [['dashboard','Mes relevés'],['vehicles','Véhicules']];
-}
+function tabsForRole(){ if(profile?.role==='superadmin') return [['dashboard','Dashboard'],['brokers','Brokers'],['invitations','Invitations']]; if(profile?.role==='broker') return [['dashboard','Dashboard'],['drivers','Chauffeurs'],['invitations','Invitations'],['settings','Paramètres']]; return [['dashboard','Mes relevés'],['vehicles','Véhicules']]; }
 function renderTabs(){ $('tabs').innerHTML = tabsForRole().map(([id,label])=>`<button class="tab ${currentTab===id?'active':''}" onclick="currentTab='${id}';renderTabs();render()">${label}</button>`).join(''); }
-async function render(){
-  if(!profile) return;
-  if(profile.role==='superadmin') return renderSuperAdmin();
-  if(profile.role==='broker') return renderBroker();
-  return renderDriver();
-}
-
+async function render(){ if(!profile) return; if(profile.role==='superadmin') return renderSuperAdmin(); if(profile.role==='broker') return renderBroker(); return renderDriver(); }
 async function renderSuperAdmin(){
   const c=$('content');
   if(currentTab==='dashboard'){
     const [brokers, users, invs] = await Promise.all([db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get()]);
-    c.innerHTML = `<div class="grid">${card(`<h2>Brokers</h2><div class="big">${brokers.size}</div><p class="muted">Entreprises créées</p>`,'col-4')}${card(`<h2>Utilisateurs</h2><div class="big">${users.size}</div><p class="muted">Super admin, brokers, chauffeurs</p>`,'col-4')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div><p class="muted">Créées dans Firebase</p>`,'col-4')}</div>`;
+    c.innerHTML = `<div class="grid">${card(`<h2>Brokers</h2><div class="big">${brokers.size}</div><p class="muted">Entreprises créées</p>`,'col-4')}${card(`<h2>Utilisateurs</h2><div class="big">${users.size}</div><p class="muted">Super admin, brokers, chauffeurs</p>`,'col-4')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div><p class="muted">Invitations Firestore</p>`,'col-4')}</div>`;
   }
   if(currentTab==='brokers'){
     const snap = await db.collection('brokers').orderBy('createdAt','desc').get().catch(()=>db.collection('brokers').get());
     c.innerHTML = `<div class="grid">
-      ${card(`<h2>Créer Broker</h2><label>Nom compagnie</label><input id="bCompany"><label>Nom responsable</label><input id="bOwner"><label>Email broker</label><input id="bEmail" type="email"><label>Mot de passe temporaire / suggestion</label><input id="bTemp" placeholder="généré automatiquement si vide"><label>Plan</label><select id="bPlan"><option value="free">free</option><option value="pro" selected>pro</option><option value="enterprise">enterprise</option></select><label>Max chauffeurs</label><input id="bMax" type="number" value="50"><button class="green" style="margin-top:12px" onclick="createBroker()">Créer Broker + Invitation</button><p class="muted small">Le bouton crée le broker ET l’invitation dans Firestore, puis ouvre Gmail.</p>`,'col-4')}
+      ${card(`<h2>Créer Broker</h2><label>Nom compagnie</label><input id="bCompany"><label>Nom responsable</label><input id="bOwner"><label>Email broker</label><input id="bEmail" type="email"><label>Mot de passe temporaire / suggestion</label><input id="bTemp" placeholder="généré automatiquement si vide"><label>Plan</label><select id="bPlan"><option value="free">free</option><option value="pro" selected>pro</option><option value="enterprise">enterprise</option></select><label>Max chauffeurs</label><input id="bMax" type="number" value="50"><button class="green" style="margin-top:12px" onclick="createBroker()">Créer Broker + Invitation</button><p class="muted small">Crée le broker ET l’invitation dans Firestore. Gmail s’ouvre seulement pour envoyer le lien.</p>`,'col-4')}
       ${card(`<h2>Brokers</h2><div class="wide"><table><tr><th>Compagnie</th><th>Email</th><th>Plan</th><th>Actif</th><th>Invitation</th><th>Actions</th></tr>${snap.docs.map(d=>brokerRow(d.id,d.data())).join('')}</table></div>`,'col-8')}
     </div>`;
   }
@@ -199,76 +172,33 @@ async function renderSuperAdmin(){
     c.innerHTML = card(`<h2>Invitations</h2><div class="wide"><table><tr><th>Email</th><th>Rôle</th><th>Broker</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
   }
 }
-function brokerRow(id,b){
-  const inv = {email:b.email, name:b.ownerName, role:'broker', brokerId:id, tempPassword:b.tempPassword||''};
-  return `<tr><td>${safe(b.companyName)}</td><td>${safe(b.email)}</td><td>${safe(b.plan)}</td><td>${b.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td>${b.active===false?`<button class="mini green" onclick="toggleBroker('${id}',true)">Réactiver</button>`:`<button class="mini orange" onclick="toggleBroker('${id}',false)">Désactiver</button>`} <button class="mini red" onclick="deleteBroker('${id}')">Supprimer</button></td></tr>`;
-}
-function inviteRow(id,inv){
-  return `<tr><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${inv.used?'Oui':'Non'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button> <button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button></td></tr>`;
-}
+function brokerRow(id,b){ const inv = {email:b.email, name:b.ownerName, role:'broker', brokerId:id, tempPassword:b.tempPassword||''}; return `<tr class="${b.active===false?'disabled':''}"><td>${safe(b.companyName)}</td><td>${safe(b.email)}</td><td>${safe(b.plan)}</td><td>${b.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td>${b.active===false?`<button class="mini green" onclick="toggleBroker('${id}',true)">Réactiver</button>`:`<button class="mini orange" onclick="toggleBroker('${id}',false)">Désactiver</button>`} <button class="mini red" onclick="deleteBroker('${id}')">Supprimer</button></td></tr>`; }
+function inviteRow(id,inv){ return `<tr><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${inv.used?'Oui':'Non'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button> <button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button></td></tr>`; }
 window.createBroker = async()=>{
   try{
     const email=normEmail($('bEmail').value); if(!email) return showMsg('Email broker obligatoire','err');
-    const brokerId = 'broker_' + Date.now();
-    const temp = $('bTemp').value.trim() || tempPass();
-    const data = {companyName:$('bCompany').value.trim(), ownerName:$('bOwner').value.trim(), email, emailLower:email, plan:$('bPlan').value, maxDrivers:Number($('bMax').value||0), active:true, tempPassword:temp, createdAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid};
+    const brokerId = 'broker_' + Date.now(); const temp = $('bTemp').value.trim() || tempPass();
+    const data = {companyName:$('bCompany').value.trim(), ownerName:$('bOwner').value.trim(), email, emailLower:email, plan:$('bPlan').value, maxDrivers:Number($('bMax').value||0), active:true, tempPassword:temp, createdAt:now(), createdBy:currentUser.uid};
     await db.collection('brokers').doc(brokerId).set(data);
-    const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid};
-    await db.collection('invitations').doc('broker_'+brokerId).set(inv);
-    showMsg('Broker + invitation Firebase créés. Gmail va s’ouvrir.','ok');
-    openGmail(inv);
-    render();
-  }catch(e){ showMsg(e.message,'err'); }
+    const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:now(), createdBy:currentUser.uid};
+    await db.collection('invitations').doc(emailDocId(email)).set(inv);
+    showMsg('Broker + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
+  }catch(e){ showMsg(humanError(e),'err'); }
 };
-window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').doc(id).set({active}, {merge:true}); showMsg(active?'Broker réactivé':'Broker désactivé','ok'); render(); }catch(e){showMsg(e.message,'err')} };
-async function deleteQuery(q){ const s=await q.get(); const batch=db.batch(); s.docs.forEach(d=>batch.delete(d.ref)); if(s.size) await batch.commit(); }
-window.deleteBroker = async(id)=>{
-  if(!confirm('Supprimer ce broker et ses données liées ?')) return;
-  try{
-    await deleteQuery(db.collection('invitations').where('brokerId','==',id));
-    await deleteQuery(db.collection('drivers').where('brokerId','==',id));
-    await deleteQuery(db.collection('weeks').where('brokerId','==',id));
-    await deleteQuery(db.collection('dailyVehicles').where('brokerId','==',id));
-    await deleteQuery(db.collection('settings').where('brokerId','==',id));
-    await db.collection('brokers').doc(id).delete();
-    showMsg('Broker supprimé','ok'); render();
-  }catch(e){ showMsg(e.message,'err'); }
-};
-window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(e.message,'err')} };
-
+window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').doc(id).set({active}, {merge:true}); showMsg(active?'Broker réactivé':'Broker désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+async function deleteQuery(q){ const s=await q.get(); const docs=s.docs; for(let i=0;i<docs.length;i+=400){ const batch=db.batch(); docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit(); } }
+window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteQuery(db.collection('drivers').where('brokerId','==',id)); await deleteQuery(db.collection('weeks').where('brokerId','==',id)); await deleteQuery(db.collection('dailyVehicles').where('brokerId','==',id)); await deleteQuery(db.collection('settings').where('brokerId','==',id)); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
-  if(currentTab==='dashboard'){
-    const [drivers, invs] = await Promise.all([db.collection('drivers').where('brokerId','==',brokerId).get(), db.collection('invitations').where('brokerId','==',brokerId).get()]);
-    c.innerHTML = `<div class="grid">${card(`<h2>Chauffeurs</h2><div class="big">${drivers.size}</div>`,'col-6')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div>`,'col-6')}</div>`;
-  }
-  if(currentTab==='drivers'){
-    const snap=await db.collection('drivers').where('brokerId','==',brokerId).get();
-    c.innerHTML=`<div class="grid">${card(`<h2>Ajouter Chauffeur</h2><label>Nom</label><input id="dName"><label>Code Intelcom</label><input id="dCode"><label>Email</label><input id="dEmail" type="email"><label>Téléphone</label><input id="dPhone"><label>Mot de passe temporaire / suggestion</label><input id="dTemp" placeholder="généré automatiquement si vide"><button class="green" style="margin-top:12px" onclick="createDriverInvite()">Créer Chauffeur + Invitation</button>`,'col-4')}${card(`<h2>Chauffeurs</h2><div class="wide"><table><tr><th>Nom</th><th>Code</th><th>Email</th><th>Actif</th><th>Invitation</th></tr>${snap.docs.map(d=>{const x=d.data(); const inv={email:x.email,name:x.name,role:'driver',brokerId:x.brokerId,tempPassword:x.tempPassword||''}; return `<tr><td>${safe(x.name)}</td><td>${safe(x.code)}</td><td>${safe(x.email)}</td><td>${x.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td></tr>`}).join('')}</table></div>`,'col-8')}</div>`;
-  }
-  if(currentTab==='invitations'){
-    const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
-    c.innerHTML=card(`<h2>Invitations</h2><div class="wide"><table><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
-  }
-  if(currentTab==='settings'){
-    c.innerHTML=card(`<h2>Paramètres</h2><p class="muted">Les barèmes et imports PDF restent dans la version PDF. Ici on stabilise d’abord les comptes, invitations, désactivation/suppression.</p>`);
-  }
+  if(currentTab==='dashboard'){ const [drivers, invs] = await Promise.all([db.collection('drivers').where('brokerId','==',brokerId).get(), db.collection('invitations').where('brokerId','==',brokerId).get()]); c.innerHTML = `<div class="grid">${card(`<h2>Chauffeurs</h2><div class="big">${drivers.size}</div>`,'col-6')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div>`,'col-6')}</div>`; }
+  if(currentTab==='drivers'){ const snap=await db.collection('drivers').where('brokerId','==',brokerId).get(); c.innerHTML=`<div class="grid">${card(`<h2>Ajouter Chauffeur</h2><label>Nom</label><input id="dName"><label>Code Intelcom</label><input id="dCode"><label>Email</label><input id="dEmail" type="email"><label>Téléphone</label><input id="dPhone"><label>Mot de passe temporaire / suggestion</label><input id="dTemp" placeholder="généré automatiquement si vide"><button class="green" style="margin-top:12px" onclick="createDriverInvite()">Créer Chauffeur + Invitation</button>`,'col-4')}${card(`<h2>Chauffeurs</h2><div class="wide"><table><tr><th>Nom</th><th>Code</th><th>Email</th><th>Actif</th><th>Invitation</th><th>Actions</th></tr>${snap.docs.map(d=>{const x=d.data(); const inv={email:x.email,name:x.name,role:'driver',brokerId:x.brokerId,tempPassword:x.tempPassword||''}; return `<tr><td>${safe(x.name)}</td><td>${safe(x.code)}</td><td>${safe(x.email)}</td><td>${x.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td><button class="mini orange" onclick="toggleDriver('${d.id}',${x.active===false?'true':'false'})">${x.active===false?'Réactiver':'Désactiver'}</button></td></tr>`}).join('')}</table></div>`,'col-8')}</div>`; }
+  if(currentTab==='invitations'){ const snap=await db.collection('invitations').where('brokerId','==',brokerId).get(); c.innerHTML=card(`<h2>Invitations</h2><div class="wide"><table><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`); }
+  if(currentTab==='settings'){ c.innerHTML=card(`<h2>Paramètres</h2><p class="muted">Les barèmes/import PDF seront rebranchés après validation complète des comptes. Cette v21 stabilise d’abord Firebase Auth + Firestore.</p>`); }
 }
-window.createDriverInvite = async()=>{
-  try{
-    const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err');
-    const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass();
-    const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),tempPassword:temp,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid};
-    await db.collection('drivers').doc(driverId).set(data);
-    const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid};
-    await db.collection('invitations').doc('driver_'+driverId).set(inv);
-    showMsg('Chauffeur + invitation Firebase créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
-  }catch(e){ showMsg(e.message,'err'); }
-};
-
-async function renderDriver(){
-  $('content').innerHTML = card(`<h2>Espace Chauffeur</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><p class="muted">Les relevés et véhicules par jour seront branchés après validation du système de comptes.</p>`);
-}
+window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await db.collection('drivers').doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.toggleDriver = async(id,active)=>{ try{ await db.collection('drivers').doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+async function renderDriver(){ $('content').innerHTML = card(`<h2>Espace Chauffeur</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><p class="muted">Les relevés et véhicules par jour seront rebranchés dans la prochaine étape, après validation des comptes.</p>`); }
 </script>
 </body>
 </html>
