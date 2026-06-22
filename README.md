@@ -1,32 +1,37 @@
-# Broker Intelcom Pay v21
+# Broker Intelcom Pay — v22 SaaS Dashboard
 
-Version vérifiée pour stabiliser Firebase Auth + Firestore.
+Version basée sur la v21 fonctionnelle, avec de vraies nouveautés :
 
-## Ce qui est corrigé
+## Nouveautés v22
 
-- Flux invitation corrigé : l'utilisateur invité crée d'abord son compte Auth, puis l'app lit `invitations/{email}`.
-- Les invitations utilisent maintenant l'email en minuscule comme ID de document.
-- Création Broker = crée aussi `brokers/{brokerId}` + `invitations/{email}`.
-- Le bouton Gmail ouvre seulement Gmail, mais l'invitation existe déjà dans Firestore.
-- Désactiver / réactiver / supprimer broker.
-- Création chauffeur + invitation par le broker.
-- Messages d'erreurs plus clairs.
+### Super Admin
+- Dashboard SaaS avec statistiques globales
+- Total brokers, chauffeurs, utilisateurs, invitations
+- Brokers actifs/désactivés
+- Plans Free / Pro / Enterprise
+- Modification du plan d’un broker
+- Station Intelcom par broker
+- Recherche dans les brokers et invitations
+- Désactiver / réactiver / supprimer broker
 
-## Installation
+### Broker
+- Dashboard broker plus complet
+- Limite chauffeurs selon le plan
+- Recherche chauffeurs
+- Désactiver / réactiver / supprimer chauffeur
+- Onglet Relevés prêt pour l’import PDF
+- Paramètres broker modifiables
 
-1. Mets `index.html` sur GitHub Pages.
-2. Active Firebase Authentication > Email / Mot de passe.
-3. Ajoute le domaine autorisé : `allaouaboucheneb04-lgtm.github.io`.
-4. Copie `firestore.rules` dans Firestore Rules.
-5. Ouvre l'application.
-6. Crée ton Super Admin avec `allaouaboucheneb04@gmail.com` ou `allaouaboucheneb06@gmail.com`.
+### Chauffeur
+- Espace Mes relevés
+- Onglet Véhicules par jour
+- Profil chauffeur
 
-## Première invitation broker
+## Plans
+- Free : 5 chauffeurs
+- Pro : 50 chauffeurs
+- Enterprise : illimité
 
-1. Super Admin > Brokers > Créer Broker + Invitation.
-2. L'app crée l'invitation dans Firestore.
-3. Gmail s'ouvre pour envoyer le lien.
-4. Le broker ouvre le lien.
-5. Il utilise **Créer compte avec invitation**.
-6. Après ça, il peut utiliser **Connexion**.
+## Firebase
+Utilise Auth + Firestore. Pas de Storage : les PDF seront générés à la demande.
 
