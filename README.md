@@ -1,37 +1,20 @@
-# Broker Intelcom Pay — v22 SaaS Dashboard
+# Broker Intelcom Pay — v22.1 Factures Pro
 
-Version basée sur la v21 fonctionnelle, avec de vraies nouveautés :
+Cette version remet le module **Factures** au centre de l'application, en reprenant la version v13.1 PDF compact.
 
-## Nouveautés v22
+## Fonctions principales
+- Import jusqu'à 40 PDF Intelcom.
+- Détection automatique chauffeur, code, semaine, période, station.
+- Résumé par jour : date, colis, montant.
+- Commission broker.
+- Frais fixe par jour travaillé ou barème par colis.
+- Véhicule choisi par journée : essence, électrique, diesel, hybride.
+- Barèmes personnalisables et masqués après enregistrement.
+- Détails des frais broker dans le PDF.
+- Détails des colis Intelcom dans le PDF.
+- Génération d'une facture PDF par chauffeur.
+- Génération ZIP de toutes les factures.
+- Historique local des factures.
 
-### Super Admin
-- Dashboard SaaS avec statistiques globales
-- Total brokers, chauffeurs, utilisateurs, invitations
-- Brokers actifs/désactivés
-- Plans Free / Pro / Enterprise
-- Modification du plan d’un broker
-- Station Intelcom par broker
-- Recherche dans les brokers et invitations
-- Désactiver / réactiver / supprimer broker
-
-### Broker
-- Dashboard broker plus complet
-- Limite chauffeurs selon le plan
-- Recherche chauffeurs
-- Désactiver / réactiver / supprimer chauffeur
-- Onglet Relevés prêt pour l’import PDF
-- Paramètres broker modifiables
-
-### Chauffeur
-- Espace Mes relevés
-- Onglet Véhicules par jour
-- Profil chauffeur
-
-## Plans
-- Free : 5 chauffeurs
-- Pro : 50 chauffeurs
-- Enterprise : illimité
-
-## Firebase
-Utilise Auth + Firestore. Pas de Storage : les PDF seront générés à la demande.
-
+## Utilisation
+Ouvrir `index.html` dans Chrome ou publier le contenu sur GitHub Pages.

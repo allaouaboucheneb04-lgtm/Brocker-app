@@ -2,266 +2,502 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v22</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Broker Intelcom Pay - v22.1 Factures Pro</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}.brand{font-size:28px;font-weight:950;letter-spacing:-.5px}.sub{color:var(--muted);line-height:1.35}.pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:#cbd5e1;font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.28)}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:850px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}.wide{overflow-x:auto}.wrap{padding:18px 14px}.brand{font-size:24px}}
-    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:12px;outline:none;font-size:15px} button{border:0;border-radius:12px;padding:11px 14px;font-weight:850;color:white;background:var(--blue);cursor:pointer}button.secondary{background:#334155}button.green{background:var(--green)}button.red{background:var(--red)}button.orange{background:var(--orange);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;white-space:nowrap}th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.warn{background:#451a03;border-color:#c2410c;color:#ffedd5}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.big{font-size:30px;font-weight:950}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.linkbox{font-size:12px;color:#cbd5e1;background:#0b1220;border:1px dashed var(--border);padding:10px;border-radius:12px;word-break:break-all}.right{text-align:right}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}.disabled{opacity:.55}.kbd{background:#0b1220;border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:#e2e8f0}.bluebox{background:#062842;border-color:#0ea5e9;color:#e0f2fe}.stat{border-left:4px solid var(--blue)}.plan{font-weight:950;text-transform:uppercase}.search{max-width:340px}.dangerText{color:#fca5a5}.successText{color:#86efac}.nowrap{white-space:nowrap}
+    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;color:#111}.wrap{max-width:1250px;margin:auto;padding:22px}h1{margin:0 0 10px}.card{background:#fff;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 2px 10px #0001}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:#111;color:white;border-radius:12px;padding:14px}.stat b{font-size:22px;display:block;margin-top:6px}label{font-weight:bold;font-size:13px}input,select,textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}textarea{min-height:70px}button{background:#111;color:white;border:0;border-radius:10px;padding:11px 14px;cursor:pointer;margin:5px 5px 5px 0}button.secondary{background:#555}button.danger{background:#a11}table{width:100%;border-collapse:collapse;background:white}th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left;font-size:13px;vertical-align:top}th{background:#111;color:white}.small{font-size:12px;color:#666}.mini{width:90px}.nameinput{min-width:190px}.warn{color:#b36b00;font-weight:bold}.bracketBox{border:1px solid #ddd;border-radius:12px;padding:10px;margin:10px 0;background:#fafafa}.bracketTitle{font-weight:bold;margin-bottom:6px}.bracketRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:6px 0}.pill{display:inline-block;background:#eee;border-radius:20px;padding:4px 8px;font-size:12px;margin-top:4px}.feeTop{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.feeSummary{background:#f6f6f6;border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}.hidden{display:none!important}.softBtn{background:#eee;color:#111;border:1px solid #ccc}@media(max-width:900px){.grid,.grid3{grid-template-columns:1fr}table{font-size:12px;display:block;overflow:auto}th,td{padding:6px}}
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v22 — dashboard SaaS, plans, limites chauffeurs, brokers/chauffeurs améliorés</div></div>
-    <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
+  <h1>Relevés chauffeurs Intelcom</h1>
+  <div class="small">Importe plusieurs PDF Intelcom. L’app détecte le chauffeur, la période, les montants, puis génère un relevé par chauffeur. V13.1 : PDF compact corrigé, le bloc paiement reste sur la première page, frais broker détaillés et détails colis à la fin.</div>
+
+  <div class="card">
+    <h3>Informations broker / compagnie</h3>
+    <div class="grid3">
+      <div><label>Nom compagnie broker</label><input id="brokerCompany" value="9486-5482 QUÉBEC INC"></div>
+      <div><label>Station / Client</label><input id="brokerStation" value="STATION HICK, INTELCOM"></div>
+      <div><label>Paiement à l’ordre de</label><input id="payTo" value="Merouane Guellour"></div>
+      <div><label>Email</label><input id="brokerEmail" value="abennounas-kibsolutions@outlook.com"></div>
+      <div><label>Téléphone</label><input id="brokerPhone" value="514 793 3116"></div>
+      <div><label>Règlement</label><input id="paymentMethod" value="Par virement bancaire"></div>
+    </div>
+    <label>Adresse broker</label><textarea id="brokerAddress">7245-A Boul Wilfrid-Hamel
+Québec
+G2G 1B8</textarea>
   </div>
-  <div id="msg"></div>
 
-  <section id="authView" class="grid">
-    <div class="card col-4">
-      <h2>Connexion</h2>
-      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
-      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
-      <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
-      <div class="notice bluebox">Utilise ce bloc seulement si ton compte existe déjà dans Firebase Auth.</div>
+  <div class="card">
+    <h3>Paramètres de calcul</h3>
+    <div class="grid">
+      <div><label>Commission broker (%)</label><input id="commission" type="number" value="25" step="0.01"></div>
+      <div><label>Mode frais broker</label><select id="feeMode" onchange="renderFeeSettings();saveAll();render()"><option value="daily_fixed">Frais fixe par jour travaillé</option><option value="bracket_daily">Barème par colis</option></select></div>
+      <div id="fixedFeeWrap"><label>Frais fixe par jour travaillé ($)</label><input id="fixedFee" type="number" value="60" step="0.01"></div>
+      <div><label>Mode calcul commission</label><select id="calcMode"><option value="invoice">Sur Total invoice</option><option value="subtotal">Sur sous-total avant frais Intelcom</option></select></div>
+      <div><label>Détails colis dans PDF</label><select id="includeParcelDetails"><option value="yes">Oui</option><option value="no">Non</option></select></div>
     </div>
-    <div class="card col-4">
-      <h2>Créer compte avec invitation</h2>
-      <p class="muted">Pour broker ou chauffeur invité par email. L’invitation doit déjà exister.</p>
-      <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
-      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
-      <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-      <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
-      <div class="notice">Première connexion d’un broker/chauffeur : utiliser ce bloc, pas le bouton Se connecter.</div>
-    </div>
-    <div class="card col-4">
-      <h2>Créer Super Admin</h2>
-      <p class="muted">À faire une seule fois. Autorisé seulement pour tes emails.</p>
-      <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
-      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
-      <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
-      <button id="createSuperBtn" class="green" style="margin-top:12px">Créer Super Admin</button>
-    </div>
-  </section>
+    <div id="feeSettings" style="margin-top:15px"></div>
+    <div class="small">Pour les barèmes : le broker choisit les intervalles comme il veut, séparément pour Essence, Électrique, Hybride et Diesel.</div>
+  </div>
 
-  <section id="appView" class="hidden">
-    <div class="tabs" id="tabs"></div>
-    <div id="content"></div>
-  </section>
+  <div class="card">
+    <h3>Importer PDF Intelcom</h3>
+    <input id="pdfFiles" type="file" multiple accept="application/pdf">
+    <div class="small">Maximum : 40 fichiers PDF à la fois.</div>
+    <button onclick="importPDFs()">Importer et lire</button>
+    <button class="secondary" onclick="saveAndHideBrackets()">Sauvegarder</button>
+    <button class="danger" onclick="clearData()">Vider</button>
+    <div id="status" class="small"></div>
+    <div class="small warn">Note : Intelcom donne normalement le code + nom du chauffeur. L’adresse, email et ID du chauffeur ne sont pas dans le PDF Intelcom, donc tu les ajoutes une fois ici; l’app les garde en mémoire pour la prochaine fois.</div>
+  </div>
+
+  <div class="grid">
+    <div class="stat">Total Intelcom<b id="totalIntelcom">0.00 $</b></div>
+    <div class="stat">Commission broker<b id="totalCommission">0.00 $</b></div>
+    <div class="stat">Frais broker<b id="totalFees">0.00 $</b></div>
+    <div class="stat">Total chauffeurs<b id="totalDrivers">0.00 $</b></div>
+  </div>
+
+  <div class="card">
+    <h3>Chauffeurs détectés</h3>
+    <button onclick="generateAllZip()">Télécharger ZIP de toutes les factures</button>
+    <button onclick="saveHistoryLocal()" style="background:#0f766e">Sauvegarder historique local</button>
+    <button class="secondary" onclick="exportCSV()">Exporter résumé CSV</button>
+    <table>
+      <thead><tr><th>Infos chauffeur</th><th>Période</th><th>Colis</th><th>Total Intelcom</th><th>Commission</th><th>Frais</th><th>Déduction</th><th>Avance</th><th>Net</th><th>Action</th></tr></thead>
+      <tbody id="driversBody"></tbody>
+    </table>
+  </div>
 </div>
-
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC8N0FYmFplqOdaZGzk-fxbqxX3kr3mmDQ",
-  authDomain: "brocker-intel.firebaseapp.com",
-  projectId: "brocker-intel",
-  storageBucket: "brocker-intel.firebasestorage.app",
-  messagingSenderId: "641968934387",
-  appId: "1:641968934387:web:be779857dc0eb93a7bd686",
-  measurementId: "G-L0MKXG2MS6"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-let currentUser = null;
-let profile = null;
-let currentTab = 'dashboard';
-const SUPER_EMAILS = ['allaouaboucheneb04@gmail.com','allaouaboucheneb06@gmail.com'];
-const $ = id => document.getElementById(id);
-function showMsg(text, type='notice'){$('msg').innerHTML = `<div class="notice ${type}">${safe(text)}</div>`; setTimeout(()=>{$('msg').innerHTML=''}, 9000)}
-function safe(v){return String(v??'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function normEmail(e){return String(e||'').trim().toLowerCase();}
-function appUrl(){ return 'https://allaouaboucheneb04-lgtm.github.io/Brocker-app/'; }
-function card(html, cls='col-12'){ return `<div class="card ${cls}">${html}</div>`; }
-function tempPass(){ return 'Temp' + Math.random().toString(36).slice(2,8).toUpperCase() + '!' + Math.floor(10+Math.random()*89); }
-function emailDocId(email){ return normEmail(email); }
-function now(){ return firebase.firestore.FieldValue.serverTimestamp(); }
-function cleanObj(obj){ Object.keys(obj).forEach(k=>{ if(obj[k]===undefined) delete obj[k]; }); return obj; }
-function humanError(e){
-  const code = e?.code || '';
-  if(code==='auth/invalid-credential') return 'Email ou mot de passe incorrect, ou compte non créé. Si c’est une première connexion, utilise “Créer compte avec invitation”.';
-  if(code==='auth/email-already-in-use') return 'Ce compte existe déjà. Utilise “Se connecter” ou “Mot de passe oublié”.';
-  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v21 fournies dans le dossier.';
-  return e?.message || String(e);
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+let drivers = JSON.parse(localStorage.getItem('intelcomDriversBatchV2') || '[]');
+let broker = JSON.parse(localStorage.getItem('intelcomBrokerV2') || '{}');
+const money = n => (Number(n)||0).toFixed(2)+' $';
+const moneyClean = n => { const v=Number(n)||0; return Math.abs(v)<0.005 ? '0 $' : v.toFixed(2)+' $'; };
+const VEHICLES = ['essence','electrique','hybride','diesel'];
+const VEHICLE_LABELS = {essence:'Essence', electrique:'Électrique', hybride:'Hybride', diesel:'Diesel'};
+function defaultBrackets(){return {
+  essence:[{min:0,max:100,fee:50},{min:101,max:200,fee:70},{min:201,max:9999,fee:95}],
+  electrique:[{min:0,max:100,fee:35},{min:101,max:200,fee:55},{min:201,max:9999,fee:75}],
+  hybride:[{min:0,max:100,fee:45},{min:101,max:200,fee:65},{min:201,max:9999,fee:85}],
+  diesel:[{min:0,max:100,fee:55},{min:101,max:200,fee:75},{min:201,max:9999,fee:100}]
+};}
+function getBrackets(){
+  if(!broker.brackets) broker.brackets = defaultBrackets();
+  VEHICLES.forEach(v=>{ if(!broker.brackets[v]) broker.brackets[v]=[]; });
+  return broker.brackets;
 }
-function gmailUrl(inv){
-  const subject = inv.role === 'broker' ? 'Invitation à votre espace Broker Intelcom' : 'Invitation à votre espace Chauffeur Intelcom';
-  const body = `Bonjour ${inv.name || ''},\n\nVotre invitation est prête.\n\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire / suggestion : ${inv.tempPassword || 'à créer'}\n\nIMPORTANT :\n1. Ouvrir le lien.\n2. Cliquer sur "Créer compte avec invitation".\n3. Entrer cet email et créer votre mot de passe.\n4. Ensuite seulement, utiliser "Se connecter".\n\nMerci.`;
-  return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(inv.email) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+function findBracketFee(vehicle, parcels){
+  const list=(getBrackets()[vehicle]||[]).map(r=>({min:Number(r.min)||0,max:Number(r.max)||0,fee:Number(r.fee)||0}));
+  const p=Number(parcels)||0;
+  const row=list.find(r=>p>=r.min && p<=r.max);
+  return row ? {fee:row.fee, label:row.min+'-'+row.max} : {fee:0, label:'aucune tranche'};
 }
-function openGmail(inv){ window.open(gmailUrl(inv), '_blank'); }
-function copyInvite(inv){
-  const txt = `Invitation ${inv.role}\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire : ${inv.tempPassword||''}\n\nPremière connexion : cliquer sur Créer compte avec invitation.`;
-  navigator.clipboard?.writeText(txt).then(()=>showMsg('Invitation copiée','ok')).catch(()=>showMsg('Copie impossible','err'));
-}
-async function getProfile(uid){ const d = await db.collection('users').doc(uid).get(); return d.exists ? d.data() : null; }
-async function ensureBrokerActive(p){
-  if(p.role !== 'broker') return true;
-  const b = await db.collection('brokers').doc(p.brokerId).get();
-  if(!b.exists || b.data().active === false){ showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err'); await auth.signOut(); return false; }
-  return true;
-}
-auth.onAuthStateChanged(async user=>{
-  currentUser = user;
-  if(!user){ profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
-  try{
-    profile = await getProfile(user.uid);
-    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Pour un invité : utilise Créer compte avec invitation. Pour toi : crée le Super Admin.', 'err'); await auth.signOut(); return; }
-    if(!(await ensureBrokerActive(profile))) return;
-    $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
-  }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
-});
-$('logoutBtn').onclick = () => auth.signOut();
-$('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
-$('resetBtn').onclick = async()=>{ try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
-$('createSuperBtn').onclick = async()=>{
-  try{
-    const email=normEmail($('saEmail').value), pass=$('saPass').value, name=$('saName').value.trim();
-    if(!SUPER_EMAILS.includes(email)) return showMsg('Cet email n’est pas autorisé comme Super Admin dans cette version.', 'err');
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({name,email,emailLower:email,role:'superadmin',active:true,createdAt:now()});
-    showMsg('Super Admin créé','ok');
-  }catch(e){ showMsg(humanError(e),'err'); }
-};
-$('acceptInviteBtn').onclick = async()=>{
-  let cred = null;
-  try{
-    const email=normEmail($('invEmail').value), pass=$('invPass').value, name=$('invName').value.trim();
-    if(!email || !pass) return showMsg('Email et mot de passe obligatoires','err');
-    cred = await auth.createUserWithEmailAndPassword(email, pass);
-    const invRef = db.collection('invitations').doc(emailDocId(email));
-    const invDoc = await invRef.get();
-    if(!invDoc.exists || invDoc.data().used === true){
-      await cred.user.delete().catch(()=>{});
-      await auth.signOut().catch(()=>{});
-      return showMsg('Aucune invitation active pour cet email. Demande au Super Admin/Broker de recréer l’invitation.', 'err');
+function feeModeLabel(mode){ return ({daily_fixed:'Frais fixe par jour travaillé', bracket_daily:'Barème par colis'})[mode] || mode; }
+
+function parseMoney(s){return Number(String(s||'').replace(/[^0-9.-]/g,''))||0}
+function byId(id){return document.getElementById(id)}
+function loadBroker(){ if(broker.showBrackets===undefined) broker.showBrackets=false; ['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>{if(broker[id]!==undefined)byId(id).value=broker[id]})}
+function collectBroker(){['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>broker[id]=byId(id).value)}
+async function pdfText(file){
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  let text='';
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const content=await page.getTextContent();
+    // IMPORTANT: garder les lignes du PDF. Si on colle tout en une seule ligne,
+    // le nom chauffeur est perdu entre Driver / Week reference / From.
+    const items = content.items
+      .filter(i => String(i.str || '').trim())
+      .map(i => ({str:String(i.str).trim(), x:i.transform[4], y:Math.round(i.transform[5])}));
+    const lines = {};
+    for(const it of items){
+      const key = Object.keys(lines).find(k => Math.abs(Number(k)-it.y) <= 2) || it.y;
+      if(!lines[key]) lines[key]=[];
+      lines[key].push(it);
     }
-    const inv = invDoc.data();
-    if(normEmail(inv.email) !== email){ throw new Error('Invitation invalide pour cet email.'); }
-    const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
-    await db.collection('users').doc(cred.user.uid).set(userData);
-    if(inv.role === 'driver' && inv.driverId){ await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
-    if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
-    await invRef.set({used:true, usedBy:cred.user.uid, usedAt:now()}, {merge:true});
-    showMsg('Compte créé avec invitation','ok');
-  }catch(e){ if(cred?.user && !profile){ await cred.user.delete().catch(()=>{}); await auth.signOut().catch(()=>{}); } showMsg(humanError(e),'err'); }
-};
-function tabsForRole(){ if(profile?.role==='superadmin') return [['dashboard','Dashboard'],['brokers','Brokers'],['plans','Plans'],['invitations','Invitations']]; if(profile?.role==='broker') return [['dashboard','Dashboard'],['drivers','Chauffeurs'],['weeks','Relevés'],['invitations','Invitations'],['settings','Paramètres']]; return [['dashboard','Mes relevés'],['vehicles','Véhicules'],['profile','Profil']]; }
-function renderTabs(){ $('tabs').innerHTML = tabsForRole().map(([id,label])=>`<button class="tab ${currentTab===id?'active':''}" onclick="currentTab='${id}';renderTabs();render()">${label}</button>`).join(''); }
-async function render(){ if(!profile) return; if(profile.role==='superadmin') return renderSuperAdmin(); if(profile.role==='broker') return renderBroker(); return renderDriver(); }
-function money(n){ return (Number(n||0)).toFixed(2)+' $'; }
-function planLimit(plan){ return plan==='free'?5:plan==='pro'?50:9999; }
-function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))); }
-function countBy(docs, field){ const out={}; docs.forEach(d=>{ const v=d.data()[field]||'non défini'; out[v]=(out[v]||0)+1; }); return out; }
-function statsCard(title, value, note, cls='col-3'){ return card(`<h2>${safe(title)}</h2><div class="big">${safe(value)}</div><p class="muted">${safe(note||'')}</p>`, cls+' stat'); }
-async function renderSuperAdmin(){
-  const c=$('content');
-  if(currentTab==='dashboard'){
-    const [brokersSnap, usersSnap, invsSnap, driversSnap, weeksSnap] = await Promise.all([
-      db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get(), db.collection('drivers').get(), db.collection('weeks').get().catch(()=>({size:0,docs:[]}))
-    ]);
-    const brokers=brokersSnap.docs, active=brokers.filter(d=>d.data().active!==false).length, inactive=brokers.length-active;
-    const planCounts=countBy(brokersSnap.docs,'plan');
-    const brokerRows=brokers.slice(0,6).map(d=>`<tr><td>${safe(d.data().companyName)}</td><td>${safe(d.data().email)}</td><td><span class="badge plan">${safe(d.data().plan||'pro')}</span></td><td>${d.data().active===false?'<span class="dangerText">Non</span>':'<span class="successText">Oui</span>'}</td></tr>`).join('');
-    c.innerHTML = `<div class="grid">
-      ${statsCard('Brokers', brokersSnap.size, `${active} actifs / ${inactive} désactivés`, 'col-3')}
-      ${statsCard('Chauffeurs', driversSnap.size, 'Tous brokers confondus', 'col-3')}
-      ${statsCard('Utilisateurs', usersSnap.size, 'Comptes application', 'col-3')}
-      ${statsCard('Invitations', invsSnap.size, 'Invitations envoyées', 'col-3')}
-      ${card(`<h2>Plans</h2><div class="row"><span class="badge">Free: ${planCounts.free||0}</span><span class="badge">Pro: ${planCounts.pro||0}</span><span class="badge">Enterprise: ${planCounts.enterprise||0}</span></div><p class="muted">Limites : Free 5 chauffeurs, Pro 50, Enterprise illimité.</p>`,'col-4')}
-      ${card(`<h2>Brokers récents</h2><div class="wide"><table><tr><th>Compagnie</th><th>Email</th><th>Plan</th><th>Actif</th></tr>${brokerRows||'<tr><td colspan="4">Aucun broker</td></tr>'}</table></div>`,'col-8')}
-    </div>`;
+    Object.keys(lines).sort((a,b)=>Number(b)-Number(a)).forEach(k=>{
+      text += lines[k].sort((a,b)=>a.x-b.x).map(i=>i.str).join(' ') + '\n';
+    });
+    text += '\n';
   }
-  if(currentTab==='brokers'){
-    const snap = await db.collection('brokers').orderBy('createdAt','desc').get().catch(()=>db.collection('brokers').get());
-    c.innerHTML = `<div class="grid">
-      ${card(`<h2>Créer Broker</h2><label>Nom compagnie</label><input id="bCompany"><label>Nom responsable</label><input id="bOwner"><label>Email broker</label><input id="bEmail" type="email"><label>Station Intelcom</label><input id="bStation" placeholder="ex: MONT, HICK"><label>Mot de passe temporaire / suggestion</label><input id="bTemp" placeholder="généré automatiquement si vide"><label>Plan</label><select id="bPlan" onchange="document.getElementById('bMax').value=planLimit(this.value)"><option value="free">free</option><option value="pro" selected>pro</option><option value="enterprise">enterprise</option></select><label>Max chauffeurs</label><input id="bMax" type="number" value="50"><button class="green" style="margin-top:12px" onclick="createBroker()">Créer Broker + Invitation</button><p class="muted small">Crée broker + invitation Firestore. Gmail sert seulement à envoyer le lien prérempli.</p>`,'col-4')}
-      ${card(`<div class="sectionTitle"><h2>Brokers</h2><input id="brokerSearch" class="search" placeholder="Rechercher" oninput="filterRows('brokerTable', this.value)"></div><div class="wide"><table id="brokerTable"><tr><th>Compagnie</th><th>Email</th><th>Station</th><th>Plan</th><th>Limite</th><th>Actif</th><th>Invitation</th><th>Actions</th></tr>${snap.docs.map(d=>brokerRow(d.id,d.data())).join('')}</table></div>`,'col-8')}
-    </div>`;
-  }
-  if(currentTab==='plans'){
-    c.innerHTML = `<div class="grid">
-      ${card(`<h2>Free</h2><div class="big">5</div><p class="muted">chauffeurs max</p><ul><li>Import PDF</li><li>Relevés de base</li></ul>`,'col-4')}
-      ${card(`<h2>Pro</h2><div class="big">50</div><p class="muted">chauffeurs max</p><ul><li>Portail chauffeur</li><li>Barèmes</li><li>Historique</li></ul>`,'col-4')}
-      ${card(`<h2>Enterprise</h2><div class="big">∞</div><p class="muted">chauffeurs illimités</p><ul><li>Multi-stations</li><li>Support prioritaire</li><li>Rapports avancés</li></ul>`,'col-4')}
-    </div>`;
-  }
-  if(currentTab==='invitations'){
-    const snap = await db.collection('invitations').orderBy('createdAt','desc').limit(150).get().catch(()=>db.collection('invitations').limit(150).get());
-    c.innerHTML = card(`<div class="sectionTitle"><h2>Invitations</h2><input class="search" placeholder="Rechercher email" oninput="filterRows('invTable', this.value)"></div><div class="wide"><table id="invTable"><tr><th>Email</th><th>Rôle</th><th>Broker</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
-  }
+  return text;
 }
-function brokerRow(id,b){ const inv = {email:b.email, name:b.ownerName, role:'broker', brokerId:id, tempPassword:b.tempPassword||''}; const limit=b.maxDrivers||planLimit(b.plan||'pro'); return `<tr class="${b.active===false?'disabled':''}"><td>${safe(b.companyName)}</td><td>${safe(b.email)}</td><td>${safe(b.station||'')}</td><td><span class="badge plan">${safe(b.plan||'pro')}</span></td><td>${safe(limit)}</td><td>${b.active===false?'<span class="dangerText">Non</span>':'<span class="successText">Oui</span>'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td>${b.active===false?`<button class="mini green" onclick="toggleBroker('${id}',true)">Réactiver</button>`:`<button class="mini orange" onclick="toggleBroker('${id}',false)">Désactiver</button>`} <button class="mini secondary" onclick="editBrokerPlan('${id}','${safe(b.plan||'pro')}')">Plan</button> <button class="mini red" onclick="deleteBroker('${id}')">Supprimer</button></td></tr>`; }
-function inviteRow(id,inv){ return `<tr><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${inv.used?'Oui':'Non'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button> <button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button></td></tr>`; }
-window.createBroker = async()=>{
-  try{
-    const email=normEmail($('bEmail').value); if(!email) return showMsg('Email broker obligatoire','err');
-    const brokerId = 'broker_' + Date.now(); const temp = $('bTemp').value.trim() || tempPass();
-    const data = {companyName:$('bCompany').value.trim(), ownerName:$('bOwner').value.trim(), email, emailLower:email, station:$('bStation').value.trim(), plan:$('bPlan').value, maxDrivers:Number($('bMax').value||planLimit($('bPlan').value)), active:true, tempPassword:temp, createdAt:now(), createdBy:currentUser.uid};
-    await db.collection('brokers').doc(brokerId).set(data);
-    const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:now(), createdBy:currentUser.uid};
-    await db.collection('invitations').doc(emailDocId(email)).set(inv);
-    showMsg('Broker + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
-  }catch(e){ showMsg(humanError(e),'err'); }
-};
-window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').doc(id).set({active}, {merge:true}); showMsg(active?'Broker réactivé':'Broker désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.editBrokerPlan = async(id,current)=>{ const plan=prompt('Plan: free, pro ou enterprise', current||'pro'); if(!plan) return; const max=planLimit(plan); try{ await db.collection('brokers').doc(id).set({plan,maxDrivers:max},{merge:true}); showMsg('Plan modifié','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-function filterRows(tableId,q){ q=normEmail(q); const table=document.getElementById(tableId); if(!table) return; Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr=>{ tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none'; }); };
-async function deleteQuery(q){ const s=await q.get(); const docs=s.docs; for(let i=0;i<docs.length;i+=400){ const batch=db.batch(); docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit(); } }
-window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteQuery(db.collection('drivers').where('brokerId','==',id)); await deleteQuery(db.collection('weeks').where('brokerId','==',id)); await deleteQuery(db.collection('dailyVehicles').where('brokerId','==',id)); await deleteQuery(db.collection('settings').where('brokerId','==',id)); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
-window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-async function renderBroker(){
-  const c=$('content'); const brokerId=profile.brokerId;
-  const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
-  const broker = brokerDoc?.exists ? brokerDoc.data() : {};
-  const max = broker.maxDrivers || planLimit(broker.plan || 'pro');
-  if(currentTab==='dashboard'){
-    const [drivers, invs, weeks] = await Promise.all([
-      db.collection('drivers').where('brokerId','==',brokerId).get(),
-      db.collection('invitations').where('brokerId','==',brokerId).get(),
-      db.collection('weeks').where('brokerId','==',brokerId).get().catch(()=>({size:0,docs:[]}))
-    ]);
-    const activeDrivers=drivers.docs.filter(d=>d.data().active!==false).length;
-    const disabledDrivers=drivers.size-activeDrivers;
-    c.innerHTML = `<div class="grid">
-      ${statsCard('Chauffeurs', `${activeDrivers}/${max}`, `Actifs (${disabledDrivers} désactivés)`, 'col-3')}
-      ${statsCard('Invitations', invs.size, 'Comptes invités', 'col-3')}
-      ${statsCard('Relevés', weeks.size, 'Semaines importées', 'col-3')}
-      ${statsCard('Plan', broker.plan||'pro', safe(broker.companyName||''), 'col-3')}
-      ${card(`<h2>État du compte</h2><p>Broker : <b>${safe(broker.companyName||profile.name||'')}</b></p><p>Station : <b>${safe(broker.station||'Non définie')}</b></p><p>Limite chauffeurs : <b>${max}</b></p><p class="muted">Si la limite est atteinte, demande au Super Admin de changer le plan.</p>`,'col-6')}
-      ${card(`<h2>Prochaine étape</h2><p>Ajoute les chauffeurs, puis importe les PDF Intelcom dans l’onglet Relevés.</p><p class="muted">Les PDF sont générés à la demande, sans Firebase Storage.</p>`,'col-6')}
-    </div>`;
-  }
-  if(currentTab==='drivers'){
-    const snap=await db.collection('drivers').where('brokerId','==',brokerId).get();
-    const canAdd = snap.size < max;
-    c.innerHTML=`<div class="grid">
-      ${card(`<h2>Ajouter Chauffeur</h2>${canAdd?'':`<div class="notice warn">Limite du plan atteinte (${snap.size}/${max}).</div>`}<label>Nom</label><input id="dName" ${canAdd?'':'disabled'}><label>Code Intelcom</label><input id="dCode" ${canAdd?'':'disabled'}><label>Email</label><input id="dEmail" type="email" ${canAdd?'':'disabled'}><label>Téléphone</label><input id="dPhone" ${canAdd?'':'disabled'}><label>Mot de passe temporaire / suggestion</label><input id="dTemp" placeholder="généré automatiquement si vide" ${canAdd?'':'disabled'}><button class="green" style="margin-top:12px" onclick="createDriverInvite()" ${canAdd?'':'disabled'}>Créer Chauffeur + Invitation</button>`,'col-4')}
-      ${card(`<div class="sectionTitle"><h2>Chauffeurs (${snap.size}/${max})</h2><input class="search" placeholder="Rechercher" oninput="filterRows('driversTable', this.value)"></div><div class="wide"><table id="driversTable"><tr><th>Nom</th><th>Code</th><th>Email</th><th>Téléphone</th><th>Actif</th><th>Invitation</th><th>Actions</th></tr>${snap.docs.map(d=>{const x=d.data(); const inv={email:x.email,name:x.name,role:'driver',brokerId:x.brokerId,tempPassword:x.tempPassword||''}; return `<tr><td>${safe(x.name)}</td><td>${safe(x.code)}</td><td>${safe(x.email)}</td><td>${safe(x.phone||'')}</td><td>${x.active===false?'<span class="dangerText">Non</span>':'<span class="successText">Oui</span>'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td><button class="mini orange" onclick="toggleDriver('${d.id}',${x.active===false?'true':'false'})">${x.active===false?'Réactiver':'Désactiver'}</button> <button class="mini red" onclick="deleteDriver('${d.id}')">Supprimer</button></td></tr>`}).join('')}</table></div>`,'col-8')}
-    </div>`;
-  }
-  if(currentTab==='weeks'){
-    const snap=await db.collection('weeks').where('brokerId','==',brokerId).get().catch(()=>({docs:[]}));
-    c.innerHTML=card(`<h2>Relevés</h2><div class="notice bluebox">Module prêt pour l’étape suivante : import PDF Intelcom, déductions, avances, PDF chauffeur.</div><div class="wide"><table><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th></tr>${snap.docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td></tr>`}).join('')||'<tr><td colspan="4">Aucun relevé importé</td></tr>'}</table></div>`);
-  }
-  if(currentTab==='invitations'){
-    const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
-    c.innerHTML=card(`<div class="sectionTitle"><h2>Invitations</h2><input class="search" placeholder="Rechercher" oninput="filterRows('brokerInvTable', this.value)"></div><div class="wide"><table id="brokerInvTable"><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
-  }
-  if(currentTab==='settings'){
-    c.innerHTML=card(`<h2>Paramètres Broker</h2><label>Nom compagnie</label><input id="setCompany" value="${safe(broker.companyName||'')}"><label>Station Intelcom</label><input id="setStation" value="${safe(broker.station||'')}"><label>Email</label><input id="setEmail" value="${safe(broker.email||'')}"><button class="green" style="margin-top:12px" onclick="saveBrokerSettings()">Sauvegarder</button><div class="hr"></div><h3>Barèmes</h3><p class="muted">Les barèmes par colis et véhicule seront branchés avec l’import PDF dans la prochaine version.</p>`);
-  }
+function extractAfter(label,text){ const r=new RegExp(label+'\\s*:?\\s*([^\\n]+)','i'); const m=text.match(r); return m?m[1].trim():''; }
+function cleanDriverName(name){
+  return String(name||'')
+    .replace(/\s+/g,' ')
+    .replace(/\b(Week reference|From|To|Station|Invoice To|Delivery Invoice)\b.*$/i,'')
+    .trim();
 }
-window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await db.collection('drivers').doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
-window.toggleDriver = async(id,active)=>{ try{ await db.collection('drivers').doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await db.collection('drivers').doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.saveBrokerSettings = async()=>{ try{ await db.collection('brokers').doc(profile.brokerId).set({companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),email:normEmail($('setEmail').value)},{merge:true}); showMsg('Paramètres sauvegardés','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-async function renderDriver(){ if(currentTab==='dashboard'){ const snap=await db.collection('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})); $('content').innerHTML = card(`<h2>Mes relevés</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="wide"><table><tr><th>Semaine</th><th>Total</th><th>Statut</th></tr>${snap.docs.map(d=>{const w=d.data();return `<tr><td>${safe(w.week)}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td></tr>`}).join('')||'<tr><td colspan="3">Aucun relevé disponible</td></tr>'}</table></div>`); } if(currentTab==='vehicles'){ $('content').innerHTML=card(`<h2>Véhicules par jour</h2><p class="muted">Le chauffeur pourra déclarer Essence / Électrique / Diesel / Hybride par journée ici.</p>`); } if(currentTab==='profile'){ $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`); } }
+function getLineValue(lines, label){
+  for(let i=0;i<lines.length;i++){
+    const line = lines[i].trim();
+    const re = new RegExp('^'+label+'\\s*:?\\s*(.*)$','i');
+    const m=line.match(re);
+    if(m){
+      const rest=(m[1]||'').trim();
+      if(rest) return rest;
+      for(let j=i+1;j<Math.min(i+4,lines.length);j++){
+        const v=lines[j].trim();
+        if(v && !/^(Week reference|From|To|Station|Invoice To|Delivery Invoice)\b/i.test(v)) return v;
+      }
+    }
+  }
+  return '';
+}
+function cleanDriverName(name){
+  return String(name||'')
+    .replace(/\s+/g,' ')
+    .replace(/\b(Week reference|From|To|Station|Invoice To|Delivery Invoice|Transaction summary)\b.*$/i,'')
+    .trim();
+}
+function splitDriver(raw){
+  raw = cleanDriverName(raw);
+  const m = raw.match(/\b(C[0-9A-Z]{5,12})\b\s*(.*)$/i);
+  if(m) return {code:m[1].toUpperCase(), name:cleanDriverName(m[2])};
+  return {code:'', name:cleanDriverName(raw)};
+}
+function extractIntelcom(text, fileName){
+  const lines = text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  let driverCode='', driverName='';
+
+  // Méthode principale: ligne Driver ou ligne juste après Driver.
+  const rawDriver = getLineValue(lines, 'Driver');
+  if(rawDriver){
+    const d = splitDriver(rawDriver);
+    driverCode = d.code;
+    driverName = d.name;
+  }
+
+  // Méthode secours: parfois le lecteur met "Driver: C0V3493 Mohammed Arkat Week reference:" sur une seule ligne.
+  if(!driverName){
+    let m = text.match(/Driver\s*:?\s*(C[0-9A-Z]{5,12})\s+([A-Za-zÀ-ÿ'’\- ]{2,80}?)(?=\s+(Week reference|From|To|Station|Invoice To|Delivery Invoice)|\n)/i);
+    if(!m) m = text.match(/\b(C[0-9A-Z]{5,12})\s+([A-Za-zÀ-ÿ'’\- ]{2,80})\s+Week reference\b/i);
+    if(m){ driverCode=m[1].toUpperCase(); driverName=cleanDriverName(m[2]); }
+  }
+
+  // Dernier secours: code dans le fichier seulement. Ne jamais mettre la référence fichier dans le nom.
+  if(!driverCode){
+    const fm=fileName.match(/(C[0-9A-Z]{5,12})/i);
+    driverCode=fm?fm[1].toUpperCase():'';
+  }
+
+  const weekRaw = getLineValue(lines,'Week reference') || '';
+  const week = ((weekRaw.match(/[0-9]{4}-[0-9]{1,2}/)||[])[0]) || ((text.match(/Week reference\s*:?\s*([0-9]{4}-[0-9]{1,2})/i)||[])[1]||'');
+
+  // IMPORTANT: lire seulement la date YYYY-MM-DD après From et To.
+  // Certains PDF mettent l'adresse Intelcom sur la même ligne visuelle :
+  // From: 2025-11-24 1380, rue William / To: 2025-11-30 Suite 200.
+  // Avant, l'app prenait toute la ligne; maintenant elle garde seulement la date.
+  const fromRaw = getLineValue(lines,'From') || '';
+  const toRaw = getLineValue(lines,'To') || '';
+  const from = ((fromRaw.match(/\d{4}-\d{2}-\d{2}/)||[])[0]) || ((text.match(/From\s*:?\s*(\d{4}-\d{2}-\d{2})/i)||[])[1]||'');
+  const to = ((toRaw.match(/\d{4}-\d{2}-\d{2}/)||[])[0]) || ((text.match(/To\s*:?\s*(\d{4}-\d{2}-\d{2})/i)||[])[1]||'');
+
+  const stationRaw = getLineValue(lines,'Station') || '';
+  const station = ((stationRaw.match(/[A-Z0-9]{3,}/)||[])[0]) || ((text.match(/Station\s*:?\s*([A-Z0-9]+)/i)||[])[1]||'');
+
+  const totalInvoiceMatch = text.match(/Total invoice\s*\$?([0-9,]+\.\d{2})/i);
+  const totalLineMatch = text.match(/Total\s+0\s+([0-9]+)\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.?\d*)/i);
+  const parcels = totalLineMatch ? Number(totalLineMatch[1]) : 0;
+  const subtotal = totalLineMatch ? parseMoney(totalLineMatch[2]) : 0;
+  const fsc = totalLineMatch ? parseMoney(totalLineMatch[3]) : 0;
+  const invoice = totalInvoiceMatch ? parseMoney(totalInvoiceMatch[1]) : (subtotal+fsc);
+  const dayRows=[];
+  const dayRegex = /(202\d-\d{2}-\d{2})\s+0\s+([0-9]+)\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})/g;
+  let m;
+  while((m=dayRegex.exec(text))!==null){dayRows.push({date:m[1], parcels:Number(m[2]), amount:parseMoney(m[6])});}
+  const parcelDetails=[];
+  const seenDetails = new Set();
+  for(const line of lines){
+    const pm = line.match(/^(202\d-\d{2}-\d{2})\s+(DELIVERY|FLEX|RETNXTDAY|RETURN|PICKUP|MISSORT|CANCEL[^\s]*)\s+([A-Z0-9]+)\s+([A-Z]\d[A-Z]\d[A-Z]\d)\s+(ZONE_[A-Z])\s+(.+?)\s+([0-9.]+)\s+LB\s+\$?([0-9,]+\.\d{2})$/i);
+    if(pm){
+      const detail = {date:pm[1], service:pm[2], station:pm[3], postal:pm[4], zone:pm[5], tracking:pm[6].replace(/\s+/g,''), weight:pm[7]+' LB', amount:parseMoney(pm[8])};
+      const key = detail.date+'|'+detail.tracking+'|'+detail.amount;
+      if(!seenDetails.has(key)){seenDetails.add(key); parcelDetails.push(detail);}
+    }
+  }
+  const saved = JSON.parse(localStorage.getItem('driverInfo_'+(driverCode||driverName)) || '{}');
+  dayRows.forEach(r=>{ if(!r.vehicle) r.vehicle = saved.defaultVehicle || 'essence'; });
+  return {id:Date.now()+Math.random(), fileName, driverCode, driverName, driverId:saved.driverId||'', driverAddress:saved.driverAddress||'', driverEmail:saved.driverEmail||'', driverPhone:saved.driverPhone||'', week, from, to, station, parcels, subtotal, fsc, invoice, deduction:0, advance:0, dayRows, parcelDetails};
+}
+function summarizeBrackets(){
+  const br=getBrackets();
+  let html='<div class="feeSummary"><b>Résumé des barèmes enregistrés</b>';
+  VEHICLES.forEach(v=>{
+    const rows=(br[v]||[]).map(r=>`${r.min}-${r.max} colis = ${money(r.fee)}`).join(' • ');
+    html+=`<div class="small" style="margin-top:6px"><b>${VEHICLE_LABELS[v]} :</b> ${rows || 'Aucune tranche'}</div>`;
+  });
+  html+='</div>';
+  return html;
+}
+function toggleBrackets(show){
+  collectBroker();
+  broker.showBrackets = !!show;
+  localStorage.setItem('intelcomBrokerV2',JSON.stringify(broker));
+  renderFeeSettings();
+}
+function saveAndHideBrackets(){
+  collectBroker();
+  broker.showBrackets=false;
+  localStorage.setItem('intelcomBrokerV2',JSON.stringify(broker));
+  renderFeeSettings();
+  render();
+}
+function updateFeeModeUI(){
+  const mode=byId('feeMode').value;
+  const fixedWrap=byId('fixedFeeWrap');
+  if(fixedWrap) fixedWrap.classList.toggle('hidden', mode!=='daily_fixed');
+}
+function renderFeeSettings(){
+  const el=byId('feeSettings'); if(!el) return;
+  collectBroker();
+  updateFeeModeUI();
+  const mode=byId('feeMode').value;
+  if(mode==='daily_fixed'){
+    el.innerHTML='<div class="small">Le frais fixe est appliqué seulement aux journées travaillées : colis > 0 ou montant > 0. Aucune charge sur les journées à 0 colis.</div>';
+    return;
+  }
+  const visible = broker.showBrackets === true;
+  let html='<div class="feeTop"><button class="softBtn" onclick="toggleBrackets('+(!visible)+')">'+(visible?'Masquer les barèmes':'Afficher / modifier les barèmes')+'</button>';
+  if(visible) html+='<button onclick="saveAndHideBrackets()">Enregistrer les barèmes</button>';
+  html+='</div>';
+  if(!visible){
+    html += summarizeBrackets();
+    el.innerHTML=html;
+    return;
+  }
+  const br=getBrackets();
+  html+='<h4>Barème par colis — personnalisable par type de véhicule</h4>';
+  html+='<div class="small">Le véhicule se choisit pour chaque journée dans le tableau des chauffeurs. Exemple : lundi essence, mardi électrique. L’app applique la tranche selon les colis de cette journée.</div>';
+  VEHICLES.forEach(v=>{
+    html+=`<div class="bracketBox"><div class="bracketTitle">${VEHICLE_LABELS[v]}</div>`;
+    html+=(br[v]||[]).map((r,idx)=>`<div class="bracketRow"><input type="number" value="${r.min}" placeholder="Min colis" onchange="setBracket('${v}',${idx},'min',this.value)"><input type="number" value="${r.max}" placeholder="Max colis" onchange="setBracket('${v}',${idx},'max',this.value)"><input type="number" value="${r.fee}" placeholder="Frais $" step="0.01" onchange="setBracket('${v}',${idx},'fee',this.value)"><button class="danger" onclick="removeBracket('${v}',${idx})">X</button></div>`).join('');
+    html+=`<button class="secondary" onclick="addBracket('${v}')">+ Ajouter une tranche ${VEHICLE_LABELS[v]}</button></div>`;
+  });
+  el.innerHTML=html;
+}
+function setBracket(vehicle, idx, key, value){ collectBroker(); const br=getBrackets(); br[vehicle][idx][key]=Number(value)||0; saveAll(); render(); }
+function addBracket(vehicle){ collectBroker(); const br=getBrackets(); br[vehicle].push({min:0,max:0,fee:0}); saveAll(); renderFeeSettings(); render(); }
+function removeBracket(vehicle, idx){ collectBroker(); const br=getBrackets(); br[vehicle].splice(idx,1); saveAll(); renderFeeSettings(); render(); }
+async function importPDFs(){
+  const files=[...byId('pdfFiles').files];
+  if(!files.length) return alert('Choisis au moins un PDF.');
+  if(files.length>40){
+    alert('Maximum 40 fichiers PDF à la fois. Tu as choisi '+files.length+' fichiers.');
+    return;
+  }
+  const nonPdf = files.filter(f => !/pdf$/i.test(f.name) && f.type !== 'application/pdf');
+  if(nonPdf.length){
+    alert('Il y a '+nonPdf.length+' fichier(s) qui ne sont pas PDF. Choisis seulement des PDF.');
+    return;
+  }
+  byId('status').textContent='Lecture en cours : 0 / '+files.length;
+  let ok=0, fail=0;
+  for(let idx=0; idx<files.length; idx++){
+    const f=files[idx];
+    byId('status').textContent='Lecture en cours : '+(idx+1)+' / '+files.length+' — '+f.name;
+    try{
+      const t=await pdfText(f);
+      drivers.push(extractIntelcom(t,f.name));
+      ok++;
+    }catch(e){
+      fail++;
+      console.error(e);
+      alert('Erreur avec '+f.name+': '+e.message);
+    }
+  }
+  saveAll();
+  render();
+  byId('status').textContent=ok+' PDF importé(s) sur '+files.length+(fail?' — '+fail+' erreur(s)':'')+'.';
+}
+function calc(d){
+  const base = byId('calcMode').value==='subtotal'?d.subtotal:d.invoice;
+  const rate=Number(byId('commission').value)||0, fixedFee=Number(byId('fixedFee').value)||0;
+  const mode=byId('feeMode') ? byId('feeMode').value : 'daily_fixed';
+  const workedRows=(d.dayRows||[]).filter(r => (Number(r.parcels)||0)>0 || (Number(r.amount)||0)>0);
+  const workedDays=workedRows.length;
+  let fee=0, feeDetails=[];
+  if(mode==='daily_fixed'){
+    workedRows.forEach(r=>{ fee += fixedFee; feeDetails.push({date:r.date, parcels:r.parcels, vehicle:r.vehicle||'essence', bracket:'fixe jour', amount:fixedFee}); });
+  }else if(mode==='bracket_daily'){
+    workedRows.forEach(r=>{ const vehicle=r.vehicle||'essence'; const b=findBracketFee(vehicle, r.parcels); fee += b.fee; feeDetails.push({date:r.date, parcels:r.parcels, vehicle, bracket:b.label, amount:b.fee}); });
+  }
+  const commission=base*rate/100, net=base-commission-fee-(Number(d.deduction)||0)-(Number(d.advance)||0);
+  return {base,commission,fee,net,workedDays,feePerDay:fixedFee,mode,feeDetails};
+}
+function updateDriver(i,k,v){drivers[i][k]=v; const d=drivers[i]; if(k.startsWith('driver')) localStorage.setItem('driverInfo_'+(d.driverCode||d.driverName), JSON.stringify({driverId:d.driverId,driverAddress:d.driverAddress,driverEmail:d.driverEmail,driverPhone:d.driverPhone,defaultVehicle:'essence'})); saveAll(); render();}
+function updateDayVehicle(i, ri, vehicle){ if(drivers[i] && drivers[i].dayRows && drivers[i].dayRows[ri]){ drivers[i].dayRows[ri].vehicle=vehicle; saveAll(); render(); }}
+function render(){
+  const body=byId('driversBody'); body.innerHTML=''; let ti=0,tc=0,tf=0,td=0;
+  drivers.forEach((d,i)=>{const c=calc(d); ti+=c.base; tc+=c.commission; tf+=c.fee; td+=c.net;
+    const dayEditor = (d.dayRows||[]).map((r,ri)=>{
+      const disabled = ((Number(r.parcels)||0)<=0 && (Number(r.amount)||0)<=0);
+      return `<div style="display:grid;grid-template-columns:95px 55px 110px;gap:5px;align-items:center;margin:3px 0;font-size:12px">
+        <span>${r.date}</span><span>${r.parcels} colis</span>
+        <select ${disabled?'disabled':''} onchange="updateDayVehicle(${i},${ri},this.value)">
+          ${VEHICLES.map(v=>`<option value="${v}" ${(r.vehicle||'essence')===v?'selected':''}>${VEHICLE_LABELS[v]}</option>`).join('')}
+        </select>
+      </div>`;
+    }).join('');
+    body.innerHTML+=`<tr>
+      <td>
+        <label>Code</label><input class="mini" value="${d.driverCode||''}" onchange="updateDriver(${i},'driverCode',this.value)">
+        <label>Nom</label><input class="nameinput" value="${d.driverName||''}" onchange="updateDriver(${i},'driverName',this.value)">
+        <label>ID</label><input value="${d.driverId||''}" onchange="updateDriver(${i},'driverId',this.value)">
+        <label>Adresse</label><input value="${d.driverAddress||''}" onchange="updateDriver(${i},'driverAddress',this.value)">
+        <label>Email / téléphone</label><input value="${d.driverEmail||''}" placeholder="email" onchange="updateDriver(${i},'driverEmail',this.value)"><input value="${d.driverPhone||''}" placeholder="téléphone" onchange="updateDriver(${i},'driverPhone',this.value)">
+        <div class="pill">Véhicule par journée ci-dessous</div>
+      </td>
+      <td>${d.from} au ${d.to}<br><span class="small">Semaine ${d.week}<br>Station ${d.station||''}<br>Jours travaillés ${c.workedDays||0}<br>Détails colis ${d.parcelDetails?d.parcelDetails.length:0}</span><hr>${dayEditor}</td><td>${d.parcels}</td><td>${money(c.base)}</td><td>${money(c.commission)}</td><td>${money(c.fee)}</td>
+      <td><input type="number" value="${d.deduction}" onchange="drivers[${i}].deduction=Number(this.value);saveAll();render()"></td><td><input type="number" value="${d.advance}" onchange="drivers[${i}].advance=Number(this.value);saveAll();render()"></td><td><b>${money(c.net)}</b></td><td><button onclick="downloadOne(${i})">PDF</button><button class="danger" onclick="removeDriver(${i})">X</button></td></tr>`;
+  });
+  byId('totalIntelcom').textContent=money(ti);byId('totalCommission').textContent=money(tc);byId('totalFees').textContent=money(tf);byId('totalDrivers').textContent=money(td);
+}
+function buildPdf(d){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF(); const c=calc(d); collectBroker();
+  const autoTitle=(d.driverName||d.driverCode||'Chauffeur')+' - Semaine '+(d.week||'');
+
+  // PAGE 1 : résumé compact — tout le résumé + paiement reste sur la même page
+  doc.setFontSize(autoTitle.length>38 ? 14 : 16);
+  doc.setFont(undefined,'bold');
+  doc.text(autoTitle,105,14,{align:'center'});
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(8.5);
+  doc.text('Fait le '+new Date().toLocaleDateString('fr-CA'),20,27);
+  doc.text('Période de paie : '+d.from+' au '+d.to,20,36);
+  doc.line(20,48,190,48);
+
+  doc.setFontSize(9.2);
+  doc.setFont(undefined,'bold'); doc.text((broker.brokerStation||'').toUpperCase(),20,58); doc.setFont(undefined,'normal');
+  doc.text(broker.brokerCompany||'',20,66);
+  (broker.brokerAddress||'').split('\n').slice(0,3).forEach((l,idx)=>doc.text(l,20,74+idx*6));
+  doc.setFont(undefined,'bold'); doc.text('À L’ATTENTION DE',130,58); doc.setFont(undefined,'normal');
+  doc.text(d.driverName||'',130,66); doc.text('Code : '+(d.driverCode||''),130,73);
+  if(d.driverId)doc.text('ID : '+d.driverId,130,80);
+  if(d.driverAddress)doc.text(String(d.driverAddress).slice(0,32),130,87);
+  if(d.driverEmail)doc.text(String(d.driverEmail).slice(0,38),130,94);
+  if(d.driverPhone)doc.text(String(d.driverPhone).slice(0,22),130,101);
+
+  let y=108;
+  doc.setFillColor(20,20,20); doc.setTextColor(255); doc.rect(20,y,170,8,'F');
+  doc.setFontSize(8.7); doc.setFont(undefined,'bold');
+  doc.text('DATES',28,y+5.8); doc.text('COLIS',78,y+5.8); doc.text('MONTANT',145,y+5.8);
+  doc.setTextColor(0); doc.setFont(undefined,'normal'); y+=13;
+  const rows=(d.dayRows&&d.dayRows.length?d.dayRows:[{date:d.from,parcels:d.parcels,amount:c.base}]);
+  rows.slice(0,9).forEach(r=>{doc.text(String(r.date),25,y); doc.text(String(r.parcels),83,y); doc.text(money(r.amount),145,y); y+=6.2;});
+
+  // Résumé à droite, compact.
+  y+=4;
+  const sx=112;
+  doc.setFontSize(8.7);
+  const summary = [
+    ['Sous total Intelcom', money(c.base)],
+    ['Commission broker', money(c.commission)],
+    ['Jours travaillés', String(c.workedDays||0)],
+    ['Mode frais', feeModeLabel(c.mode)],
+    ['Frais broker', money(c.fee)],
+    ['Déduction', moneyClean(d.deduction)],
+    ['Avance', moneyClean(d.advance)]
+  ];
+  summary.forEach(([k,v])=>{ doc.text(k+' : '+v, sx, y); y+=6.3; });
+  y+=2;
+  doc.setFillColor(20,20,20); doc.setTextColor(255); doc.rect(105,y,85,11,'F');
+  doc.setFont(undefined,'bold'); doc.text('TOTAL : '+money(c.net),147.5,y+7.4,{align:'center'});
+  doc.setFont(undefined,'normal'); doc.setTextColor(0);
+
+  // Bloc paiement forcé sur la page 1, sous le total.
+  let footerY = Math.max(y + 18, 230);
+  if(footerY > 246) footerY = 246;
+  doc.setFontSize(8);
+  doc.text('Paiement à l’ordre de : '+(broker.payTo||''),20,footerY);
+  doc.text('Règlement : '+(broker.paymentMethod||''),20,footerY+7);
+  if(broker.brokerEmail) doc.text('Email : '+broker.brokerEmail,20,footerY+14);
+  if(broker.brokerPhone) doc.text('Téléphone : '+broker.brokerPhone,20,footerY+21);
+  doc.line(20,footerY+29,190,footerY+29);
+  doc.setFontSize(9); doc.text('MERCI DE VOTRE CONFIANCE',105,footerY+40,{align:'center'});
+
+  // PAGE 2 : détails des frais broker
+  if(c.feeDetails && c.feeDetails.length){
+    doc.addPage();
+    doc.setFontSize(16); doc.setFont(undefined,'bold'); doc.text('Détails des frais broker',20,18);
+    doc.setFontSize(10); doc.setFont(undefined,'normal'); doc.text('Mode : '+feeModeLabel(c.mode),20,28); doc.text('Véhicule choisi par journée',20,36);
+    let fy=50; doc.setFillColor(20,20,20); doc.setTextColor(255); doc.rect(20,fy,170,8,'F');
+    doc.setFont(undefined,'bold');
+    doc.text('Date',25,fy+6); doc.text('Colis',57,fy+6); doc.text('Véhicule',78,fy+6); doc.text('Tranche',112,fy+6); doc.text('Frais',165,fy+6);
+    doc.setFont(undefined,'normal'); doc.setTextColor(0); fy+=15;
+    c.feeDetails.forEach(r=>{
+      if(fy>270){doc.addPage(); fy=20;}
+      doc.text(String(r.date||''),25,fy); doc.text(String(r.parcels||0),57,fy); doc.text(String(VEHICLE_LABELS[r.vehicle]||r.vehicle||''),78,fy); doc.text(String(r.bracket||''),112,fy); doc.text(money(r.amount),165,fy); fy+=8;
+    });
+    fy+=8; doc.setFont(undefined,'bold'); doc.text('Frais broker total : '+money(c.fee),115,fy); doc.setFont(undefined,'normal');
+  }
+
+  // PAGES SUIVANTES : détails des colis Intelcom
+  if((broker.includeParcelDetails||'yes')==='yes' && d.parcelDetails && d.parcelDetails.length){
+    const rows = d.parcelDetails;
+    const rowsPerPage = 36;
+    for(let start=0; start<rows.length; start+=rowsPerPage){
+      doc.addPage();
+      doc.setFontSize(16); doc.setFont(undefined,'bold'); doc.text('Détails des colis Intelcom',20,18);
+      doc.setFontSize(9); doc.setFont(undefined,'normal');
+      doc.text((d.driverName||'')+'  '+(d.driverCode||''),20,25);
+      doc.text('Période : '+d.from+' au '+d.to,20,31);
+      doc.text('Page détails '+(Math.floor(start/rowsPerPage)+1)+' / '+Math.ceil(rows.length/rowsPerPage),150,25);
+      let yy=40;
+      doc.setFillColor(20,20,20); doc.setTextColor(255); doc.rect(10,yy,190,8,'F');
+      doc.text('Date',12,yy+6); doc.text('Service',37,yy+6); doc.text('Code postal',65,yy+6); doc.text('Zone',92,yy+6); doc.text('Tracking',113,yy+6); doc.text('Poids',165,yy+6); doc.text('Montant',183,yy+6);
+      doc.setTextColor(0); yy+=13; doc.setFontSize(7.2);
+      rows.slice(start,start+rowsPerPage).forEach(r=>{
+        doc.text(String(r.date||''),12,yy);
+        doc.text(String(r.service||''),37,yy);
+        doc.text(String(r.postal||''),65,yy);
+        doc.text(String(r.zone||''),92,yy);
+        let tr=String(r.tracking||''); if(tr.length>24) tr=tr.slice(0,24);
+        doc.text(tr,113,yy);
+        doc.text(String(r.weight||''),165,yy);
+        doc.text(money(r.amount),183,yy);
+        yy+=6;
+      });
+    }
+  }
+  return doc;
+}
+
+function saveHistoryLocal(){
+  if(!drivers.length) return alert('Aucune facture à sauvegarder.');
+  const history = JSON.parse(localStorage.getItem('intelcomInvoiceHistoryV22')||'[]');
+  drivers.forEach(d=>{
+    const c=calc(d);
+    history.push({
+      savedAt:new Date().toISOString(),
+      driverCode:d.driverCode, driverName:d.driverName,
+      week:d.week, from:d.from, to:d.to,
+      parcels:d.parcels, subtotal:c.base, commission:c.commission,
+      fees:c.fee, deduction:Number(d.deduction||0), advance:Number(d.advance||0), net:c.net
+    });
+  });
+  localStorage.setItem('intelcomInvoiceHistoryV22', JSON.stringify(history));
+  alert('Historique local sauvegardé : '+drivers.length+' facture(s).');
+}
+
+function cleanFileName(x){return String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9 _-]/g,'').trim().replace(/\s+/g,' ')}
+function pdfFileName(d){const name=cleanFileName(d.driverName||d.driverCode||'Chauffeur'); const week=cleanFileName(d.week||'Semaine'); return `${name} - Semaine ${week}.pdf`; }
+function downloadOne(i){buildPdf(drivers[i]).save(pdfFileName(drivers[i]))}
+async function generateAllZip(){ if(!drivers.length)return alert('Aucun chauffeur.'); const zip=new JSZip(); drivers.forEach(d=>{const pdf=buildPdf(d).output('blob'); zip.file(pdfFileName(d),pdf);}); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='releves_chauffeurs.zip'; a.click(); }
+function exportCSV(){let csv='Code,Chauffeur,Vehicule,Mode frais,ID,Adresse,Email,Telephone,Periode,Colis,Total Intelcom,Commission,Frais,Deduction,Avance,Net,Details colis\n'; drivers.forEach(d=>{const c=calc(d);csv+=`"${d.driverCode}","${d.driverName}","Par journée","${feeModeLabel(c.mode)}","${d.driverId}","${d.driverAddress}","${d.driverEmail}","${d.driverPhone}","${d.from} au ${d.to}",${d.parcels},${c.base.toFixed(2)},${c.commission.toFixed(2)},${c.fee.toFixed(2)},${d.deduction},${d.advance},${c.net.toFixed(2)},${d.parcelDetails?d.parcelDetails.length:0}\n`;}); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='resume_broker.csv'; a.click();}
+function saveAll(){collectBroker(); localStorage.setItem('intelcomDriversBatchV2',JSON.stringify(drivers)); localStorage.setItem('intelcomBrokerV2',JSON.stringify(broker));}
+function clearData(){if(confirm('Vider tous les chauffeurs?')){drivers=[];saveAll();render();}}
+function removeDriver(i){drivers.splice(i,1);saveAll();render();}
+['brokerCompany','brokerStation','payTo','brokerEmail','brokerPhone','paymentMethod','brokerAddress','commission','feeMode','fixedFee','calcMode','includeParcelDetails'].forEach(id=>{byId(id).onchange=()=>{saveAll(); if(id==='feeMode') renderFeeSettings(); render();}});
+loadBroker(); renderFeeSettings(); render();
 </script>
 </body>
 </html>
