@@ -3,36 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v19.1 Gmail</title>
+  <title>Broker Intelcom Pay - v20</title>
   <style>
-    :root{--bg:#0f172a;--card:#111827;--card2:#1f2937;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--border:#334155;--yellow:#f59e0b}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-size:24px;font-weight:800}.pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.92);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 14px 40px rgba(0,0,0,.25)}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:800px){.col-4,.col-6,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}}
-    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:11px;outline:none} button{border:0;border-radius:12px;padding:11px 14px;font-weight:700;color:white;background:var(--blue);cursor:pointer} button.secondary{background:#334155} button.green{background:var(--green)} button.red{background:var(--red)} button.yellow{background:var(--yellow);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden} th,td{border-bottom:1px solid var(--border);padding:9px;text-align:left;font-size:13px} th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.big{font-size:30px;font-weight:900}.right{text-align:right}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.pdf-preview{background:white;color:#111827;padding:20px;border-radius:12px}.pdf-preview table{background:white;color:#111827}.pdf-preview th{background:#f1f5f9;color:#111827}.pdf-preview td,.pdf-preview th{border-color:#e5e7eb}
+    :root{--bg:#0b1220;--card:#111827;--card2:#172033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#0b1220,#162136);color:var(--text)}
+    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-size:25px;font-weight:900}.sub{color:var(--muted)}
+    .pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:#cbd5e1;font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.94);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.28)}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:850px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}.wide{overflow-x:auto}}
+    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:11px;outline:none} button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;color:white;background:var(--blue);cursor:pointer}button.secondary{background:#334155}button.green{background:var(--green)}button.red{background:var(--red)}button.orange{background:var(--orange);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;white-space:nowrap}th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.warn{background:#451a03;border-color:#c2410c;color:#ffedd5}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.big{font-size:30px;font-weight:900}.dangerline{border:1px solid #7f1d1d;background:#1f0b0b}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.linkbox{font-size:12px;color:#cbd5e1;background:#0b1220;border:1px dashed var(--border);padding:10px;border-radius:12px;word-break:break-all}.right{text-align:right}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div><div class="brand">Broker Intelcom Pay</div><div class="muted">v19.1 — email/mot de passe + invitations Gmail, sans Storage</div></div><div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div></div>
+  <div class="top">
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v20 — invitations Firebase + Gmail + désactiver/supprimer broker</div></div>
+    <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
+  </div>
   <div id="msg"></div>
 
   <section id="authView" class="grid">
-    <div class="card col-6">
+    <div class="card col-4">
       <h2>Connexion</h2>
       <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com">
       <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••">
       <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
-      <div class="notice">Version stable : crée d’abord ton compte Super Admin une seule fois, ensuite tu crées les brokers et les chauffeurs depuis l’app.</div>
+      <div class="notice">Utilise ce bloc si ton compte existe déjà.</div>
     </div>
-    <div class="card col-6">
-      <h2>Créer le Super Admin</h2>
-      <p class="muted">À faire une seule fois avec ton email. Si le compte existe déjà, connecte-toi simplement.</p>
+    <div class="card col-4">
+      <h2>Créer compte avec invitation</h2>
+      <p class="muted">Pour broker ou chauffeur invité par email.</p>
+      <label>Nom</label><input id="invName" placeholder="Nom complet">
+      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité">
+      <label>Mot de passe</label><input id="invPass" type="password" placeholder="minimum 6 caractères">
+      <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
+    </div>
+    <div class="card col-4">
+      <h2>Créer Super Admin</h2>
+      <p class="muted">À faire une seule fois.</p>
       <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
       <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb06@gmail.com">
       <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
@@ -57,86 +66,209 @@ const firebaseConfig = {
   measurementId: "G-L0MKXG2MS6"
 };
 firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth(); const db=firebase.firestore();
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let currentUser=null, profile=null, currentTab='dashboard';
-const $=id=>document.getElementById(id);
-function showMsg(t,type='notice'){ $('msg').innerHTML=`<div class="notice ${type}">${t}</div>`; setTimeout(()=>{$('msg').innerHTML=''},6000)}
-function money(n){n=Number(n||0); return n.toLocaleString('fr-CA',{minimumFractionDigits:2,maximumFractionDigits:2})+' $'}
-function cleanFileName(s){return (s||'releve').replace(/[\\/:*?"<>|]/g,'-')}
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let profile = null;
+let currentTab = 'dashboard';
+const $ = id => document.getElementById(id);
 
-function appUrl(){
-  const href = window.location.href;
-  if(href && href.startsWith('http')) return href.split('#')[0];
-  return 'https://allaouaboucheneb04-lgtm.github.io/Brocker-app/';
+function showMsg(text, type='notice'){
+  $('msg').innerHTML = `<div class="notice ${type}">${text}</div>`;
+  setTimeout(()=>{$('msg').innerHTML=''}, 7000);
 }
-function openGmailInvitation(email, role, name='', tempPassword='', brokerId=''){
-  if(!email) return showMsg('Email manquant pour envoyer l’invitation','err');
-  const title = role==='broker' ? 'Invitation à votre espace Broker Intelcom' : 'Invitation à votre espace Chauffeur Intelcom';
-  const body = role==='broker'
-    ? `Bonjour ${name||''},
+function safe(v){return String(v||'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function normEmail(e){return String(e||'').trim().toLowerCase();}
+function appUrl(){ return 'https://allaouaboucheneb04-lgtm.github.io/Brocker-app/'; }
+function money(n){ n=Number(n||0); return n.toLocaleString('fr-CA',{minimumFractionDigits:2, maximumFractionDigits:2})+' $'; }
+function card(html, cls='col-12'){ return `<div class="card ${cls}">${html}</div>`; }
+function tempPass(){ return 'Temp' + Math.random().toString(36).slice(2,8).toUpperCase() + '!' + Math.floor(10+Math.random()*89); }
 
-Votre espace Broker Intelcom est prêt.
-
-Lien de connexion :
-${appUrl()}
-
-Email : ${email}
-${tempPassword ? 'Mot de passe temporaire : '+tempPassword+'\n' : 'Mot de passe : à créer / à confirmer avec le Super Admin\n'}${brokerId ? 'ID broker : '+brokerId+'\n' : ''}
-Connectez-vous pour gérer vos chauffeurs, vos PDF Intelcom et vos relevés.
-
-Merci.`
-    : `Bonjour ${name||''},
-
-Votre espace Chauffeur Intelcom est prêt.
-
-Lien de connexion :
-${appUrl()}
-
-Email : ${email}
-${tempPassword ? 'Mot de passe temporaire : '+tempPassword+'\n' : 'Mot de passe : à créer / à confirmer avec votre broker\n'}${brokerId ? 'ID broker : '+brokerId+'\n' : ''}
-Vous pourrez consulter vos relevés et déclarer le véhicule utilisé.
-
-Merci.`;
-  const gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1'
-    + '&to=' + encodeURIComponent(email)
-    + '&su=' + encodeURIComponent(title)
-    + '&body=' + encodeURIComponent(body);
-  window.open(gmailUrl, '_blank');
+function gmailUrl(inv){
+  const subject = inv.role === 'broker' ? 'Invitation à votre espace Broker Intelcom' : 'Invitation à votre espace Chauffeur Intelcom';
+  const body = `Bonjour ${inv.name || ''},\n\nVotre invitation est prête.\n\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire / suggestion : ${inv.tempPassword || 'à créer'}\n\nÉtapes :\n1. Ouvrir le lien.\n2. Cliquer sur "Créer compte avec invitation".\n3. Entrer cet email et créer un mot de passe.\n\nMerci.`;
+  return 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(inv.email) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+function openGmail(inv){ window.open(gmailUrl(inv), '_blank'); }
+function copyInvite(inv){
+  const txt = `Invitation ${inv.role}\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire : ${inv.tempPassword||''}`;
+  navigator.clipboard?.writeText(txt).then(()=>showMsg('Invitation copiée','ok')).catch(()=>showMsg('Copie impossible','err'));
 }
 
-async function getProfile(uid){ const d=await db.collection('users').doc(uid).get(); return d.exists?d.data():null; }
-auth.onAuthStateChanged(async u=>{ currentUser=u; if(!u){profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return;} profile=await getProfile(u.uid); if(!profile){showMsg('Compte créé mais aucun rôle trouvé. Demande au Super Admin de t’ajouter.', 'err'); await auth.signOut(); return;} $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent=(profile.role||'')+' — '+(u.email||''); renderTabs(); render();});
-$('logoutBtn').onclick=()=>auth.signOut();
-$('loginBtn').onclick=async()=>{try{await auth.signInWithEmailAndPassword($('loginEmail').value.trim(),$('loginPass').value)}catch(e){showMsg(e.message,'err')}};
-$('resetBtn').onclick=async()=>{try{if(!$('loginEmail').value) return showMsg('Entre ton email d’abord','err'); await auth.sendPasswordResetEmail($('loginEmail').value.trim()); showMsg('Email de réinitialisation envoyé','ok')}catch(e){showMsg(e.message,'err')}};
-$('createSuperBtn').onclick=async()=>{try{const email=$('saEmail').value.trim(), pass=$('saPass').value, name=$('saName').value.trim(); const cred=await auth.createUserWithEmailAndPassword(email,pass); await db.collection('users').doc(cred.user.uid).set({name,email,role:'superadmin',createdAt:firebase.firestore.FieldValue.serverTimestamp()}); showMsg('Super Admin créé','ok')}catch(e){showMsg(e.message,'err')}};
-function tabsForRole(){ if(profile.role==='superadmin') return [['dashboard','Dashboard'],['brokers','Brokers'],['settings','Paramètres']]; if(profile.role==='broker') return [['dashboard','Dashboard'],['drivers','Chauffeurs'],['import','Import PDF'],['weeks','Relevés'],['settings','Barèmes']]; return [['dashboard','Mes relevés'],['vehicles','Véhicules']];}
-function renderTabs(){ $('tabs').innerHTML=tabsForRole().map(([id,label])=>`<button class="tab ${currentTab===id?'active':''}" onclick="currentTab='${id}';renderTabs();render()">${label}</button>`).join('')}
-function render(){ if(profile.role==='superadmin') return renderSuper(); if(profile.role==='broker') return renderBroker(); return renderDriver();}
-function card(html,cls='col-12'){return `<div class="card ${cls}">${html}</div>`}
-async function count(q){ const s=await q.get(); return s.size; }
-async function renderSuper(){ const c=$('content'); if(currentTab==='dashboard'){ const [b,u]=await Promise.all([count(db.collection('brokers')), count(db.collection('users'))]); c.innerHTML=`<div class="grid">${card(`<h2>Super Admin</h2><div class="grid"><div class="card col-6"><div class="muted">Brokers</div><div class="big">${b}</div></div><div class="card col-6"><div class="muted">Utilisateurs</div><div class="big">${u}</div></div></div>`,'col-12')}</div>`; }
- if(currentTab==='brokers'){ const snap=await db.collection('brokers').orderBy('createdAt','desc').get().catch(()=>({docs:[]})); c.innerHTML=`<div class="grid">${card(`<h2>Créer Broker</h2><label>Nom compagnie</label><input id="bName"><label>Nom responsable</label><input id="bOwner"><label>Email broker</label><input id="bEmail"><label>Mot de passe temporaire / note</label><input id="bTempPass" placeholder="ex: Temp12345 ou à créer"><label>Plan</label><select id="bPlan"><option>free</option><option selected>pro</option><option>enterprise</option></select><label>Max chauffeurs</label><input id="bMax" type="number" value="50"><div class="row" style="margin-top:12px"><button class="green" onclick="createBroker()">Créer Broker</button><button class="secondary" onclick="openGmailInvitation($('bEmail').value,'broker',$('bOwner').value,$('bTempPass').value,'')">Gmail</button></div>`,'col-4')}${card(`<h2>Brokers</h2><table><tr><th>Compagnie</th><th>Email</th><th>Plan</th><th>Actif</th><th>Invitation</th></tr>${snap.docs.map(d=>{let x=d.data();return `<tr><td>${x.companyName||''}</td><td>${x.email||''}</td><td>${x.plan||''}</td><td>${x.active?'Oui':'Non'}</td><td><button class="secondary" onclick="openGmailInvitation('${(x.email||'').replace(/'/g,"\\'")}','broker','${(x.ownerName||x.companyName||'').replace(/'/g,"\\'")}','${(x.tempPassword||'').replace(/'/g,"\\'")}','${d.id}')">Gmail</button></td></tr>`}).join('')}</table>`,'col-8')}</div>`; }
- if(currentTab==='settings'){ c.innerHTML=card(`<h2>Paramètres plateforme</h2><p class="muted">Version stable sans Google. Les comptes broker/chauffeur sont créés par email/mot de passe.</p>`); }}
-window.createBroker=async()=>{try{const id='broker_'+Date.now(); const data={companyName:$('bName').value,ownerName:$('bOwner').value,email:$('bEmail').value,tempPassword:$('bTempPass').value,plan:$('bPlan').value,maxDrivers:Number($('bMax').value||0),active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}; await db.collection('brokers').doc(id).set(data); showMsg('Broker créé. Gmail va s’ouvrir pour envoyer l’invitation. Crée ensuite son compte Auth + users/{UID}.','ok'); openGmailInvitation(data.email,'broker',data.ownerName,data.tempPassword,id); render()}catch(e){showMsg(e.message,'err')}};
-async function renderBroker(){ const c=$('content'); const brokerId=profile.brokerId; if(currentTab==='dashboard'){ const [d,w]=await Promise.all([count(db.collection('drivers').where('brokerId','==',brokerId)), count(db.collection('weeks').where('brokerId','==',brokerId))]); c.innerHTML=`<div class="grid">${card(`<h2>Dashboard Broker</h2><div class="grid"><div class="card col-6"><div class="muted">Chauffeurs</div><div class="big">${d}</div></div><div class="card col-6"><div class="muted">Relevés</div><div class="big">${w}</div></div></div>`,'col-12')}</div>`; }
- if(currentTab==='drivers'){ const snap=await db.collection('drivers').where('brokerId','==',brokerId).get(); c.innerHTML=`<div class="grid">${card(`<h2>Ajouter chauffeur</h2><label>Nom</label><input id="dName"><label>Code Intelcom</label><input id="dCode"><label>Email</label><input id="dEmail"><label>Téléphone</label><input id="dPhone"><label>Mot de passe temporaire / note</label><input id="dTempPass" placeholder="ex: Temp12345 ou à créer"><div class="row" style="margin-top:12px"><button class="green" onclick="createDriver()">Ajouter</button><button class="secondary" onclick="openGmailInvitation($('dEmail').value,'driver',$('dName').value,$('dTempPass').value,profile.brokerId)">Gmail</button></div><p class="muted small">Ensuite crée son compte Auth et users/{UID} role driver.</p>`,'col-4')}${card(`<h2>Chauffeurs</h2><table><tr><th>Nom</th><th>Code</th><th>Email</th><th>Téléphone</th><th>Invitation</th></tr>${snap.docs.map(d=>{let x=d.data();return `<tr><td>${x.name}</td><td>${x.code}</td><td>${x.email||''}</td><td>${x.phone||''}</td><td><button class="secondary" onclick="openGmailInvitation('${(x.email||'').replace(/'/g,"\\'")}','driver','${(x.name||'').replace(/'/g,"\\'")}','${(x.tempPassword||'').replace(/'/g,"\\'")}','${x.brokerId||''}')">Gmail</button></td></tr>`}).join('')}</table>`,'col-8')}</div>`; }
- if(currentTab==='import'){ c.innerHTML=card(`<h2>Import PDF Intelcom</h2><input id="pdfFiles" type="file" accept="application/pdf" multiple><div class="row" style="margin-top:12px"><button onclick="importPDFs()">Importer PDF</button><button class="secondary" onclick="generateZip()">Générer ZIP PDF</button></div><div id="importResults" style="margin-top:14px"></div>`); }
- if(currentTab==='weeks'){ const snap=await db.collection('weeks').where('brokerId','==',brokerId).get(); c.innerHTML=card(`<h2>Relevés</h2><table><tr><th>Chauffeur</th><th>Semaine</th><th>Total Intelcom</th><th>Net</th><th>PDF</th></tr>${snap.docs.map(d=>{let x=d.data();return `<tr><td>${x.driverName}</td><td>${x.week}</td><td>${money(x.totalInvoice)}</td><td>${money(x.net)}</td><td><button onclick="downloadWeek('${d.id}')">PDF</button></td></tr>`}).join('')}</table>`); }
- if(currentTab==='settings'){ const doc=await db.collection('settings').doc(brokerId).get(); const s=doc.exists?doc.data():{}; c.innerHTML=card(`<h2>Barèmes</h2><label>Commission broker (%)</label><input id="setCommission" type="number" value="${s.commission??25}"><label>Mode frais</label><select id="setFeeMode"><option value="daily" ${s.feeMode==='daily'?'selected':''}>Frais fixe par jour travaillé</option><option value="parcel" ${s.feeMode!=='daily'?'selected':''}>Barème par colis</option></select><label>Frais par jour</label><input id="setDailyFee" type="number" value="${s.dailyFee??60}"><div class="hr"></div><h3>Barème essence</h3><textarea id="essenceRules" rows="4">${JSON.stringify(s.essenceRules||[{min:0,max:100,fee:50},{min:101,max:9999,fee:70}],null,2)}</textarea><h3>Barème électrique</h3><textarea id="electricRules" rows="4">${JSON.stringify(s.electricRules||[{min:0,max:100,fee:30},{min:101,max:9999,fee:50}],null,2)}</textarea><button class="green" onclick="saveSettings()" style="margin-top:12px">Enregistrer</button>`); }}
-window.createDriver=async()=>{try{const id='driver_'+Date.now(); const data={brokerId:profile.brokerId,name:$('dName').value,code:$('dCode').value,email:$('dEmail').value,phone:$('dPhone').value,tempPassword:$('dTempPass').value,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp()}; await db.collection('drivers').doc(id).set(data); showMsg('Chauffeur ajouté. Gmail va s’ouvrir pour envoyer l’invitation.','ok'); openGmailInvitation(data.email,'driver',data.name,data.tempPassword,profile.brokerId); render()}catch(e){showMsg(e.message,'err')}};
-window.saveSettings=async()=>{try{await db.collection('settings').doc(profile.brokerId).set({brokerId:profile.brokerId,commission:Number($('setCommission').value||25),feeMode:$('setFeeMode').value,dailyFee:Number($('setDailyFee').value||0),essenceRules:JSON.parse($('essenceRules').value||'[]'),electricRules:JSON.parse($('electricRules').value||'[]'),updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}); showMsg('Paramètres enregistrés','ok')}catch(e){showMsg('Erreur barème JSON: '+e.message,'err')}};
-async function parsePDF(file){ const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise; let text=''; for(let p=1;p<=pdf.numPages;p++){ const page=await pdf.getPage(p); const cont=await page.getTextContent(); text += cont.items.map(i=>i.str).join(' ')+'\n'; } return extractIntel(text,file.name); }
-function extractIntel(text,fileName){ const codeName=(text.match(/(C0[A-Z0-9]{5})\s+([A-Za-zÀ-ÿ' -]+?)\s+Invoice To/i)||[]); const code=codeName[1]||((fileName.match(/(C0[A-Z0-9]{5})/)||[])[1]||''); const name=(codeName[2]||'Chauffeur').trim(); const week=(text.match(/Week reference:\s*([0-9]{4}-[0-9]{1,2})/i)||text.match(/\b(20\d{2}-\d{1,2})\b/)||[])[1]||''; const from=(text.match(/From:\s*(20\d{2}-\d{2}-\d{2})/i)||[])[1]||''; const to=(text.match(/To:\s*(20\d{2}-\d{2}-\d{2})/i)||[])[1]||''; const totalInvoice=Number(((text.match(/Total invoice\s*\$?([0-9,]+\.\d{2})/i)||[])[1]||'0').replace(',',''));
- const daily=[]; const re=/(20\d{2}-\d{2}-\d{2})\s+0\s+(\d+)\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})\s+\$?([0-9,]+\.\d{2})/g; let m; while((m=re.exec(text))&&daily.length<10){ daily.push({date:m[1],parcels:Number(m[2]),amount:Number(m[6].replace(',','')),vehicle:'Essence'}); }
- return {code,name,week,from,to,totalInvoice,daily,raw:text}; }
-async function calcFees(data){ const sd=await db.collection('settings').doc(profile.brokerId).get(); const s=sd.exists?sd.data():{commission:25,feeMode:'parcel',dailyFee:60,essenceRules:[{min:0,max:100,fee:50},{min:101,max:9999,fee:70}],electricRules:[{min:0,max:100,fee:30},{min:101,max:9999,fee:50}]}; const commission=data.totalInvoice*(Number(s.commission||0)/100); let brokerFees=0, feeDetails=[]; for(const d of data.daily){ if(!d.parcels && !d.amount) continue; let fee=0, tranche=''; if(s.feeMode==='daily'){fee=Number(s.dailyFee||0); tranche='jour travaillé'} else { const rules=(d.vehicle==='Électrique'?s.electricRules:s.essenceRules)||[]; const r=rules.find(x=>d.parcels>=Number(x.min)&&d.parcels<=Number(x.max)); fee=r?Number(r.fee):0; tranche=r?`${r.min}-${r.max}`:'aucune'; } brokerFees+=fee; feeDetails.push({...d,fee,tranche}); } return {commission,brokerFees,net:data.totalInvoice-commission-brokerFees,feeDetails,workingDays:feeDetails.length}; }
-window.importPDFs=async()=>{try{const files=[...$('pdfFiles').files].slice(0,40); let html='<table><tr><th>Chauffeur</th><th>Semaine</th><th>Total</th><th>Net</th></tr>'; for(const f of files){ const data=await parsePDF(f); const fees=await calcFees(data); const doc={brokerId:profile.brokerId,driverCode:data.code,driverName:data.name,week:data.week,from:data.from,to:data.to,totalInvoice:data.totalInvoice,daily:data.daily,commission:fees.commission,brokerFees:fees.brokerFees,net:fees.net,feeDetails:fees.feeDetails,workingDays:fees.workingDays,createdAt:firebase.firestore.FieldValue.serverTimestamp()}; await db.collection('weeks').add(doc); html+=`<tr><td>${data.name}</td><td>${data.week}</td><td>${money(data.totalInvoice)}</td><td>${money(fees.net)}</td></tr>`; } $('importResults').innerHTML=html+'</table>'; showMsg('Import terminé','ok')}catch(e){showMsg(e.message,'err')}};
-async function getWeek(id){const d=await db.collection('weeks').doc(id).get(); return {id,...d.data()};}
-function makePDF(w){ const {jsPDF}=window.jspdf; const doc=new jsPDF(); let y=12; doc.setFontSize(15); doc.text(`${w.driverName} - Semaine ${w.week}`,105,y,{align:'center'}); y+=9; doc.setFontSize(10); doc.text(`Période de paie : ${w.from||''} au ${w.to||''}`,14,y); y+=8; doc.text(`À l’attention de : ${w.driverName}`,14,y); doc.text(`Code : ${w.driverCode||''}`,130,y); y+=8; doc.setFontSize(9); doc.text('DATES',14,y); doc.text('COLIS',70,y); doc.text('MONTANT',120,y); y+=5; (w.daily||[]).forEach(d=>{doc.text(d.date,14,y); doc.text(String(d.parcels),75,y); doc.text(money(d.amount),120,y); y+=6;}); y+=4; doc.setFontSize(10); [['Sous total Intelcom',w.totalInvoice],['Commission broker',w.commission],['Frais broker',w.brokerFees],['TOTAL',w.net]].forEach(([l,v])=>{doc.text(l+' :',14,y); doc.text(money(v),120,y); y+=7}); doc.text(`Jours travaillés : ${w.workingDays||0}`,14,y); y+=8; doc.text('Paiement à l’ordre de : Broker',14,y); y+=6; doc.text('Règlement : Par virement bancaire',14,y); y+=8; doc.text('MERCI DE VOTRE CONFIANCE',105,y,{align:'center'}); doc.addPage(); y=14; doc.setFontSize(14); doc.text('Détails des frais broker',14,y); y+=10; doc.setFontSize(9); doc.text('Date',14,y); doc.text('Colis',50,y); doc.text('Véhicule',75,y); doc.text('Tranche',115,y); doc.text('Frais',155,y); y+=6; (w.feeDetails||[]).forEach(d=>{doc.text(d.date,14,y); doc.text(String(d.parcels),52,y); doc.text(d.vehicle||'',75,y); doc.text(d.tranche||'',115,y); doc.text(money(d.fee),155,y); y+=6; if(y>280){doc.addPage();y=14}}); return doc; }
-window.downloadWeek=async(id)=>{const w=await getWeek(id); makePDF(w).save(cleanFileName(`${w.driverName} - Semaine ${w.week}.pdf`));}
-window.generateZip=async()=>{showMsg('Utilise la page Relevés pour télécharger les PDF. ZIP global sera ajouté après validation.', 'notice')}
-async function renderDriver(){ const c=$('content'); if(currentTab==='dashboard'){ const snap=await db.collection('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})); c.innerHTML=card(`<h2>Mes relevés</h2><table><tr><th>Semaine</th><th>Total</th><th>PDF</th></tr>${snap.docs.map(d=>{let x=d.data();return `<tr><td>${x.week}</td><td>${money(x.net)}</td><td><button onclick="downloadWeek('${d.id}')">PDF</button></td></tr>`}).join('')}</table>`); } if(currentTab==='vehicles'){ c.innerHTML=card(`<h2>Véhicules utilisés</h2><p class="muted">La saisie quotidienne complète sera branchée après validation de la connexion stable.</p>`); }}
+async function getProfile(uid){
+  const d = await db.collection('users').doc(uid).get();
+  return d.exists ? d.data() : null;
+}
+async function requireBrokerActive(p){
+  if(p.role !== 'broker') return true;
+  const b = await db.collection('brokers').doc(p.brokerId).get();
+  if(!b.exists || b.data().active === false){
+    showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err');
+    await auth.signOut();
+    return false;
+  }
+  return true;
+}
+auth.onAuthStateChanged(async user=>{
+  currentUser = user;
+  if(!user){
+    profile = null;
+    $('authView').classList.remove('hidden');
+    $('appView').classList.add('hidden');
+    $('logoutBtn').classList.add('hidden');
+    $('userPill').textContent = 'Non connecté';
+    return;
+  }
+  profile = await getProfile(user.uid);
+  if(!profile){
+    showMsg('Compte Auth créé, mais aucun profil app trouvé. Utilise "Créer compte avec invitation" ou crée ton document Super Admin.', 'err');
+    await auth.signOut();
+    return;
+  }
+  if(!(await requireBrokerActive(profile))) return;
+  $('authView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  $('logoutBtn').classList.remove('hidden');
+  $('userPill').textContent = `${profile.role} — ${user.email}`;
+  renderTabs();
+  render();
+});
+$('logoutBtn').onclick = () => auth.signOut();
+$('loginBtn').onclick = async()=>{
+  try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }
+  catch(e){ showMsg(e.message, 'err'); }
+};
+$('resetBtn').onclick = async()=>{
+  try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }
+  catch(e){ showMsg(e.message,'err'); }
+};
+$('createSuperBtn').onclick = async()=>{
+  try{
+    const email=normEmail($('saEmail').value), pass=$('saPass').value, name=$('saName').value.trim();
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection('users').doc(cred.user.uid).set({name,email,role:'superadmin',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    showMsg('Super Admin créé','ok');
+  }catch(e){ showMsg(e.message,'err'); }
+};
+$('acceptInviteBtn').onclick = async()=>{
+  try{
+    const email=normEmail($('invEmail').value), pass=$('invPass').value, name=$('invName').value.trim();
+    if(!email || !pass) return showMsg('Email et mot de passe obligatoires','err');
+    const snap = await db.collection('invitations').where('emailLower','==',email).where('used','==',false).limit(1).get();
+    if(snap.empty) return showMsg('Aucune invitation active trouvée pour cet email','err');
+    const invDoc = snap.docs[0];
+    const inv = invDoc.data();
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const userData = {name:name || inv.name || '', email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    await db.collection('users').doc(cred.user.uid).set(userData);
+    if(inv.role === 'driver' && inv.driverId){ await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, active:true}, {merge:true}); }
+    if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true}, {merge:true}); }
+    await invDoc.ref.set({used:true, usedBy:cred.user.uid, usedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+    showMsg('Compte créé avec invitation','ok');
+  }catch(e){ showMsg(e.message,'err'); }
+};
+
+function tabsForRole(){
+  if(profile?.role==='superadmin') return [['dashboard','Dashboard'],['brokers','Brokers'],['invitations','Invitations']];
+  if(profile?.role==='broker') return [['dashboard','Dashboard'],['drivers','Chauffeurs'],['invitations','Invitations'],['settings','Paramètres']];
+  return [['dashboard','Mes relevés'],['vehicles','Véhicules']];
+}
+function renderTabs(){ $('tabs').innerHTML = tabsForRole().map(([id,label])=>`<button class="tab ${currentTab===id?'active':''}" onclick="currentTab='${id}';renderTabs();render()">${label}</button>`).join(''); }
+async function render(){
+  if(!profile) return;
+  if(profile.role==='superadmin') return renderSuperAdmin();
+  if(profile.role==='broker') return renderBroker();
+  return renderDriver();
+}
+
+async function renderSuperAdmin(){
+  const c=$('content');
+  if(currentTab==='dashboard'){
+    const [brokers, users, invs] = await Promise.all([db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get()]);
+    c.innerHTML = `<div class="grid">${card(`<h2>Brokers</h2><div class="big">${brokers.size}</div><p class="muted">Entreprises créées</p>`,'col-4')}${card(`<h2>Utilisateurs</h2><div class="big">${users.size}</div><p class="muted">Super admin, brokers, chauffeurs</p>`,'col-4')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div><p class="muted">Créées dans Firebase</p>`,'col-4')}</div>`;
+  }
+  if(currentTab==='brokers'){
+    const snap = await db.collection('brokers').orderBy('createdAt','desc').get().catch(()=>db.collection('brokers').get());
+    c.innerHTML = `<div class="grid">
+      ${card(`<h2>Créer Broker</h2><label>Nom compagnie</label><input id="bCompany"><label>Nom responsable</label><input id="bOwner"><label>Email broker</label><input id="bEmail" type="email"><label>Mot de passe temporaire / suggestion</label><input id="bTemp" placeholder="généré automatiquement si vide"><label>Plan</label><select id="bPlan"><option value="free">free</option><option value="pro" selected>pro</option><option value="enterprise">enterprise</option></select><label>Max chauffeurs</label><input id="bMax" type="number" value="50"><button class="green" style="margin-top:12px" onclick="createBroker()">Créer Broker + Invitation</button><p class="muted small">Le bouton crée le broker ET l’invitation dans Firestore, puis ouvre Gmail.</p>`,'col-4')}
+      ${card(`<h2>Brokers</h2><div class="wide"><table><tr><th>Compagnie</th><th>Email</th><th>Plan</th><th>Actif</th><th>Invitation</th><th>Actions</th></tr>${snap.docs.map(d=>brokerRow(d.id,d.data())).join('')}</table></div>`,'col-8')}
+    </div>`;
+  }
+  if(currentTab==='invitations'){
+    const snap = await db.collection('invitations').orderBy('createdAt','desc').limit(100).get().catch(()=>db.collection('invitations').limit(100).get());
+    c.innerHTML = card(`<h2>Invitations</h2><div class="wide"><table><tr><th>Email</th><th>Rôle</th><th>Broker</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
+  }
+}
+function brokerRow(id,b){
+  const inv = {email:b.email, name:b.ownerName, role:'broker', brokerId:id, tempPassword:b.tempPassword||''};
+  return `<tr><td>${safe(b.companyName)}</td><td>${safe(b.email)}</td><td>${safe(b.plan)}</td><td>${b.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td>${b.active===false?`<button class="mini green" onclick="toggleBroker('${id}',true)">Réactiver</button>`:`<button class="mini orange" onclick="toggleBroker('${id}',false)">Désactiver</button>`} <button class="mini red" onclick="deleteBroker('${id}')">Supprimer</button></td></tr>`;
+}
+function inviteRow(id,inv){
+  return `<tr><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${inv.used?'Oui':'Non'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button> <button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button></td></tr>`;
+}
+window.createBroker = async()=>{
+  try{
+    const email=normEmail($('bEmail').value); if(!email) return showMsg('Email broker obligatoire','err');
+    const brokerId = 'broker_' + Date.now();
+    const temp = $('bTemp').value.trim() || tempPass();
+    const data = {companyName:$('bCompany').value.trim(), ownerName:$('bOwner').value.trim(), email, emailLower:email, plan:$('bPlan').value, maxDrivers:Number($('bMax').value||0), active:true, tempPassword:temp, createdAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid};
+    await db.collection('brokers').doc(brokerId).set(data);
+    const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:firebase.firestore.FieldValue.serverTimestamp(), createdBy:currentUser.uid};
+    await db.collection('invitations').doc('broker_'+brokerId).set(inv);
+    showMsg('Broker + invitation Firebase créés. Gmail va s’ouvrir.','ok');
+    openGmail(inv);
+    render();
+  }catch(e){ showMsg(e.message,'err'); }
+};
+window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').doc(id).set({active}, {merge:true}); showMsg(active?'Broker réactivé':'Broker désactivé','ok'); render(); }catch(e){showMsg(e.message,'err')} };
+async function deleteQuery(q){ const s=await q.get(); const batch=db.batch(); s.docs.forEach(d=>batch.delete(d.ref)); if(s.size) await batch.commit(); }
+window.deleteBroker = async(id)=>{
+  if(!confirm('Supprimer ce broker et ses données liées ?')) return;
+  try{
+    await deleteQuery(db.collection('invitations').where('brokerId','==',id));
+    await deleteQuery(db.collection('drivers').where('brokerId','==',id));
+    await deleteQuery(db.collection('weeks').where('brokerId','==',id));
+    await deleteQuery(db.collection('dailyVehicles').where('brokerId','==',id));
+    await deleteQuery(db.collection('settings').where('brokerId','==',id));
+    await db.collection('brokers').doc(id).delete();
+    showMsg('Broker supprimé','ok'); render();
+  }catch(e){ showMsg(e.message,'err'); }
+};
+window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(e.message,'err')} };
+
+async function renderBroker(){
+  const c=$('content'); const brokerId=profile.brokerId;
+  if(currentTab==='dashboard'){
+    const [drivers, invs] = await Promise.all([db.collection('drivers').where('brokerId','==',brokerId).get(), db.collection('invitations').where('brokerId','==',brokerId).get()]);
+    c.innerHTML = `<div class="grid">${card(`<h2>Chauffeurs</h2><div class="big">${drivers.size}</div>`,'col-6')}${card(`<h2>Invitations</h2><div class="big">${invs.size}</div>`,'col-6')}</div>`;
+  }
+  if(currentTab==='drivers'){
+    const snap=await db.collection('drivers').where('brokerId','==',brokerId).get();
+    c.innerHTML=`<div class="grid">${card(`<h2>Ajouter Chauffeur</h2><label>Nom</label><input id="dName"><label>Code Intelcom</label><input id="dCode"><label>Email</label><input id="dEmail" type="email"><label>Téléphone</label><input id="dPhone"><label>Mot de passe temporaire / suggestion</label><input id="dTemp" placeholder="généré automatiquement si vide"><button class="green" style="margin-top:12px" onclick="createDriverInvite()">Créer Chauffeur + Invitation</button>`,'col-4')}${card(`<h2>Chauffeurs</h2><div class="wide"><table><tr><th>Nom</th><th>Code</th><th>Email</th><th>Actif</th><th>Invitation</th></tr>${snap.docs.map(d=>{const x=d.data(); const inv={email:x.email,name:x.name,role:'driver',brokerId:x.brokerId,tempPassword:x.tempPassword||''}; return `<tr><td>${safe(x.name)}</td><td>${safe(x.code)}</td><td>${safe(x.email)}</td><td>${x.active===false?'Non':'Oui'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td></tr>`}).join('')}</table></div>`,'col-8')}</div>`;
+  }
+  if(currentTab==='invitations'){
+    const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
+    c.innerHTML=card(`<h2>Invitations</h2><div class="wide"><table><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
+  }
+  if(currentTab==='settings'){
+    c.innerHTML=card(`<h2>Paramètres</h2><p class="muted">Les barèmes et imports PDF restent dans la version PDF. Ici on stabilise d’abord les comptes, invitations, désactivation/suppression.</p>`);
+  }
+}
+window.createDriverInvite = async()=>{
+  try{
+    const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err');
+    const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass();
+    const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),tempPassword:temp,active:true,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid};
+    await db.collection('drivers').doc(driverId).set(data);
+    const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:currentUser.uid};
+    await db.collection('invitations').doc('driver_'+driverId).set(inv);
+    showMsg('Chauffeur + invitation Firebase créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
+  }catch(e){ showMsg(e.message,'err'); }
+};
+
+async function renderDriver(){
+  $('content').innerHTML = card(`<h2>Espace Chauffeur</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><p class="muted">Les relevés et véhicules par jour seront branchés après validation du système de comptes.</p>`);
+}
 </script>
-</body></html>
+</body>
+</html>

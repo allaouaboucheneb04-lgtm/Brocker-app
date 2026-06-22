@@ -1,28 +1,28 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function signedIn(){ return request.auth != null; }
-    function userExists(){ return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
-    function userData(){ return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
-    function isSuperAdmin(){ return userExists() && userData().role == 'superadmin'; }
-    function isBroker(){ return userExists() && userData().role == 'broker'; }
-    function isDriver(){ return userExists() && userData().role == 'driver'; }
-    function myBrokerId(){ return userData().brokerId; }
+    function signedIn() { return request.auth != null; }
+    function userExists() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function isSuperAdmin() { return userExists() && userData().role == "superadmin"; }
+    function isBroker() { return userExists() && userData().role == "broker"; }
+    function isDriver() { return userExists() && userData().role == "driver"; }
+    function myBrokerId() { return userData().brokerId; }
 
     match /users/{uid} {
+      allow read, write: if isSuperAdmin();
       allow create: if signedIn() && request.auth.uid == uid;
       allow read, update: if signedIn() && request.auth.uid == uid;
-      allow read, write: if isSuperAdmin();
       allow read: if isBroker() && resource.data.brokerId == myBrokerId();
     }
     match /brokers/{brokerId} {
       allow read, write: if isSuperAdmin();
-      allow read, update: if isBroker() && brokerId == myBrokerId();
+      allow read, update: if isBroker() && brokerId == myBrokerId() && resource.data.active != false;
     }
     match /drivers/{driverId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
-      allow read: if isDriver() && driverId == request.auth.uid;
+      allow read, update: if isDriver() && (resource.data.uid == request.auth.uid || driverId == request.auth.uid);
     }
     match /weeks/{weekId} {
       allow read, write: if isSuperAdmin();
@@ -34,14 +34,14 @@ service cloud.firestore {
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
       allow read, create, update: if isDriver() && request.resource.data.driverId == request.auth.uid;
     }
-    match /parcelDetails/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
-      allow read: if isDriver() && resource.data.driverId == request.auth.uid;
-    }
     match /settings/{docId} {
       allow read, write: if isSuperAdmin();
       allow read, write: if isBroker() && resource.data.brokerId == myBrokerId();
+    }
+    match /invitations/{inviteId} {
+      allow read, write: if isSuperAdmin();
+      allow create, read, update, delete: if isBroker() && (request.resource.data.brokerId == myBrokerId() || resource.data.brokerId == myBrokerId());
+      allow read, update: if signedIn();
     }
     match /{document=**} { allow read, write: if false; }
   }

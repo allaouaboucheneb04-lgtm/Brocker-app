@@ -1,18 +1,20 @@
-# Broker Intelcom Pay — v19.1 Gmail Invitation
+# Broker Intelcom Pay v20
 
-Version stable email/mot de passe avec boutons Gmail.
+Version corrigée :
+- Créer Broker crée réellement un document `brokers` et un document `invitations`.
+- Bouton Gmail ouvre seulement Gmail, mais l'invitation existe déjà dans Firebase.
+- Bouton Copier invitation.
+- Désactiver / Réactiver broker.
+- Supprimer broker + données liées.
+- Broker crée chauffeur + invitation Firebase.
+- Nouveau compte invité : onglet "Créer compte avec invitation".
 
-## Nouveautés
-- Bouton **Gmail** pour envoyer l'invitation broker.
-- Bouton **Gmail** pour envoyer l'invitation chauffeur.
-- Le message contient le lien de connexion, l'email, le mot de passe temporaire/note et l'ID broker.
-- Aucun Firebase Storage : les PDF sont générés à la demande.
+## Installation
+1. Décompresser le ZIP.
+2. Envoyer `index.html` sur GitHub Pages dans `Brocker-app`.
+3. Copier `firestore.rules` dans Firebase > Firestore > Rules.
+4. Activer Firebase Auth : Email/Password.
+5. Ajouter le domaine autorisé : `allaouaboucheneb04-lgtm.github.io`.
 
 ## Important
-Firebase n'envoie pas les emails tout seul. Le bouton Gmail ouvre une fenêtre Gmail préremplie. Il reste à cliquer sur **Envoyer** dans Gmail.
-
-## Déploiement
-Remplace le fichier `index.html` sur GitHub Pages par celui-ci.
-
-## v19.2 code fixed
-Correction importante : le fichier v19.1 avait une erreur JavaScript dans les boutons Gmail des listes broker/chauffeur. Cette erreur bloquait tout le script, donc même la connexion ne pouvait pas fonctionner.
+Le bouton Gmail n'envoie pas automatiquement l'email sans confirmation : il ouvre Gmail avec le message rempli. L'utilisateur doit cliquer Envoyer.
