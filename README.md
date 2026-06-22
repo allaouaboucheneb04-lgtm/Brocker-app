@@ -1,36 +1,24 @@
-# Broker Intelcom Pay — v23 intégrée depuis v22
+# Broker Intelcom Pay — v23.1
 
-Cette version repart du ZIP v22 SaaS existant et ajoute un vrai onglet **Factures** sans casser le reste.
+Version basée sur la v22/v23 intégrée, avec le module principal **Factures Intelcom** et la gestion des **chauffeurs inconnus**.
 
-## Gardé de v22
-- Connexion Firebase Auth
-- Super Admin
-- Brokers
-- Chauffeurs
-- Invitations
-- Plans Free / Pro / Enterprise
-- Désactivation / suppression broker
-- Historique Firestore
+## Nouveautés v23.1
 
-## Ajout principal
-### Onglet Broker > Factures
-- Import jusqu'à 40 PDF Intelcom
-- Lecture PDF avec PDF.js
-- Détection chauffeur / code / semaine / période
-- Tableau avant génération
-- Avance et déduction par chauffeur
-- Commission broker
-- Frais fixe par jour travaillé
-- Barème par colis selon véhicule
-- Véhicule modifiable par journée
-- PDF compact type v13.1
-- ZIP de toutes les factures
-- Sauvegarde dans `weeks` Firestore
+- Import PDF Intelcom jusqu’à 40 fichiers.
+- Détection automatique chauffeur / code / semaine / colis / montants.
+- Si un chauffeur n’existe pas dans Firebase :
+  - création automatique dans `drivers` avec statut `pending`;
+  - facture sauvegardée avec statut `waiting_driver_info`;
+  - notification broker dans `notifications`;
+  - section “Chauffeurs à compléter”.
+- Le broker peut compléter le profil chauffeur : email, téléphone, adresse, paiement.
+- Création automatique d’une invitation chauffeur après profil complété.
+- Gmail s’ouvre ensuite pour envoyer l’invitation.
 
-## Fichiers
-- `index.html`
-- `firestore.rules`
-- `README.md`
+## Collections utilisées
 
-## Déploiement
-Remplace ton `index.html` actuel sur GitHub Pages par celui-ci.
+`users`, `brokers`, `drivers`, `invitations`, `weeks`, `dailyVehicles`, `parcelDetails`, `settings`, `stats`, `notifications`.
+
+## Important
+
+Le cœur de l’application reste : importer PDF Intelcom → calculer → créer facture PDF → sauvegarder historique Firebase.
