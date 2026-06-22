@@ -1,12 +1,12 @@
-# Broker Intelcom Pay v23.2
+# Broker Intelcom Pay v23.3 — Commission personnalisée par chauffeur
 
-Correction principale : les relevés sauvegardés sont maintenant liés au compte chauffeur.
+Nouveautés :
+- chaque chauffeur peut avoir son propre pourcentage de commission broker ;
+- champ Commission broker (%) dans Ajouter chauffeur ;
+- modification rapide de la commission dans le tableau Chauffeurs ;
+- import PDF Intelcom utilise la commission du chauffeur si elle existe ;
+- sinon il utilise la commission par défaut du broker ;
+- le PDF affiche Commission broker (XX%) ;
+- l’historique sauvegarde commissionPercent.
 
-## Nouveautés v23.2
-- Lorsqu'un chauffeur accepte une invitation, ses anciennes factures importées sont reliées à son UID Firebase.
-- Les factures sauvegardées gardent `driverId`, `driverDocId`, `driverUid` et `driverEmail`.
-- L'espace chauffeur cherche les relevés par `driverUid`, ancien `driverId`, et `driverEmail`.
-- Quand le broker complète un chauffeur inconnu, les anciennes factures sont liées à son email.
-
-## Important
-Garde les rules de développement v23 pendant les tests.
+Base : v23.2 relevés chauffeur par UID.
