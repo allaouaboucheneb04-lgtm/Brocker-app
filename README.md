@@ -13,3 +13,6 @@ Firebase n'envoie pas les emails tout seul. Le bouton Gmail ouvre une fenêtre G
 
 ## Déploiement
 Remplace le fichier `index.html` sur GitHub Pages par celui-ci.
+
+## v19.2 code fixed
+Correction importante : le fichier v19.1 avait une erreur JavaScript dans les boutons Gmail des listes broker/chauffeur. Cette erreur bloquait tout le script, donc même la connexion ne pouvait pas fonctionner.
