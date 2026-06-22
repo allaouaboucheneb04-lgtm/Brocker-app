@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v23.5 PDF + recherche</title>
+  <title>Broker Intelcom Pay - v23.8 PDF Pro</title>
   <style>
     :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.5 — PDF chauffeur + recherche relevés + anti-doublons</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.8 — Facture PDF professionnelle + option afficher les colis</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -230,7 +230,6 @@ async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
   const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
   const broker = brokerDoc?.exists ? brokerDoc.data() : {};
-  currentBrokerData = broker || {};
   const max = broker.maxDrivers || planLimit(broker.plan || 'pro');
   if(currentTab==='factures') return renderBrokerFactures(broker);
   if(currentTab==='dashboard'){
@@ -273,14 +272,14 @@ async function renderBroker(){
     c.innerHTML=card(`<div class="sectionTitle"><h2>Invitations</h2><input class="search" placeholder="Rechercher" oninput="filterRows('brokerInvTable', this.value)"></div><div class="wide"><table id="brokerInvTable"><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
   }
   if(currentTab==='settings'){
-    c.innerHTML=card(`<h2>Paramètres Broker</h2><div class="notice bluebox">Ces informations apparaissent automatiquement sur les factures PDF. Le Super Admin peut les mettre au départ, puis le broker peut les modifier ici.</div><div class="grid"><div><label>Nom compagnie</label><input id="setCompany" value="${safe(broker.companyName||'')}"></div><div><label>Station Intelcom</label><input id="setStation" value="${safe(broker.station||'')}"></div><div><label>Adresse</label><input id="setAddress" value="${safe(broker.address||'')}"></div><div><label>Ville / Province / Code postal</label><input id="setCity" value="${safe(broker.city||'')}"></div><div><label>Téléphone</label><input id="setPhone" value="${safe(broker.phone||'')}"></div><div><label>Email</label><input id="setEmail" value="${safe(broker.email||currentUser.email||'')}"></div><div><label>Paiement à l’ordre de</label><input id="setPaymentOrder" value="${safe(broker.paymentOrder||broker.ownerName||broker.companyName||'')}"></div><div><label>Règlement / mode de paiement</label><input id="setPaymentMethod" value="${safe(broker.paymentMethod||'Par virement bancaire')}"></div></div><button class="green" style="margin-top:12px" onclick="saveBrokerSettings()">Sauvegarder</button><div class="hr"></div><h3>Barèmes</h3><p class="muted">Les barèmes par colis et véhicule sont dans l’onglet Factures.</p>`);
+    c.innerHTML=card(`<h2>Paramètres Broker</h2><p class="muted">Ces informations apparaissent dans les relevés PDF.</p><div class="grid"><div class="col-6"><label>Nom entreprise</label><input id="setCompany" value="${safe(broker.companyName||'')}"></div><div class="col-6"><label>Station Intelcom</label><input id="setStation" value="${safe(broker.station||'')}"></div><div class="col-6"><label>Paiement à l'ordre de</label><input id="setOwner" value="${safe(broker.ownerName||profile.name||'')}"></div><div class="col-6"><label>Email entreprise</label><input id="setEmail" value="${safe(broker.email||currentUser.email||'')}"></div><div class="col-6"><label>Téléphone</label><input id="setPhone" value="${safe(broker.phone||'')}"></div><div class="col-6"><label>Règlement</label><input id="setPayment" value="${safe(broker.paymentMethod||'Par virement bancaire')}"></div><div class="col-12"><label>Adresse entreprise</label><textarea id="setAddress" rows="4">${safe(broker.address||'')}</textarea></div></div><button class="green" style="margin-top:12px" onclick="saveBrokerSettings()">Sauvegarder</button><div class="hr"></div><h3>Barèmes</h3><p class="muted">Les barèmes se modifient dans l’onglet Factures.</p>`);
   }
 }
 window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || invoiceSettings.commission || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await db.collection('drivers').doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 window.updateDriverCommission = async(id,value)=>{ try{ await db.collection('drivers').doc(id).set({commissionPercent:Number(value||0), updatedAt:now()}, {merge:true}); showMsg('Commission chauffeur mise à jour','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 window.toggleDriver = async(id,active)=>{ try{ await db.collection('drivers').doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await db.collection('drivers').doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.saveBrokerSettings = async()=>{ try{ await db.collection('brokers').doc(profile.brokerId).set({companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),address:$('setAddress').value.trim(),city:$('setCity').value.trim(),phone:$('setPhone').value.trim(),email:normEmail($('setEmail').value),paymentOrder:$('setPaymentOrder').value.trim(),paymentMethod:$('setPaymentMethod').value.trim()},{merge:true}); showMsg('Paramètres sauvegardés','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.saveBrokerSettings = async()=>{ try{ await db.collection('brokers').doc(profile.brokerId).set({companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),ownerName:$('setOwner').value.trim(),email:normEmail($('setEmail').value),phone:$('setPhone').value.trim(),paymentMethod:$('setPayment').value.trim(),address:$('setAddress').value.trim()},{merge:true}); showMsg('Paramètres sauvegardés','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 
 
 // ================= MODULE FACTURES INTELCOM v22.2 =================
@@ -309,7 +308,7 @@ async function renderBrokerFactures(broker){
       <label>Importer PDF Intelcom (max 40)</label><input id="invoicePdfFiles" type="file" multiple accept="application/pdf">
       <div class="row" style="margin-top:10px"><button onclick="importIntelcomPDFs()">Importer et lire</button><button class="green" onclick="downloadAllInvoicesZip()">ZIP de toutes les factures</button><button class="secondary" onclick="saveAllInvoicesToFirebase()">Sauvegarder historique Firebase</button><button class="red" onclick="clearInvoiceImport()">Vider import</button></div>
       <div class="summaryBar"><div class="feeBox"><b>Total Intelcom</b><br><span class="big">${fmtMoney(totalIntelcom)}</span></div><div class="feeBox"><b>Factures</b><br><span class="big">${invoiceDrivers.length}</span></div><div class="feeBox"><b>Total chauffeurs</b><br><span class="big">${fmtMoney(totalCalc)}</span></div><div class="feeBox"><b>Historique</b><br><span class="big">${snap.docs.length}</span></div></div>`,'col-12')}
-    ${card(`<h2>Paramètres facture</h2><div class="grid"><div><label>Commission broker (%)</label><input id="invCommission" type="number" step="0.01" value="${invoiceSettings.commission}" onchange="invoiceSettings.commission=Number(this.value);saveInvoiceLocal();render()"></div><div><label>Mode frais</label><select id="invFeeMode" onchange="invoiceSettings.feeMode=this.value;saveInvoiceLocal();render()"><option value="daily_fixed" ${invoiceSettings.feeMode==='daily_fixed'?'selected':''}>Frais fixe par jour travaillé</option><option value="bracket_daily" ${invoiceSettings.feeMode==='bracket_daily'?'selected':''}>Barème par colis</option></select></div><div><label>Frais fixe / jour</label><input id="invFixedFee" type="number" step="0.01" value="${invoiceSettings.fixedFee}" onchange="invoiceSettings.fixedFee=Number(this.value);saveInvoiceLocal();render()"></div><div><label>Détails colis dans PDF</label><select onchange="invoiceSettings.includeDetails=this.value;saveInvoiceLocal()"><option value="yes" ${invoiceSettings.includeDetails==='yes'?'selected':''}>Oui</option><option value="no" ${invoiceSettings.includeDetails==='no'?'selected':''}>Non</option></select></div></div><div class="hr"></div><button class="secondary" onclick="toggleBrackets()">Afficher / modifier les barèmes</button><div id="bracketsEditor" class="${invoiceSettings.showBrackets?'':'hidden'}">${renderBracketsHtml()}</div>`,'col-12')}
+    ${card(`<h2>Paramètres facture</h2><div class="grid"><div><label>Commission broker (%)</label><input id="invCommission" type="number" step="0.01" value="${invoiceSettings.commission}" onchange="invoiceSettings.commission=Number(this.value);saveInvoiceLocal();render()"></div><div><label>Mode frais</label><select id="invFeeMode" onchange="invoiceSettings.feeMode=this.value;saveInvoiceLocal();render()"><option value="daily_fixed" ${invoiceSettings.feeMode==='daily_fixed'?'selected':''}>Frais fixe par jour travaillé</option><option value="bracket_daily" ${invoiceSettings.feeMode==='bracket_daily'?'selected':''}>Barème par colis</option></select></div><div><label>Frais fixe / jour</label><input id="invFixedFee" type="number" step="0.01" value="${invoiceSettings.fixedFee}" onchange="invoiceSettings.fixedFee=Number(this.value);saveInvoiceLocal();render()"></div><div><label>Afficher les colis détaillés</label><select onchange="invoiceSettings.includeDetails=this.value;saveInvoiceLocal();render()"><option value="yes" ${invoiceSettings.includeDetails==='yes'?'selected':''}>Oui, ajouter les pages colis</option><option value="no" ${invoiceSettings.includeDetails==='no'?'selected':''}>Non, relevé seulement</option></select></div></div><div class="hr"></div><button class="secondary" onclick="toggleBrackets()">Afficher / modifier les barèmes</button><div id="bracketsEditor" class="${invoiceSettings.showBrackets?'':'hidden'}">${renderBracketsHtml()}</div>`,'col-12')}
     ${card(`<h2>Aperçu avant génération</h2><div class="wide"><table><tr><th>Chauffeur</th><th>Semaine</th><th>Période</th><th>Colis</th><th>Total Intelcom</th><th>% Broker</th><th>Commission</th><th>Frais</th><th>Déduction</th><th>Avance</th><th>Net</th><th>Statut chauffeur</th><th>Actions</th></tr>${invoiceDrivers.map((d,i)=>invoiceRow(d,i)).join('')||'<tr><td colspan="13">Aucun PDF importé</td></tr>'}</table></div>`,'col-12')}
   </div>`;
 }
@@ -324,134 +323,128 @@ function parseIntelcomText(text,fileName){ const lines=text.split(/\n+/).map(l=>
  if(!days.length){ const byDate={}; for(const l of lines){ const m=l.match(/^(20\d{2}-\d{2}-\d{2})\s+(DELIVERY|FLEX|RETNXTDAY).*?\s+(\d+(?:\.\d+)?)\s+LB\s+\$?([\d.]+)/); if(m){ byDate[m[1]]=byDate[m[1]]||{date:m[1],parcels:0,total:0,vehicle:'essence'}; byDate[m[1]].parcels++; byDate[m[1]].total+=parseAmount(m[4]); } } Object.values(byDate).sort((a,b)=>a.date.localeCompare(b.date)).forEach(x=>days.push(x)); }
  const parcels=days.reduce((a,d)=>a+Number(d.parcels||0),0); const total=totalInvoice || days.reduce((a,d)=>a+Number(d.total||0),0); return {id:code+'_'+week, code, name, week, from:from||days[0]?.date||'', to:to||days[days.length-1]?.date||'', days, parcels, totalInvoice:total, deduction:0, advance:0, rawText:text, fileName}; }
 window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFiles')?.files||[]); if(!files.length) return showMsg('Choisis au moins un PDF','err'); if(files.length>40) return showMsg('Maximum 40 PDF','err'); let ok=0, created=0; for(const f of files){ if(!/pdf$/i.test(f.name)) continue; const text=await pdfToText(f); const inv=parseIntelcomText(text,f.name); const res=await ensureDriverForInvoice(inv); inv.driverId=res.driverId; inv.driverStatus=res.status; inv.missingDriver=res.created; if(res.commissionPercent!==undefined && res.commissionPercent!=='') inv.commissionPercent=Number(res.commissionPercent); if(res.created) created++; { const k=(inv.code||'driver')+'_'+(inv.week||'week'); const idx=invoiceDrivers.findIndex(x=>(x.code||'driver')+'_'+(x.week||'week')===k); if(idx>=0) invoiceDrivers[idx]=inv; else invoiceDrivers.push(inv); } ok++; } saveInvoiceLocal(); showMsg(ok+' PDF importé(s). '+created+' chauffeur(s) inconnu(s) créé(s) en attente.','ok'); render(); }catch(e){ showMsg('Erreur import PDF : '+humanError(e),'err'); } };
-function getCompanyInfoForPdf(d){
-  const b = d.companyInfo || currentBrokerData || {};
+function getPdfCompany(){
+  // v23.8 : priorité aux paramètres du broker, puis override quand un chauffeur télécharge un ancien relevé.
+  const b=window.pdfCompanyOverride || currentBroker || {};
   return {
-    companyName: b.companyName || b.name || profile?.companyName || profile?.name || 'Entreprise',
-    station: b.station || '',
-    address: b.address || '',
-    city: b.city || '',
-    phone: b.phone || '',
-    email: b.email || currentUser?.email || '',
-    paymentOrder: b.paymentOrder || b.ownerName || b.companyName || profile?.name || '',
-    paymentMethod: b.paymentMethod || 'Par virement bancaire'
+    companyName:b.companyName||'STATION HICK, INTELCOM',
+    address:b.address||'9486-5482 QUÉBEC INC\n7245-A Boul Wilfrid-Hamel\nQuébec\nG2G 1B8',
+    ownerName:b.ownerName||profile?.name||'',
+    email:b.email||currentUser?.email||'',
+    phone:b.phone||'',
+    paymentMethod:b.paymentMethod||'Par virement bancaire'
   };
-}
-function pdfMoney(n){ return fmtMoney(n); }
-function addFooterBlock(doc, info, left, y){
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  const lines = [
-    'Paiement à l’ordre de : ' + (info.paymentOrder || ''),
-    'Règlement : ' + (info.paymentMethod || 'Par virement bancaire'),
-    info.email ? 'Email : ' + info.email : '',
-    info.phone ? 'Téléphone : ' + info.phone : ''
-  ].filter(Boolean);
-  lines.forEach(t=>{ doc.text(t,left,y); y+=12; });
-  y+=4; doc.setFont('helvetica','bold'); doc.text('MERCI DE VOTRE CONFIANCE', left, y);
-  return y+12;
 }
 function drawInvoiceDoc(d){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'pt',format:'letter'});
   const c=calcInvoice(d);
-  const info=getCompanyInfoForPdf(d);
-  const left=42, right=570, center=306;
-  let y=34;
-  const lineH=12;
+  const company=getPdfCompany();
+  const left=42, right=570, pageW=612, pageH=792;
+  let y=30;
+  const money=v=>fmtMoney(Number(v||0));
+  const line=yy=>{doc.setDrawColor(20);doc.setLineWidth(.8);doc.line(left,yy,right,yy)};
+  const textRight=(t,x,yy)=>doc.text(String(t??''),x,yy,{align:'right'});
+  const addTextLines=(txt,x,yy,maxW,lineH=16)=>{ const arr=doc.splitTextToSize(String(txt||''),maxW); arr.forEach(l=>{doc.text(l,x,yy); yy+=lineH;}); return yy; };
+  const modeLabel=invoiceSettings.feeMode==='daily_fixed'?'Frais fixe par jour travaillé':'Barème par colis';
 
-  // Titre
-  doc.setFont('helvetica','bold'); doc.setFontSize(14);
-  doc.text(`${d.name||'Chauffeur'} - Semaine ${d.week||''}`, center, y, {align:'center'});
-  y+=18;
-  doc.setDrawColor(30); doc.setLineWidth(0.7); doc.line(left,y,right,y); y+=16;
+  // Page 1 — modèle proche de la référence fournie par le client.
+  doc.setFont('helvetica','bold'); doc.setFontSize(18);
+  doc.text(`${d.name||'Chauffeur'} - Semaine ${d.week||''}`, pageW/2, y, {align:'center'});
+  y+=50;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text(`Fait le ${new Date().toISOString().slice(0,10)}`, left, y); y+=30;
+  doc.text(`Période de paie : ${d.from||''} au ${d.to||''}`, left, y); y+=44;
+  line(y); y+=38;
 
-  // En-tête 2 colonnes
-  const headerY=y;
-  doc.setFontSize(10); doc.setFont('helvetica','bold');
-  doc.text(info.companyName || 'Entreprise', left, y);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  let ly=y+13;
-  [info.station, info.address, info.city, info.phone?('Tél : '+info.phone):'', info.email?('Email : '+info.email):''].filter(Boolean).forEach(t=>{ doc.text(String(t), left, ly); ly+=lineH; });
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text(company.companyName||'', left, y);
+  doc.text('À L’ATTENTION DE', 390, y);
+  y+=20;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  const startBlockY=y;
+  let yLeft=addTextLines(company.address||'', left, y, 260, 17);
+  let yRight=startBlockY;
+  doc.text(d.name||'',390,yRight); yRight+=20;
+  doc.text('Code : '+(d.code||''),390,yRight); yRight+=20;
+  y=Math.max(yLeft,yRight)+58;
 
-  doc.setFont('helvetica','bold'); doc.setFontSize(10);
-  doc.text('À L’ATTENTION DE', 350, y);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  let ry=y+13;
-  doc.text(d.name||'', 350, ry); ry+=lineH;
-  doc.text('Code : '+(d.code||''), 350, ry); ry+=lineH;
-  doc.text('Semaine : '+(d.week||''), 350, ry); ry+=lineH;
-  doc.text('Date génération : '+new Date().toISOString().slice(0,10), 350, ry); ry+=lineH;
-  doc.text(`Période : ${d.from||''} au ${d.to||''}`, 350, ry);
-  y=Math.max(ly,ry)+14;
-
-  // Tableau jours
-  doc.setFont('helvetica','bold'); doc.setFontSize(9);
-  doc.setFillColor(245,245,245); doc.rect(left,y-10,right-left,18,'F');
-  doc.text('DATE', left+6, y+3); doc.text('COLIS', 235, y+3, {align:'right'}); doc.text('MONTANT', right-6, y+3, {align:'right'});
-  y+=18; doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  // Tableau résumé jours
+  doc.setFillColor(17,17,17); doc.rect(left,y,right-left,24,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text('DATES', left+28, y+16); doc.text('COLIS', left+205, y+16); doc.text('MONTANT', left+365, y+16);
+  doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); y+=40;
   (d.days||[]).forEach(day=>{
-    doc.text(day.date||'', left+6, y);
-    doc.text(String(day.parcels||0), 235, y, {align:'right'});
-    doc.text(pdfMoney(day.total||0), right-6, y, {align:'right'});
-    y+=13;
+    doc.text(String(day.date||''), left+28, y);
+    doc.text(String(day.parcels||0), left+215, y);
+    doc.text(money(day.total||0), left+365, y);
+    y+=17;
   });
-  y+=4; doc.setDrawColor(200); doc.line(left,y,right,y); y+=14;
 
-  // Résumé financier compact
+  y+=12; line(y); y+=22;
+  const labX=300, valX=520;
   const rows=[
-    ['Sous-total Intelcom',pdfMoney(d.totalInvoice)],
-    ['Commission broker ('+Number(c.commissionPercent||0).toFixed(2)+'%)',pdfMoney(c.commission)],
-    ['Jours travaillés',String(c.workedDays)],
-    ['Mode frais',invoiceSettings.feeMode==='daily_fixed'?'Frais fixe par jour':'Barème par colis'],
-    ['Frais broker',pdfMoney(c.fee)],
-    ['Déduction',cleanMoney(c.deduction)],
-    ['Avance',cleanMoney(c.advance)]
+    ['Sous total Intelcom', money(d.totalInvoice)],
+    [`Commission broker (${Number(c.commissionPercent||0).toFixed(2)}%)`, money(c.commission)],
+    ['Jours travaillés', String(c.workedDays)],
+    ['Mode frais', modeLabel],
+    ['Frais broker', money(c.fee)],
+    ['Déduction', cleanMoney(c.deduction)],
+    ['Avance', cleanMoney(c.advance)]
   ];
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  rows.forEach(r=>{ doc.text(r[0]+' :', left+6, y); doc.text(r[1], right-6, y, {align:'right'}); y+=13; });
-  y+=4;
-  doc.setFillColor(30,30,30); doc.rect(left,y-12,right-left,24,'F');
-  doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(12);
-  doc.text('TOTAL NET', left+8, y+4); doc.text(pdfMoney(c.net), right-8, y+4, {align:'right'});
-  doc.setTextColor(0); y+=30;
+  doc.setFontSize(10); doc.setFont('helvetica','normal');
+  rows.forEach(row=>{doc.text(row[0]+' :',labX,y); textRight(row[1],valX,y); y+=16});
+  y+=10;
+  doc.setFillColor(17,17,17); doc.rect(labX-25,y,right-(labX-25),32,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('TOTAL : '+money(c.net),(labX-25+right)/2,y+21,{align:'center'});
+  doc.setTextColor(0,0,0); y+=50;
 
-  // Détails frais broker: sur la première page si possible, sinon nouvelle page
-  const detailsHeight = 28 + (c.feeDetails||[]).length*12 + 18;
-  if(y + detailsHeight > 705){ doc.addPage(); y=38; }
-  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('Détails des frais broker', left, y); y+=15;
-  doc.setFontSize(8.5); doc.setFillColor(245,245,245); doc.rect(left,y-9,right-left,16,'F');
-  doc.text('Date', left+5, y+2); doc.text('Colis', 135, y+2); doc.text('Véhicule', 205, y+2); doc.text('Tranche', 340, y+2); doc.text('Frais', right-6, y+2, {align:'right'});
-  y+=18; doc.setFont('helvetica','normal');
-  (c.feeDetails||[]).forEach(r=>{
-    if(y>730){ doc.addPage(); y=38; }
-    doc.text(String(r.date||''), left+5, y);
-    doc.text(String(r.parcels||0), 135, y);
-    doc.text(VEHICLE_LABEL[r.vehicle]||r.vehicle||'', 205, y);
-    doc.text(String(r.bracket||''), 340, y);
-    doc.text(pdfMoney(r.fee||0), right-6, y, {align:'right'});
-    y+=12;
-  });
-  y+=4; doc.setFont('helvetica','bold'); doc.text('Frais broker total : '+pdfMoney(c.fee), left+5, y); y+=18;
+  // Pied de page, doit rester sur la première page.
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  if(y>690) y=690;
+  doc.text('Paiement à l’ordre de : '+(company.ownerName||company.companyName||''),left,y); y+=17;
+  doc.text('Règlement : '+(company.paymentMethod||'Par virement bancaire'),left,y); y+=17;
+  if(company.email){doc.text('Email : '+company.email,left,y); y+=17;}
+  if(company.phone){doc.text('Téléphone : '+company.phone,left,y); y+=17;}
+  y+=10; line(y); y+=31;
+  doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text('MERCI DE VOTRE CONFIANCE', pageW/2, y, {align:'center'});
 
-  if(y > 700){ doc.addPage(); y=40; }
-  addFooterBlock(doc, info, left, y);
+  // Page détails frais broker
+  if(c.feeDetails && c.feeDetails.length){
+    doc.addPage(); y=38;
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.text('Détails des frais broker',left,y); y+=34;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.text('Mode : '+modeLabel,left,y); y+=24;
+    doc.text('Véhicule choisi par journée',left,y); y+=44;
+    doc.setFillColor(17,17,17); doc.rect(left,y,right-left,24,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold');
+    doc.text('Date',left+18,y+16); doc.text('Colis',left+125,y+16); doc.text('Véhicule',left+210,y+16); doc.text('Tranche',left+330,y+16); doc.text('Frais',left+480,y+16);
+    doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); y+=42;
+    c.feeDetails.forEach(r=>{ if(y>720){doc.addPage(); y=48;} doc.text(String(r.date||''),left+18,y); doc.text(String(r.parcels||0),left+125,y); doc.text(VEHICLE_LABEL[r.vehicle]||r.vehicle||'',left+210,y); doc.text(String(r.bracket||''),left+330,y); doc.text(money(r.fee),left+480,y); y+=26; });
+    y+=24; doc.setFont('helvetica','bold'); doc.text('Frais broker total : '+money(c.fee),left+330,y);
+  }
 
-  // Détails colis Intelcom
+  // Option : afficher ou cacher les pages détaillées des colis Intelcom.
   if(invoiceSettings.includeDetails==='yes'){
     const detailLines=(d.rawText||'').split('\n').filter(l=>/^20\d{2}-\d{2}-\d{2}\s+(DELIVERY|FLEX|RETNXTDAY)/.test(l));
-    let page=1;
-    for(let i=0;i<detailLines.length;i+=42){
-      doc.addPage(); y=34;
-      doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(12);
-      doc.text('Détails des colis Intelcom',left,y); y+=14;
-      doc.setFont('helvetica','normal'); doc.setFontSize(8);
-      doc.text(`${d.name||''} ${d.code||''} — Période : ${d.from||''} au ${d.to||''} — Page détails ${page++}`,left,y); y+=13;
-      doc.setFontSize(7.3);
-      detailLines.slice(i,i+42).forEach(l=>{ doc.text(l.slice(0,135),left,y); y+=12; });
+    let page=1, perPage=38, totalPages=Math.max(1,Math.ceil(detailLines.length/perPage));
+    for(let i=0;i<detailLines.length;i+=perPage){
+      doc.addPage(); y=36;
+      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Détails des colis Intelcom',left,y); y+=18;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(`${d.name||''} ${d.code||''}`,left,y); doc.text(`Page détails ${page} / ${totalPages}`,right,y,{align:'right'}); y+=16;
+      doc.text(`Période : ${d.from||''} au ${d.to||''}`,left,y); y+=34;
+      doc.setFillColor(17,17,17); doc.rect(left,y,right-left,22,'F');
+      doc.setTextColor(255,255,255); doc.setFontSize(8);
+      doc.text('Date',left+4,y+14); doc.text('Service',left+78,y+14); doc.text('Code postal',left+158,y+14); doc.text('Zone',left+245,y+14); doc.text('Tracking',left+310,y+14); doc.text('Poids',left+450,y+14); doc.text('Montant',left+505,y+14);
+      doc.setTextColor(0,0,0); y+=36;
+      detailLines.slice(i,i+perPage).forEach(l=>{ doc.text(l.slice(0,135),left+4,y); y+=13; });
+      page++;
     }
   }
   return doc;
 }
+
 window.downloadInvoice=(idx)=>{ const d=invoiceDrivers[idx]; const doc=drawInvoiceDoc(d); doc.save(`${d.name||'Chauffeur'} - Semaine ${d.week||''}.pdf`); };
 window.downloadAllInvoicesZip=async()=>{ if(!invoiceDrivers.length) return showMsg('Aucune facture à zipper','err'); const zip=new JSZip(); invoiceDrivers.forEach(d=>{ const doc=drawInvoiceDoc(d); zip.file(`${d.name||'Chauffeur'} - Semaine ${d.week||''}.pdf`, doc.output('blob')); }); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='factures_intelcom.zip'; a.click(); };
 window.saveAllInvoicesToFirebase=async()=>{
@@ -482,7 +475,7 @@ window.saveAllInvoicesToFirebase=async()=>{
         commissionPercent:c.commissionPercent,commission:c.commission,brokerFees:c.fee,deduction:c.deduction,advance:c.advance,total:c.net,
         status: waiting?'waiting_driver_info':'généré',profileCompleted: !waiting,
         updatedAt:now(),
-        createdAt:d.createdAt||now(),createdBy:currentUser.uid,days:d.days
+        createdAt:d.createdAt||now(),createdBy:currentUser.uid,days:d.days,rawText:d.rawText||''
       }, {merge:true});
     }
     await batch.commit();
@@ -568,10 +561,6 @@ window.downloadDriverWeek = async(weekId)=>{
     if(!docSnap.exists) return showMsg('Relevé introuvable','err');
     const w = docSnap.data();
     const inv = invoiceFromWeekData(w);
-    if(inv.brokerId){
-      const bSnap = await db.collection('brokers').doc(inv.brokerId).get().catch(()=>null);
-      if(bSnap && bSnap.exists) inv.companyInfo = bSnap.data();
-    }
     if(!inv.days.length){
       return showMsg('Ce relevé ne contient pas les journées nécessaires pour générer le PDF. Réimporte le PDF Intelcom puis sauvegarde le relevé.','err');
     }
