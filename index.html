@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v23.3 Commission chauffeur</title>
+  <title>Broker Intelcom Pay - v23.5 PDF + recherche</title>
   <style>
     :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.3 — Commission broker personnalisée par chauffeur</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.5 — PDF chauffeur + recherche relevés + anti-doublons</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -264,7 +264,8 @@ async function renderBroker(){
   }
   if(currentTab==='weeks'){
     const snap=await db.collection('weeks').where('brokerId','==',brokerId).get().catch(()=>({docs:[]}));
-    c.innerHTML=card(`<h2>Relevés</h2><div class="notice bluebox">Historique des factures générées et sauvegardées par le broker.</div><div class="wide"><table><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th></tr>${snap.docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td></tr>`}).join('')||'<tr><td colspan="4">Aucun relevé importé</td></tr>'}</table></div>`);
+    const docs=snap.docs.sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')) || String(a.data().driverName||'').localeCompare(String(b.data().driverName||'')));
+    c.innerHTML=card(`<div class="sectionTitle"><h2>Historique des relevés</h2><input id="brokerWeekSearch" class="search" placeholder="Rechercher chauffeur, code, semaine" oninput="filterRows('brokerWeeksTable', this.value)"></div><div class="notice bluebox">Recherche par chauffeur, code Intelcom ou semaine. Le PDF se génère à la demande sans Storage.</div><div class="wide"><table id="brokerWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Code</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${safe(w.driverCode||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td><td><button class="mini" onclick="downloadDriverWeek('${d.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé importé</td></tr>'}</table></div>`);
   }
   if(currentTab==='invitations'){
     const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
@@ -412,6 +413,42 @@ window.completePendingDriver=async(driverId)=>{
 
 window.markNotificationRead=async(id)=>{ try{ await db.collection('notifications').doc(id).set({read:true,readAt:now()},{merge:true}); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 
+
+function invoiceFromWeekData(w){
+  const days = Array.isArray(w.days) ? w.days : [];
+  return {
+    name: w.driverName || w.name || 'Chauffeur',
+    code: w.driverCode || w.code || '',
+    week: w.week || '',
+    from: w.from || '',
+    to: w.to || '',
+    days: days.map(x=>({date:x.date||'', parcels:Number(x.parcels||0), total:Number(x.total||x.amount||0), vehicle:x.vehicle||'essence'})),
+    parcels: Number(w.parcels || days.reduce((a,x)=>a+Number(x.parcels||0),0)),
+    totalInvoice: Number(w.totalIntelcom || w.subtotal || w.totalInvoice || 0),
+    commissionPercent: (w.commissionPercent!==undefined ? Number(w.commissionPercent) : Number(invoiceSettings.commission||0)),
+    deduction: Number(w.deduction || 0),
+    advance: Number(w.advance || 0),
+    rawText: w.rawText || '',
+    driverId: w.driverId || w.driverDocId || '',
+    driverUid: w.driverUid || '',
+    brokerId: w.brokerId || ''
+  };
+}
+window.downloadDriverWeek = async(weekId)=>{
+  try{
+    const docSnap = await db.collection('weeks').doc(weekId).get();
+    if(!docSnap.exists) return showMsg('Relevé introuvable','err');
+    const w = docSnap.data();
+    const inv = invoiceFromWeekData(w);
+    if(!inv.days.length){
+      return showMsg('Ce relevé ne contient pas les journées nécessaires pour générer le PDF. Réimporte le PDF Intelcom puis sauvegarde le relevé.','err');
+    }
+    const pdf = drawInvoiceDoc(inv);
+    const name = `${inv.name || 'Chauffeur'} - Semaine ${inv.week || ''}.pdf`.replace(/[\\/:*?"<>|]/g,'_');
+    pdf.save(name);
+  }catch(e){ showMsg('Erreur téléchargement PDF : '+humanError(e),'err'); }
+};
+
 async function renderDriver(){
   if(currentTab==='dashboard'){
     // v23.2 : le relevé peut être lié par driverUid, par ancien driverId, ou par email.
@@ -427,7 +464,7 @@ async function renderDriver(){
     const byKey = {};
     docs.forEach(doc=>{ const w=doc.data(); const key=(w.brokerId||profile.brokerId||'')+'_'+(w.driverCode||w.driverId||'')+'_'+(w.week||''); const old=byKey[key]; if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')) byKey[key]={id:doc.id,data:w}; });
     const rows = Object.values(byKey);
-    $('content').innerHTML = card(`<h2>Mes relevés</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="5">Aucun relevé disponible</td></tr>'}</table></div>`);
+    $('content').innerHTML = card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="5">Aucun relevé disponible</td></tr>'}</table></div>`);
   }
   if(currentTab==='vehicles'){
     $('content').innerHTML=card(`<h2>Véhicules par jour</h2><p class="muted">Le chauffeur pourra déclarer Essence / Électrique / Diesel / Hybride par journée ici.</p>`);
