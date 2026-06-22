@@ -1,16 +1,36 @@
-# Broker Intelcom Pay — V23 Factures Firebase
+# Broker Intelcom Pay — v23 intégrée depuis v22
 
-Version centrée sur les factures, basée sur V13.1 PDF compact.
+Cette version repart du ZIP v22 SaaS existant et ajoute un vrai onglet **Factures** sans casser le reste.
 
-Fonctions:
-- Import jusqu’à 40 PDF Intelcom
-- Détection chauffeur / semaine / période / colis / montants
-- Barèmes par colis et frais par jour
-- Véhicule par jour
-- Génération PDF individuel
-- ZIP global
-- Connexion Firebase email/mot de passe
-- Sauvegarde historique dans Firestore collection `weeks`
-- PDF généré à la demande, sans Firebase Storage
+## Gardé de v22
+- Connexion Firebase Auth
+- Super Admin
+- Brokers
+- Chauffeurs
+- Invitations
+- Plans Free / Pro / Enterprise
+- Désactivation / suppression broker
+- Historique Firestore
 
-Ouvrir `index.html` ou publier le dossier sur GitHub Pages.
+## Ajout principal
+### Onglet Broker > Factures
+- Import jusqu'à 40 PDF Intelcom
+- Lecture PDF avec PDF.js
+- Détection chauffeur / code / semaine / période
+- Tableau avant génération
+- Avance et déduction par chauffeur
+- Commission broker
+- Frais fixe par jour travaillé
+- Barème par colis selon véhicule
+- Véhicule modifiable par journée
+- PDF compact type v13.1
+- ZIP de toutes les factures
+- Sauvegarde dans `weeks` Firestore
+
+## Fichiers
+- `index.html`
+- `firestore.rules`
+- `README.md`
+
+## Déploiement
+Remplace ton `index.html` actuel sur GitHub Pages par celui-ci.
