@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v23.8 PDF Pro</title>
+  <title>Broker Intelcom Pay - v23.8.1 PDF Fix</title>
   <style>
     :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.8 — Facture PDF professionnelle + option afficher les colis</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.8.1 — PDF corrigé + option afficher les colis</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -230,6 +230,8 @@ async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
   const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
   const broker = brokerDoc?.exists ? brokerDoc.data() : {};
+  // v23.8.1: garder les paramètres broker disponibles pour la génération PDF, même depuis Historique.
+  window.currentBroker = {...broker, brokerId};
   const max = broker.maxDrivers || planLimit(broker.plan || 'pro');
   if(currentTab==='factures') return renderBrokerFactures(broker);
   if(currentTab==='dashboard'){
@@ -325,7 +327,7 @@ function parseIntelcomText(text,fileName){ const lines=text.split(/\n+/).map(l=>
 window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFiles')?.files||[]); if(!files.length) return showMsg('Choisis au moins un PDF','err'); if(files.length>40) return showMsg('Maximum 40 PDF','err'); let ok=0, created=0; for(const f of files){ if(!/pdf$/i.test(f.name)) continue; const text=await pdfToText(f); const inv=parseIntelcomText(text,f.name); const res=await ensureDriverForInvoice(inv); inv.driverId=res.driverId; inv.driverStatus=res.status; inv.missingDriver=res.created; if(res.commissionPercent!==undefined && res.commissionPercent!=='') inv.commissionPercent=Number(res.commissionPercent); if(res.created) created++; { const k=(inv.code||'driver')+'_'+(inv.week||'week'); const idx=invoiceDrivers.findIndex(x=>(x.code||'driver')+'_'+(x.week||'week')===k); if(idx>=0) invoiceDrivers[idx]=inv; else invoiceDrivers.push(inv); } ok++; } saveInvoiceLocal(); showMsg(ok+' PDF importé(s). '+created+' chauffeur(s) inconnu(s) créé(s) en attente.','ok'); render(); }catch(e){ showMsg('Erreur import PDF : '+humanError(e),'err'); } };
 function getPdfCompany(){
   // v23.8 : priorité aux paramètres du broker, puis override quand un chauffeur télécharge un ancien relevé.
-  const b=window.pdfCompanyOverride || currentBroker || {};
+  const b = window.pdfCompanyOverride || (typeof window.currentBroker !== 'undefined' ? window.currentBroker : null) || profile || {};
   return {
     companyName:b.companyName||'STATION HICK, INTELCOM',
     address:b.address||'9486-5482 QUÉBEC INC\n7245-A Boul Wilfrid-Hamel\nQuébec\nG2G 1B8',
@@ -555,6 +557,17 @@ function invoiceFromWeekData(w){
     brokerId: w.brokerId || ''
   };
 }
+async function loadBrokerForPdf(brokerId){
+  if(!brokerId) return null;
+  try{
+    const snap = await db.collection('brokers').doc(brokerId).get();
+    return snap.exists ? {...snap.data(), brokerId} : null;
+  }catch(e){
+    console.warn('Broker PDF non chargé', e);
+    return null;
+  }
+}
+
 window.downloadDriverWeek = async(weekId)=>{
   try{
     const docSnap = await db.collection('weeks').doc(weekId).get();
@@ -564,8 +577,12 @@ window.downloadDriverWeek = async(weekId)=>{
     if(!inv.days.length){
       return showMsg('Ce relevé ne contient pas les journées nécessaires pour générer le PDF. Réimporte le PDF Intelcom puis sauvegarde le relevé.','err');
     }
+    const previousOverride = window.pdfCompanyOverride;
+    const brokerInfo = await loadBrokerForPdf(inv.brokerId || profile?.brokerId);
+    if(brokerInfo) window.pdfCompanyOverride = brokerInfo;
     const pdf = drawInvoiceDoc(inv);
-    const name = `${inv.name || 'Chauffeur'} - Semaine ${inv.week || ''}.pdf`.replace(/[\\/:*?"<>|]/g,'_');
+    window.pdfCompanyOverride = previousOverride;
+    const name = `${inv.name || 'Chauffeur'} - Semaine ${inv.week || ''}.pdf`.replace(/[\/:*?"<>|]/g,'_');
     pdf.save(name);
   }catch(e){ showMsg('Erreur téléchargement PDF : '+humanError(e),'err'); }
 };
