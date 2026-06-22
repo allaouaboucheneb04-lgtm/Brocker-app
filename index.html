@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v23.1 Chauffeurs inconnus</title>
+  <title>Broker Intelcom Pay - v23.2 Relevés chauffeur UID</title>
   <style>
     :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.1 — Factures + chauffeurs inconnus à compléter</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.2 — Factures visibles dans le compte chauffeur</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -149,7 +149,14 @@ $('acceptInviteBtn').onclick = async()=>{
     if(normEmail(inv.email) !== email){ throw new Error('Invitation invalide pour cet email.'); }
     const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
     await db.collection('users').doc(cred.user.uid).set(userData);
-    if(inv.role === 'driver' && inv.driverId){ await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
+    if(inv.role === 'driver' && inv.driverId){
+      await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, email, emailLower:email, active:true, status:'active', profileCompleted:true, acceptedAt:now()}, {merge:true});
+      // Relier automatiquement les anciennes factures importées avant la création du compte chauffeur
+      const oldWeeks = await db.collection('weeks').where('driverId','==',inv.driverId).get().catch(()=>({docs:[]}));
+      for(const w of oldWeeks.docs){
+        await w.ref.set({driverUid:cred.user.uid, driverEmail:email, status: (w.data().status==='waiting_driver_info'?'généré':(w.data().status||'généré')), profileCompleted:true, linkedAt:now()}, {merge:true});
+      }
+    }
     if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
     await invRef.set({used:true, usedBy:cred.user.uid, usedAt:now()}, {merge:true});
     showMsg('Compte créé avec invitation','ok');
@@ -317,7 +324,38 @@ window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFi
 function drawInvoiceDoc(d){ const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'pt',format:'letter'}); const c=calcInvoice(d); const brokerName=''; let y=34; const left=42; doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text(`${d.name} - Semaine ${d.week||''}`, 306, y, {align:'center'}); y+=22; doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.text(`Date de génération : ${new Date().toISOString().slice(0,10)}`, left, y); y+=16; doc.text(`Période de paie : ${d.from||''} au ${d.to||''}`, left, y); y+=22; doc.setFont('helvetica','bold'); doc.text('À L’ATTENTION DE', 345, y); doc.text('BROKER', left, y); y+=14; doc.setFont('helvetica','normal'); doc.text(d.name||'',345,y); doc.text(profile.name||currentUser.email||'',left,y); y+=14; doc.text('Code : '+(d.code||''),345,y); doc.text('Broker ID : '+(profile.brokerId||''),left,y); y+=24; doc.setFont('helvetica','bold'); ['DATES','COLIS','MONTANT'].forEach((h,i)=>doc.text(h,[left,190,300][i],y)); y+=10; doc.line(left,y,560,y); y+=16; doc.setFont('helvetica','normal'); (d.days||[]).forEach(day=>{ doc.text(day.date||'',left,y); doc.text(String(day.parcels||0),190,y); doc.text(fmtMoney(day.total||0),300,y); y+=15; }); y+=10; doc.line(left,y,560,y); y+=18; const rows=[['Sous total Intelcom',fmtMoney(d.totalInvoice)],['Commission broker',fmtMoney(c.commission)],['Jours travaillés',String(c.workedDays)],['Mode frais',invoiceSettings.feeMode==='daily_fixed'?'Frais fixe par jour':'Barème par colis'],['Frais broker',fmtMoney(c.fee)],['Déduction',cleanMoney(c.deduction)],['Avance',cleanMoney(c.advance)]]; rows.forEach(r=>{doc.text(r[0]+' :',left,y); doc.text(r[1],300,y); y+=15;}); doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.text('TOTAL : '+fmtMoney(c.net),left,y+8); y+=38; doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.text('Paiement à l’ordre de : '+(profile.name||''),left,y); y+=14; doc.text('Règlement : Par virement bancaire',left,y); y+=14; doc.text('Email : '+(currentUser.email||''),left,y); y+=18; doc.setFont('helvetica','bold'); doc.text('MERCI DE VOTRE CONFIANCE', left, y); doc.addPage(); y=42; doc.setFontSize(15); doc.text('Détails des frais broker',left,y); y+=24; doc.setFontSize(10); doc.text('Date',left,y); doc.text('Colis',130,y); doc.text('Véhicule',200,y); doc.text('Tranche',320,y); doc.text('Frais',430,y); y+=14; doc.line(left,y,560,y); y+=16; doc.setFont('helvetica','normal'); c.feeDetails.forEach(r=>{ doc.text(String(r.date),left,y); doc.text(String(r.parcels),130,y); doc.text(VEHICLE_LABEL[r.vehicle]||r.vehicle,200,y); doc.text(String(r.bracket),320,y); doc.text(fmtMoney(r.fee),430,y); y+=15; }); y+=12; doc.setFont('helvetica','bold'); doc.text('Frais broker total : '+fmtMoney(c.fee),left,y); if(invoiceSettings.includeDetails==='yes'){ const detailLines=(d.rawText||'').split('\n').filter(l=>/^20\d{2}-\d{2}-\d{2}\s+(DELIVERY|FLEX|RETNXTDAY)/.test(l)); let page=1; for(let i=0;i<detailLines.length;i+=38){ doc.addPage(); y=36; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Détails des colis Intelcom',left,y); y+=16; doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.text(`${d.name} ${d.code} — Page détails ${page++}`,left,y); y+=14; detailLines.slice(i,i+38).forEach(l=>{ doc.text(l.slice(0,125),left,y); y+=13; }); } } return doc; }
 window.downloadInvoice=(idx)=>{ const d=invoiceDrivers[idx]; const doc=drawInvoiceDoc(d); doc.save(`${d.name||'Chauffeur'} - Semaine ${d.week||''}.pdf`); };
 window.downloadAllInvoicesZip=async()=>{ if(!invoiceDrivers.length) return showMsg('Aucune facture à zipper','err'); const zip=new JSZip(); invoiceDrivers.forEach(d=>{ const doc=drawInvoiceDoc(d); zip.file(`${d.name||'Chauffeur'} - Semaine ${d.week||''}.pdf`, doc.output('blob')); }); const blob=await zip.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='factures_intelcom.zip'; a.click(); };
-window.saveAllInvoicesToFirebase=async()=>{ try{ if(!invoiceDrivers.length) return showMsg('Aucune facture à sauvegarder','err'); const batch=db.batch(); invoiceDrivers.forEach(d=>{ const c=calcInvoice(d); const weekId=`${profile.brokerId}_${d.code||'driver'}_${d.week||'week'}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`.replace(/[^a-zA-Z0-9_\-]/g,'_'); const ref=db.collection('weeks').doc(weekId); const waiting = d.missingDriver || d.driverStatus==='pending'; batch.set(ref,{brokerId:profile.brokerId,driverId:d.driverId||'',driverCode:d.code,driverName:d.name,week:d.week,from:d.from,to:d.to,parcels:d.parcels,totalIntelcom:d.totalInvoice,commission:c.commission,brokerFees:c.fee,deduction:c.deduction,advance:c.advance,total:c.net,status: waiting?'waiting_driver_info':'généré',profileCompleted: !waiting,createdAt:now(),createdBy:currentUser.uid,days:d.days}); }); await batch.commit(); showMsg('Factures sauvegardées. Les factures de chauffeurs inconnus sont en attente de profil.','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.saveAllInvoicesToFirebase=async()=>{
+  try{
+    if(!invoiceDrivers.length) return showMsg('Aucune facture à sauvegarder','err');
+    const batch=db.batch();
+    for(const d of invoiceDrivers){
+      const c=calcInvoice(d);
+      const weekId=`${profile.brokerId}_${d.code||'driver'}_${d.week||'week'}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
+      const ref=db.collection('weeks').doc(weekId);
+      const waiting = d.missingDriver || d.driverStatus==='pending';
+      let driverUid='', driverEmail='';
+      if(d.driverId){
+        const drv=await db.collection('drivers').doc(d.driverId).get().catch(()=>null);
+        if(drv && drv.exists){ driverUid=drv.data().uid||''; driverEmail=drv.data().email||''; }
+      }
+      batch.set(ref,{
+        brokerId:profile.brokerId,
+        driverId:d.driverId||'',          // ID du document drivers
+        driverDocId:d.driverId||'',
+        driverUid:driverUid||'',          // UID Firebase du compte chauffeur, rempli quand le compte existe
+        driverEmail:driverEmail||'',
+        driverCode:d.code,
+        driverName:d.name,
+        week:d.week,from:d.from,to:d.to,parcels:d.parcels,totalIntelcom:d.totalInvoice,
+        commission:c.commission,brokerFees:c.fee,deduction:c.deduction,advance:c.advance,total:c.net,
+        status: waiting?'waiting_driver_info':'généré',profileCompleted: !waiting,
+        createdAt:now(),createdBy:currentUser.uid,days:d.days
+      });
+    }
+    await batch.commit();
+    showMsg('Factures sauvegardées. Si le chauffeur a déjà un compte, le relevé est visible dans son espace. Sinon il sera lié après invitation.','ok'); render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
 
 
 async function ensureDriverForInvoice(inv){
@@ -355,6 +393,9 @@ window.completePendingDriver=async(driverId)=>{
     const paymentType=prompt('Mode de paiement', d.paymentType||'Virement bancaire')||'';
     const temp=tempPass();
     await db.collection('drivers').doc(driverId).set({email,emailLower:email,phone,address,paymentType,status:'active',profileCompleted:true,missingInfo:false,active:true,completedAt:now(),completedBy:currentUser.uid,tempPassword:temp},{merge:true});
+    // Relier les factures existantes à l'email du chauffeur. Le UID sera ajouté automatiquement quand il accepte l'invitation.
+    const oldWeeks = await db.collection('weeks').where('driverId','==',driverId).get().catch(()=>({docs:[]}));
+    for(const w of oldWeeks.docs){ await w.ref.set({driverEmail:email, status:(w.data().status==='waiting_driver_info'?'généré':(w.data().status||'généré')), profileCompleted:true, linkedEmailAt:now()}, {merge:true}); }
     const inv={email,emailLower:email,name:d.name,role:'driver',brokerId:d.brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid};
     await db.collection('invitations').doc(emailDocId(email)).set(inv,{merge:true});
     await db.collection('notifications').doc(`completed_${driverId}`).set({brokerId:d.brokerId,type:'driver_completed',driverId,driverName:d.name,read:false,message:`Profil chauffeur complété : ${d.name}`,createdAt:now()},{merge:true});
@@ -366,7 +407,26 @@ window.completePendingDriver=async(driverId)=>{
 
 window.markNotificationRead=async(id)=>{ try{ await db.collection('notifications').doc(id).set({read:true,readAt:now()},{merge:true}); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 
-async function renderDriver(){ if(currentTab==='dashboard'){ const snap=await db.collection('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})); $('content').innerHTML = card(`<h2>Mes relevés</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="wide"><table><tr><th>Semaine</th><th>Total</th><th>Statut</th></tr>${snap.docs.map(d=>{const w=d.data();return `<tr><td>${safe(w.week)}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td></tr>`}).join('')||'<tr><td colspan="3">Aucun relevé disponible</td></tr>'}</table></div>`); } if(currentTab==='vehicles'){ $('content').innerHTML=card(`<h2>Véhicules par jour</h2><p class="muted">Le chauffeur pourra déclarer Essence / Électrique / Diesel / Hybride par journée ici.</p>`); } if(currentTab==='profile'){ $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`); } }
+async function renderDriver(){
+  if(currentTab==='dashboard'){
+    // v23.2 : le relevé peut être lié par driverUid, par ancien driverId, ou par email.
+    const queries = await Promise.all([
+      db.collection('weeks').where('driverUid','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('weeks').where('driverEmail','==',normEmail(currentUser.email)).get().catch(()=>({docs:[]}))
+    ]);
+    const map = new Map();
+    queries.forEach(q=>q.docs.forEach(d=>map.set(d.id,d)));
+    const docs = Array.from(map.values()).sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')));
+    $('content').innerHTML = card(`<h2>Mes relevés</h2><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Si un relevé a été importé avant la création du compte, il devient visible automatiquement dès que l'invitation chauffeur est acceptée.</div><div class="wide"><table><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${docs.map(d=>{const w=d.data();return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><span class="muted small">PDF à la demande</span></td></tr>`}).join('')||'<tr><td colspan="5">Aucun relevé disponible</td></tr>'}</table></div>`);
+  }
+  if(currentTab==='vehicles'){
+    $('content').innerHTML=card(`<h2>Véhicules par jour</h2><p class="muted">Le chauffeur pourra déclarer Essence / Électrique / Diesel / Hybride par journée ici.</p>`);
+  }
+  if(currentTab==='profile'){
+    $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`);
+  }
+}
 </script>
 </body>
 </html>
