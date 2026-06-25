@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v23.8.1 PDF Fix</title>
+  <title>Broker Intelcom Pay - v23.8.2 Details Table Fix</title>
   <style>
     :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
@@ -20,7 +20,7 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.8.1 — PDF corrigé + option afficher les colis</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v23.8.2 — détails colis alignés dans le PDF</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -428,19 +428,64 @@ function drawInvoiceDoc(d){
   }
 
   // Option : afficher ou cacher les pages détaillées des colis Intelcom.
+  // v23.8.2 : les détails sont maintenant dessinés en colonnes fixes.
+  // Avant, la ligne brute du PDF Intelcom était imprimée d'un bloc, ce qui collait toutes les infos.
   if(invoiceSettings.includeDetails==='yes'){
-    const detailLines=(d.rawText||'').split('\n').filter(l=>/^20\d{2}-\d{2}-\d{2}\s+(DELIVERY|FLEX|RETNXTDAY)/.test(l));
-    let page=1, perPage=38, totalPages=Math.max(1,Math.ceil(detailLines.length/perPage));
+    const parseParcelLine=(line)=>{
+      const clean=String(line||'').replace(/\s+/g,' ').trim();
+      const m=clean.match(/^(20\d{2}-\d{2}-\d{2})\s+(DELIVERY|FLEX|RETNXTDAY|RETURN|PICKUP)\s+(?:(MONT|[A-Z]{2,5})\s+)?([A-Z]\d[A-Z]\d[A-Z]\d)\s+(ZONE_[A-Z])\s+(.+?)\s+(\d+(?:\.\d+)?)\s+LB\s+\$?([\d,]+(?:\.\d{1,2})?)/i);
+      if(!m) return null;
+      return {
+        date:m[1], service:m[2], station:m[3]||'', postal:m[4], zone:m[5],
+        tracking:m[6].trim(), weight:m[7]+' LB', amount:'$'+m[8].replace(/,/g,'')
+      };
+    };
+    const fitText=(txt,maxChars)=>{
+      txt=String(txt||'');
+      return txt.length>maxChars ? txt.slice(0,Math.max(0,maxChars-1))+'…' : txt;
+    };
+    const detailLines=(d.rawText||'').split('\n').map(l=>l.trim()).filter(l=>/^20\d{2}-\d{2}-\d{2}\s+(DELIVERY|FLEX|RETNXTDAY|RETURN|PICKUP)/i.test(l));
+    const perPage=42;
+    let page=1, totalPages=Math.max(1,Math.ceil(detailLines.length/perPage));
     for(let i=0;i<detailLines.length;i+=perPage){
-      doc.addPage(); y=36;
-      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Détails des colis Intelcom',left,y); y+=18;
-      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text(`${d.name||''} ${d.code||''}`,left,y); doc.text(`Page détails ${page} / ${totalPages}`,right,y,{align:'right'}); y+=16;
-      doc.text(`Période : ${d.from||''} au ${d.to||''}`,left,y); y+=34;
-      doc.setFillColor(17,17,17); doc.rect(left,y,right-left,22,'F');
-      doc.setTextColor(255,255,255); doc.setFontSize(8);
-      doc.text('Date',left+4,y+14); doc.text('Service',left+78,y+14); doc.text('Code postal',left+158,y+14); doc.text('Zone',left+245,y+14); doc.text('Tracking',left+310,y+14); doc.text('Poids',left+450,y+14); doc.text('Montant',left+505,y+14);
-      doc.setTextColor(0,0,0); y+=36;
-      detailLines.slice(i,i+perPage).forEach(l=>{ doc.text(l.slice(0,135),left+4,y); y+=13; });
+      doc.addPage(); y=34;
+      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.text('Détails des colis Intelcom',left,y); y+=17;
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+      doc.text(`${d.name||''} ${d.code||''}`,left,y);
+      doc.text(`Page détails ${page} / ${totalPages}`,right,y,{align:'right'}); y+=15;
+      doc.text(`Période : ${d.from||''} au ${d.to||''}`,left,y); y+=28;
+
+      const cols={date:left+4, service:left+68, station:left+118, postal:left+158, zone:left+215, tracking:left+270, weight:left+455, amount:left+510};
+      doc.setFillColor(17,17,17); doc.rect(left,y,right-left,20,'F');
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(6.8);
+      doc.text('Date',cols.date,y+13);
+      doc.text('Service',cols.service,y+13);
+      doc.text('Station',cols.station,y+13);
+      doc.text('Code',cols.postal,y+13);
+      doc.text('Zone',cols.zone,y+13);
+      doc.text('Tracking',cols.tracking,y+13);
+      doc.text('Poids',cols.weight,y+13);
+      doc.text('Montant',cols.amount,y+13);
+      doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); doc.setFontSize(6.6); y+=32;
+
+      detailLines.slice(i,i+perPage).forEach((line,idx)=>{
+        const r=parseParcelLine(line);
+        if(idx%2===1){ doc.setFillColor(246,246,246); doc.rect(left,y-9,right-left,14,'F'); }
+        if(r){
+          doc.text(r.date,cols.date,y);
+          doc.text(fitText(r.service,8),cols.service,y);
+          doc.text(fitText(r.station,6),cols.station,y);
+          doc.text(r.postal,cols.postal,y);
+          doc.text(r.zone.replace('ZONE_','Z_'),cols.zone,y);
+          doc.text(fitText(r.tracking,30),cols.tracking,y);
+          doc.text(r.weight,cols.weight,y);
+          doc.text(r.amount,cols.amount,y);
+        }else{
+          // Secours pour les lignes Intelcom qui ne suivent pas exactement le format attendu.
+          doc.text(fitText(line,115),cols.date,y);
+        }
+        y+=13;
+      });
       page++;
     }
   }
