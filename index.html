@@ -343,7 +343,16 @@ async function renderSuperAdmin(){
   }
 }
 function brokerRow(id,b){ const inv = {email:b.email, name:b.ownerName, role:'broker', brokerId:id, tempPassword:b.tempPassword||''}; const limit=b.maxDrivers||planLimit(b.plan||'pro'); return `<tr class="${b.active===false?'disabled':''}"><td>${safe(b.companyName)}</td><td>${safe(b.email)}</td><td>${safe(b.station||'')}</td><td><span class="badge plan">${safe(b.plan||'pro')}</span></td><td>${safe(limit)}</td><td>${b.active===false?'<span class="dangerText">Non</span>':'<span class="successText">Oui</span>'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button></td><td>${b.active===false?`<button class="mini green" onclick="toggleBroker('${id}',true)">Réactiver</button>`:`<button class="mini orange" onclick="toggleBroker('${id}',false)">Désactiver</button>`} <button class="mini secondary" onclick="editBrokerPlan('${id}','${safe(b.plan||'pro')}')">Plan</button> <button class="mini red" onclick="deleteBroker('${id}')">Supprimer</button></td></tr>`; }
-function inviteRow(id,inv){ return `<tr><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${inv.used?'Oui':'Non'}</td><td><button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button> <button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button></td></tr>`; }
+function inviteRow(id,inv){
+  const used = !!(inv.used || inv.usedBy);
+  const archived = !!inv.archived;
+  const status = archived ? '<span class="muted">Archivée</span>' : (used ? '<span class="successText">Acceptée</span>' : '<span class="dangerText">En attente</span>');
+  const mainAction = archived
+    ? `<button class="mini green" onclick="restoreInvitation('${id}')">Restaurer</button>`
+    : (used ? `<button class="mini orange" onclick="deleteInvitation('${id}')">Archiver</button>` : `<button class="mini red" onclick="deleteInvitation('${id}')">Supprimer</button>`);
+  const mailActions = archived ? '' : `<button class="mini secondary" onclick='openGmail(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Gmail</button> <button class="mini secondary" onclick='copyInvite(${JSON.stringify(inv).replace(/'/g,"&#39;")})'>Copier</button>`;
+  return `<tr class="${archived?'disabled':''}"><td>${safe(inv.email)}</td><td>${safe(inv.role)}</td><td>${safe(inv.brokerId)}</td><td>${status}</td><td>${mailActions} ${mainAction}</td></tr>`;
+}
 window.createBroker = async()=>{
   try{
     const email=normEmail($('bEmail').value); if(!email) return showMsg('Email broker obligatoire','err');
@@ -361,7 +370,61 @@ window.editBrokerPlan = async(id,current)=>{ const plan=prompt('Plan: free, pro 
 function filterRows(tableId,q){ q=normEmail(q); const table=document.getElementById(tableId); if(!table) return; Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr=>{ tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none'; }); };
 async function deleteQuery(q){ const s=await q.get(); const docs=s.docs; for(let i=0;i<docs.length;i+=400){ const batch=db.batch(); docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit(); } }
 window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteBrokerNestedData(id); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
-window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); if(profile?.brokerId) await bcol('invitations', profile.brokerId).doc(id).delete().catch(()=>{}); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+async function getInvitationAny(id){
+  let ref = db.collection('invitations').doc(id);
+  let snap = await ref.get().catch(()=>null);
+  if(snap && snap.exists) return {ref, data:snap.data()};
+  if(profile?.brokerId){
+    ref = bcol('invitations', profile.brokerId).doc(id);
+    snap = await ref.get().catch(()=>null);
+    if(snap && snap.exists) return {ref, data:snap.data()};
+  }
+  return null;
+}
+async function archiveAccountFromInvitation(inv, archive=true){
+  const patch = archive ? {active:false, archived:true, archivedAt:now(), archivedBy:currentUser.uid} : {active:true, archived:false, restoredAt:now(), restoredBy:currentUser.uid};
+  if(inv.role === 'broker' && inv.brokerId){
+    await db.collection('brokers').doc(inv.brokerId).set(patch,{merge:true}).catch(()=>{});
+  }
+  if(inv.role === 'driver' && inv.brokerId && inv.driverId){
+    await bcol('drivers', inv.brokerId).doc(inv.driverId).set(patch,{merge:true}).catch(()=>{});
+  }
+}
+window.deleteInvitation = async(id)=>{
+  try{
+    const found = await getInvitationAny(id);
+    if(!found) return showMsg('Invitation introuvable','err');
+    const inv = found.data;
+    const accountCreated = !!(inv.used || inv.usedBy);
+    if(!accountCreated){
+      if(!confirm('Cette invitation n’a pas encore été utilisée. La supprimer définitivement ?')) return;
+      await db.collection('invitations').doc(id).delete().catch(()=>{});
+      if(inv.brokerId) await bcol('invitations', inv.brokerId).doc(id).delete().catch(()=>{});
+      showMsg('Invitation supprimée','ok');
+    }else{
+      if(!confirm('Le compte existe déjà. Archiver cette invitation et désactiver le compte lié ?')) return;
+      const patch={archived:true, active:false, archivedAt:now(), archivedBy:currentUser.uid};
+      await db.collection('invitations').doc(id).set(patch,{merge:true}).catch(()=>{});
+      if(inv.brokerId) await bcol('invitations', inv.brokerId).doc(id).set(patch,{merge:true}).catch(()=>{});
+      await archiveAccountFromInvitation(inv, true);
+      showMsg('Invitation archivée','ok');
+    }
+    render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
+window.restoreInvitation = async(id)=>{
+  try{
+    const found = await getInvitationAny(id);
+    if(!found) return showMsg('Invitation introuvable','err');
+    const inv = found.data;
+    const patch={archived:false, active:true, restoredAt:now(), restoredBy:currentUser.uid};
+    await db.collection('invitations').doc(id).set(patch,{merge:true}).catch(()=>{});
+    if(inv.brokerId) await bcol('invitations', inv.brokerId).doc(id).set(patch,{merge:true}).catch(()=>{});
+    await archiveAccountFromInvitation(inv, false);
+    showMsg('Invitation restaurée','ok');
+    render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
 async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
   const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
