@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v24 Factures propres</title>
+  <title>Broker Intelcom Pay - v25 Pro</title>
   <style>
     :root{
       --bg:#f3f6fb;--bg2:#e9eef7;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
@@ -28,20 +28,6 @@
     ::-webkit-scrollbar{height:10px;width:10px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}::-webkit-scrollbar-track{background:#f1f5f9}
     @media(max-width:900px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column;position:static}.tabs{top:0;position:sticky;overflow-x:auto;flex-wrap:nowrap}.tab{white-space:nowrap}.wide{overflow-x:auto}.wrap{padding:14px 10px 28px}.brand{font-size:24px}.card{padding:14px;border-radius:16px}.summaryBar{grid-template-columns:1fr 1fr}.bracketRow{grid-template-columns:1fr 1fr}.bracketRow button{grid-column:span 2}button{width:auto}th,td{padding:9px 10px;font-size:12px}}
     @media(max-width:520px){.summaryBar{grid-template-columns:1fr}.row{gap:8px}.row button{flex:1}.tabs{margin-left:-2px;margin-right:-2px}.brand{font-size:22px}input,select,textarea{font-size:16px}.card{box-shadow:0 8px 20px rgba(15,23,42,.08)}}
-
-    /* Login simplifié */
-    #authView{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;padding:28px 0}
-    .loginShell{width:100%;max-width:430px;margin:auto}
-    .loginCard{padding:28px;border-radius:24px;box-shadow:0 24px 70px rgba(15,23,42,.12)}
-    .loginLogo{width:62px;height:62px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:0 14px 30px rgba(37,99,235,.25)}
-    .loginTitle{text-align:center;font-size:27px;font-weight:950;letter-spacing:-.6px;margin:0}
-    .loginSubtitle{text-align:center;color:var(--muted);margin:7px 0 22px;font-size:14px}
-    .loginPrimary{width:100%;margin-top:14px}
-    .loginLinks{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;font-size:13px}
-    .textBtn{background:none!important;color:#2563eb!important;box-shadow:none!important;padding:0!important;min-height:auto!important;border-radius:0!important;font-weight:850}
-    .textBtn:hover{transform:none!important;text-decoration:underline;box-shadow:none!important}
-    .invitePanel{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
-    .hiddenSetup{display:none!important}
     @media print{body{background:#fff}.top,.tabs,button{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:1px solid #ddd}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -54,44 +40,35 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Gestion des relevés et des chauffeurs</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v25 Pro — Factures Intelcom, chauffeurs, historique et doublons</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
 
-  <section id="authView">
-    <div class="loginShell">
-      <div class="card loginCard">
-        <div class="loginLogo">📦</div>
-        <h1 class="loginTitle">Intelcom Broker</h1>
-        <div class="loginSubtitle">Gestion des relevés et des chauffeurs</div>
-
-        <label>Email</label>
-        <input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
-        <label>Mot de passe</label>
-        <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
-        <button id="loginBtn" class="loginPrimary">Se connecter</button>
-
-        <div class="loginLinks">
-          <button id="resetBtn" class="textBtn" type="button">Mot de passe oublié</button>
-          <button id="showInviteBtn" class="textBtn" type="button">Créer un compte avec invitation</button>
-        </div>
-
-        <div id="invitePanel" class="invitePanel hidden">
-          <h3>Créer compte avec invitation</h3>
-          <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
-          <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
-          <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-          <button id="acceptInviteBtn" class="green" style="width:100%;margin-top:12px">Créer mon compte</button>
-        </div>
-      </div>
-
-      <div class="hiddenSetup">
-        <input id="saName" value="Allaoua Boucheneb">
-        <input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
-        <input id="saPass" type="password">
-        <button id="createSuperBtn" type="button"></button>
-      </div>
+  <section id="authView" class="grid">
+    <div class="card col-4">
+      <h2>Connexion</h2>
+      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
+      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
+      <div class="notice bluebox">Utilise ce bloc seulement si ton compte existe déjà dans Firebase Auth.</div>
+    </div>
+    <div class="card col-4">
+      <h2>Créer compte avec invitation</h2>
+      <p class="muted">Pour broker ou chauffeur invité par email. L’invitation doit déjà exister.</p>
+      <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
+      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
+      <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
+      <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
+      <div class="notice">Première connexion d’un broker/chauffeur : utiliser ce bloc, pas le bouton Se connecter.</div>
+    </div>
+    <div class="card col-4">
+      <h2>Créer Super Admin</h2>
+      <p class="muted">À faire une seule fois. Autorisé seulement pour tes emails.</p>
+      <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
+      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
+      <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
+      <button id="createSuperBtn" class="green" style="margin-top:12px">Créer Super Admin</button>
     </div>
   </section>
 
@@ -153,9 +130,6 @@ async function ensureBrokerActive(p){
   if(!b.exists || b.data().active === false){ showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err'); await auth.signOut(); return false; }
   return true;
 }
-$('showInviteBtn').onclick = () => {
-  $('invitePanel').classList.toggle('hidden');
-};
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
   if(!user){ profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
@@ -296,7 +270,7 @@ async function renderBroker(){
       ${statsCard('À compléter', pendingDrivers.length, 'Chauffeurs importés depuis PDF', 'col-3')}
       ${statsCard('Notifications', unreadNotifs.length, 'Non lues', 'col-3')}
       ${statsCard('Plan', broker.plan||'pro', safe(broker.companyName||''), 'col-3')}
-      ${card(`<h2>🔔 Notifications broker</h2>${unreadNotifs.length?`<div class="wide"><table><tr><th>Type</th><th>Message</th><th>Action</th></tr>${unreadNotifs.map(n=>{const x=n.data();return `<tr><td>${safe(x.type)}</td><td>${safe(x.message||'Chauffeur à compléter')}</td><td><button class="mini secondary" onclick="markNotificationRead('${n.id}')">Lu</button></td></tr>`}).join('')}</table></div>`:'<p class="muted">Aucune notification.</p>'}`,'col-6')}
+      ${card(`<h2>🔔 Notifications broker</h2>${unreadNotifs.length?`<div class="wide"><table><tr><th>Type</th><th>Message</th><th>Action</th></tr>${unreadNotifs.map(n=>{const x=n.data(); const duplicateBtn=x.type==='duplicate_invoice'?`<button class="mini orange" onclick="openDuplicateCompare('${safe(n.id)}','${safe(x.duplicateId||'')}')">Comparer</button> `:''; return `<tr><td>${safe(x.type)}</td><td>${safe(x.message||'Notification')}</td><td>${duplicateBtn}<button class="mini secondary" onclick="markNotificationRead('${n.id}')">Lu</button></td></tr>`}).join('')}</table></div>`:'<p class="muted">Aucune notification.</p>'}`,'col-6')}
       ${card(`<h2>⚠️ Chauffeurs à compléter</h2>${pendingDrivers.length?`<div class="wide"><table><tr><th>Nom</th><th>Code</th><th>Email</th><th>Action</th></tr>${pendingDrivers.map(d=>{const x=d.data();return `<tr><td>${safe(x.name)}</td><td>${safe(x.code)}</td><td>${safe(x.email||'manquant')}</td><td><button class="mini green" onclick="completePendingDriver('${d.id}')">Compléter</button></td></tr>`}).join('')}</table></div>`:'<p class="muted">Aucun chauffeur en attente.</p>'}`,'col-6')}
       ${card(`<h2>État du compte</h2><p>Broker : <b>${safe(broker.companyName||profile.name||'')}</b></p><p>Station : <b>${safe(broker.station||'Non définie')}</b></p><p>Limite chauffeurs : <b>${max}</b></p>`,'col-6')}
       ${card(`<h2>Factures Intelcom</h2><p>L’onglet <b>Factures</b> détecte maintenant les chauffeurs inconnus, crée leur profil en attente et sauvegarde les factures sans les perdre.</p>`,'col-6')}
@@ -350,6 +324,9 @@ function parseAmount(s){return Number(String(s||'').replace(/[^0-9.-]/g,''))||0}
 function loadInvoiceLocal(){ try{ invoiceSettings=Object.assign(invoiceSettings, JSON.parse(localStorage.getItem('v22_invoice_settings')||'{}')); invoiceDrivers=JSON.parse(localStorage.getItem('v22_invoice_drivers')||'[]'); }catch(e){} }
 function saveInvoiceLocal(){ localStorage.setItem('v22_invoice_settings', JSON.stringify(invoiceSettings)); localStorage.setItem('v22_invoice_drivers', JSON.stringify(invoiceDrivers)); }
 loadInvoiceLocal();
+let lastImportSummary = JSON.parse(localStorage.getItem('v25_last_import_summary')||'null');
+function saveImportSummary(obj){ lastImportSummary=obj; localStorage.setItem('v25_last_import_summary', JSON.stringify(obj)); }
+function renderImportSummary(){ if(!lastImportSummary) return ''; const s=lastImportSummary; return card(`<h2>✅ Contrôle du dernier import</h2><div class="grid"><div class="col-3"><div class="feeBox"><b>Relevés mis à jour</b><br><span class="big">${s.saved||0}</span></div></div><div class="col-3"><div class="feeBox"><b>Nouveaux chauffeurs</b><br><span class="big">${s.createdDrivers||0}</span></div></div><div class="col-3"><div class="feeBox"><b>PDF prêts</b><br><span class="big">${s.pdfs||0}</span></div></div><div class="col-3"><div class="feeBox"><b>Doublons</b><br><span class="big">${s.duplicates||0}</span></div></div></div>${(s.pendingDrivers||0)>0?`<div class="notice warn">⚠️ ${s.pendingDrivers} chauffeur(s) à compléter. <button class="mini orange" onclick="currentTab='drivers';render()">Ouvrir les chauffeurs</button></div>`:''}${(s.duplicates||0)>0?`<div class="notice warn">⚠️ ${s.duplicates} doublon(s) en attente de comparaison. Ouvre les notifications du dashboard broker.</div>`:''}`,'col-12'); }
 function bracketFee(vehicle, parcels){ const list=(invoiceSettings.brackets?.[vehicle]||[]).map(r=>({min:Number(r.min)||0,max:Number(r.max)||0,fee:Number(r.fee)||0})); const p=Number(parcels)||0; const row=list.find(r=>p>=r.min && p<=r.max); return row ? {fee:row.fee,label:row.min+'-'+row.max} : {fee:0,label:'aucune'}; }
 function calcInvoice(d){ const commissionBase=Number(d.totalInvoice||d.total||0); const commissionPercent=(d.commissionPercent!==undefined && d.commissionPercent!=='' && d.commissionPercent!==null)?Number(d.commissionPercent):0; const commission=commissionBase*(commissionPercent/100); let fee=0, details=[]; (d.days||[]).forEach(day=>{ if(Number(day.parcels||0)<=0 && Number(day.total||0)<=0) return; if(invoiceSettings.feeMode==='daily_fixed'){ fee += Number(invoiceSettings.fixedFee||0); details.push({date:day.date,parcels:day.parcels,vehicle:day.vehicle||'essence',bracket:'Jour travaillé',fee:Number(invoiceSettings.fixedFee||0)}); } else { const vehicle=day.vehicle||'essence'; const f=bracketFee(vehicle, day.parcels); fee+=f.fee; details.push({date:day.date,parcels:day.parcels,vehicle,bracket:f.label,fee:f.fee}); } }); const deduction=Number(d.deduction||0), advance=Number(d.advance||0); return {commission,commissionPercent,fee,deduction,advance,net:commissionBase-commission-fee-deduction-advance,workedDays:(d.days||[]).filter(x=>Number(x.parcels)>0||Number(x.total)>0).length, feeDetails:details}; }
 async function renderBrokerFactures(broker){
@@ -360,6 +337,7 @@ async function renderBrokerFactures(broker){
       <label>Importer PDF Intelcom (max 40)</label><input id="invoicePdfFiles" type="file" multiple accept="application/pdf">
       <div class="row" style="margin-top:10px"><button onclick="importIntelcomPDFs()">Importer et lire</button><button class="green" onclick="downloadAllInvoicesZip()">ZIP de toutes les factures</button><button class="secondary" onclick="saveAllInvoicesToFirebase()">Sauvegarder historique Firebase</button><button class="red" onclick="clearInvoiceImport()">Vider import</button></div>
       <div class="summaryBar"><div class="feeBox"><b>Total Intelcom</b><br><span class="big">${fmtMoney(totalIntelcom)}</span></div><div class="feeBox"><b>Factures</b><br><span class="big">${invoiceDrivers.length}</span></div><div class="feeBox"><b>Total chauffeurs</b><br><span class="big">${fmtMoney(totalCalc)}</span></div><div class="feeBox"><b>Historique</b><br><span class="big">${snap.docs.length}</span></div></div>`,'col-12')}
+    ${renderImportSummary()}
     ${card(`<h2>Options PDF pour cet import</h2><div class="grid"><div class="col-6"><label>Afficher les colis détaillés dans le PDF</label><select onchange="invoiceSettings.includeDetails=this.value;saveInvoiceLocal();render()"><option value="yes" ${invoiceSettings.includeDetails==='yes'?'selected':''}>Oui, ajouter les pages colis</option><option value="no" ${invoiceSettings.includeDetails==='no'?'selected':''}>Non, relevé seulement</option></select></div><div class="col-6"><label>Paramètres utilisés</label><div class="linkbox">Mode frais : <b>${invoiceSettings.feeMode==='daily_fixed'?'Frais fixe par jour travaillé':'Barème par colis'}</b><br>Frais fixe/jour : <b>${fmtMoney(invoiceSettings.fixedFee)}</b><br>Barèmes : à modifier dans <b>Paramètres</b>.<br>Commission : dans chaque fiche <b>Chauffeur</b>.</div></div></div>`,'col-12')}
     ${card(`<h2>Aperçu avant génération</h2><div class="wide"><table><tr><th>Chauffeur</th><th>Semaine</th><th>Période</th><th>Colis</th><th>Total Intelcom</th><th>% Broker</th><th>Commission</th><th>Frais</th><th>Déduction</th><th>Avance</th><th>Net</th><th>Statut chauffeur</th><th>Actions</th></tr>${invoiceDrivers.map((d,i)=>invoiceRow(d,i)).join('')||'<tr><td colspan="13">Aucun PDF importé</td></tr>'}</table></div>`,'col-12')}
   </div>`;
@@ -374,7 +352,7 @@ async function pdfToText(file){ const buf=await file.arrayBuffer(); const pdf=aw
 function parseIntelcomText(text,fileName){ const lines=text.split(/\n+/).map(l=>l.trim()).filter(Boolean); const fileWeek=(fileName||'').match(/(20\d{2}-\d{1,2})/); let code='', name=''; for(const l of lines){ const m=l.match(/\b(C0[A-Z0-9]{4,})\s+([A-Za-zÀ-ÿ'’\- ]{2,})(?:\s+Invoice To)?/); if(m){code=m[1]; name=m[2].replace(/Invoice To.*/,'').trim(); break;} } if(!code){ const m=(fileName||text).match(/\b(C0[A-Z0-9]{4,})\b/); code=m?m[1]:''; } if(!name) name=code || (fileName||'Chauffeur').replace(/\.pdf$/i,''); let week=fileWeek?fileWeek[1]:''; const weekLine = lines.find(l=>/^20\d{2}-\d{1,2}$/.test(l)); if(!week && weekLine) week=weekLine; const dates=[...text.matchAll(/\b(20\d{2}-\d{2}-\d{2})\b/g)].map(m=>m[1]); const from=dates[0]||'', to=dates.find(d=>d!==from&&d>=from)||dates[1]||''; const days=[]; const summaryStart=lines.findIndex(l=>l.includes('Transaction Date')||l.includes('Transaction summary')); const totalLine=lines.find(l=>/Total invoice\s*\$?/.test(l)); const totalInvoice=totalLine?parseAmount(totalLine.replace(/^.*Total invoice/i,'')):0; for(const l of lines){ const m=l.match(/^(20\d{2}-\d{2}-\d{2})\s+\d+\s+(\d+)\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{2})\s+\$?([\d,]+\.\d{1,2})/); if(m){ days.push({date:m[1],parcels:Number(m[2]),amount:parseAmount(m[3]),fsc:parseAmount(m[4]),additional:parseAmount(m[5]),total:parseAmount(m[6]),vehicle:'essence'}); } }
  if(!days.length){ const byDate={}; for(const l of lines){ const m=l.match(/^(20\d{2}-\d{2}-\d{2})\s+(DELIVERY|FLEX|RETNXTDAY).*?\s+(\d+(?:\.\d+)?)\s+LB\s+\$?([\d.]+)/); if(m){ byDate[m[1]]=byDate[m[1]]||{date:m[1],parcels:0,total:0,vehicle:'essence'}; byDate[m[1]].parcels++; byDate[m[1]].total+=parseAmount(m[4]); } } Object.values(byDate).sort((a,b)=>a.date.localeCompare(b.date)).forEach(x=>days.push(x)); }
  const parcels=days.reduce((a,d)=>a+Number(d.parcels||0),0); const total=totalInvoice || days.reduce((a,d)=>a+Number(d.total||0),0); return {id:code+'_'+week, code, name, week, from:from||days[0]?.date||'', to:to||days[days.length-1]?.date||'', days, parcels, totalInvoice:total, deduction:0, advance:0, rawText:text, fileName}; }
-window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFiles')?.files||[]); if(!files.length) return showMsg('Choisis au moins un PDF','err'); if(files.length>40) return showMsg('Maximum 40 PDF','err'); let ok=0, created=0; for(const f of files){ if(!/pdf$/i.test(f.name)) continue; const text=await pdfToText(f); const inv=parseIntelcomText(text,f.name); const res=await ensureDriverForInvoice(inv); inv.driverId=res.driverId; inv.driverStatus=res.status; inv.missingDriver=res.created; if(res.commissionPercent!==undefined && res.commissionPercent!=='') inv.commissionPercent=Number(res.commissionPercent); if(res.created) created++; { const k=(inv.code||'driver')+'_'+(inv.week||'week'); const idx=invoiceDrivers.findIndex(x=>(x.code||'driver')+'_'+(x.week||'week')===k); if(idx>=0) invoiceDrivers[idx]=inv; else invoiceDrivers.push(inv); } ok++; } saveInvoiceLocal(); showMsg(ok+' PDF importé(s). '+created+' chauffeur(s) inconnu(s) créé(s) en attente.','ok'); render(); }catch(e){ showMsg('Erreur import PDF : '+humanError(e),'err'); } };
+window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFiles')?.files||[]); if(!files.length) return showMsg('Choisis au moins un PDF','err'); if(files.length>40) return showMsg('Maximum 40 PDF','err'); let ok=0, created=0, updatedLocal=0; for(const f of files){ if(!/pdf$/i.test(f.name)) continue; const text=await pdfToText(f); const inv=parseIntelcomText(text,f.name); const res=await ensureDriverForInvoice(inv); inv.driverId=res.driverId; inv.driverStatus=res.status; inv.missingDriver=res.created; if(res.commissionPercent!==undefined && res.commissionPercent!=='') inv.commissionPercent=Number(res.commissionPercent); if(res.created) created++; { const k=(inv.code||'driver')+'_'+(inv.week||'week'); const idx=invoiceDrivers.findIndex(x=>(x.code||'driver')+'_'+(x.week||'week')===k); if(idx>=0){ invoiceDrivers[idx]=inv; updatedLocal++; } else invoiceDrivers.push(inv); } ok++; } saveInvoiceLocal(); saveImportSummary({saved:updatedLocal,createdDrivers:created,pdfs:ok,duplicates:0,pendingDrivers:created,at:new Date().toISOString()}); showMsg(ok+' PDF importé(s). '+created+' chauffeur(s) inconnu(s) créé(s) en attente.','ok'); render(); }catch(e){ showMsg('Erreur import PDF : '+humanError(e),'err'); } };
 function getPdfCompany(){
   // v23.8 : priorité aux paramètres du broker, puis override quand un chauffeur télécharge un ancien relevé.
   const b = window.pdfCompanyOverride || (typeof window.currentBroker !== 'undefined' ? window.currentBroker : null) || profile || {};
@@ -548,10 +526,9 @@ window.saveAllInvoicesToFirebase=async()=>{
   try{
     if(!invoiceDrivers.length) return showMsg('Aucune facture à sauvegarder','err');
     const batch=db.batch();
+    let saved=0, duplicates=0;
     for(const d of invoiceDrivers){
       const c=calcInvoice(d);
-      // Anti-doublon : un seul relevé par broker + chauffeur + semaine.
-      // Si le relevé existe déjà, on le met à jour au lieu de créer une nouvelle ligne.
       const weekId=`${profile.brokerId}_${d.code||'driver'}_${d.week||'week'}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
       const ref=db.collection('weeks').doc(weekId);
       const waiting = d.missingDriver || d.driverStatus==='pending';
@@ -560,11 +537,11 @@ window.saveAllInvoicesToFirebase=async()=>{
         const drv=await db.collection('drivers').doc(d.driverId).get().catch(()=>null);
         if(drv && drv.exists){ driverUid=drv.data().uid||''; driverEmail=drv.data().email||''; }
       }
-      batch.set(ref,{
+      const weekPayload={
         brokerId:profile.brokerId,
-        driverId:d.driverId||'',          // ID du document drivers
+        driverId:d.driverId||'',
         driverDocId:d.driverId||'',
-        driverUid:driverUid||'',          // UID Firebase du compte chauffeur, rempli quand le compte existe
+        driverUid:driverUid||'',
         driverEmail:driverEmail||'',
         driverCode:d.code,
         driverName:d.name,
@@ -573,10 +550,52 @@ window.saveAllInvoicesToFirebase=async()=>{
         status: waiting?'waiting_driver_info':'généré',profileCompleted: !waiting,
         updatedAt:now(),
         createdAt:d.createdAt||now(),createdBy:currentUser.uid,days:d.days,rawText:d.rawText||''
-      }, {merge:true});
+      };
+      const existing=await ref.get().catch(()=>null);
+      if(existing && existing.exists){
+        const old=existing.data()||{};
+        const duplicateId=`dup_${weekId}_${Date.now()}_${Math.floor(Math.random()*9999)}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
+        const duplicateDoc={
+          brokerId:profile.brokerId,
+          status:'pending',
+          existingWeekId:weekId,
+          driverCode:d.code||'',
+          driverName:d.name||'',
+          week:d.week||'',
+          oldSummary:{
+            totalIntelcom:Number(old.totalIntelcom||0),parcels:Number(old.parcels||0),commissionPercent:Number(old.commissionPercent||0),commission:Number(old.commission||0),brokerFees:Number(old.brokerFees||0),total:Number(old.total||0),updatedAt:old.updatedAt||old.createdAt||''
+          },
+          newSummary:{
+            totalIntelcom:Number(weekPayload.totalIntelcom||0),parcels:Number(weekPayload.parcels||0),commissionPercent:Number(weekPayload.commissionPercent||0),commission:Number(weekPayload.commission||0),brokerFees:Number(weekPayload.brokerFees||0),total:Number(weekPayload.total||0),updatedAt:weekPayload.updatedAt||''
+          },
+          newWeekPayload,
+          createdAt:now(),
+          createdBy:currentUser.uid
+        };
+        batch.set(db.collection('duplicateInvoices').doc(duplicateId), duplicateDoc, {merge:true});
+        batch.set(db.collection('notifications').doc(`notif_${duplicateId}`), {
+          brokerId:profile.brokerId,
+          type:'duplicate_invoice',
+          status:'pending',
+          read:false,
+          duplicateId,
+          existingWeekId:weekId,
+          driverCode:d.code||'',
+          driverName:d.name||'',
+          week:d.week||'',
+          message:`Doublon détecté : ${d.name||d.code||'chauffeur'} — semaine ${d.week||''}. Compare l’ancien relevé avec le nouveau PDF.`,
+          createdAt:now(),createdBy:currentUser.uid
+        }, {merge:true});
+        duplicates++;
+      }else{
+        batch.set(ref,weekPayload,{merge:true});
+        saved++;
+      }
     }
     await batch.commit();
-    showMsg('Factures sauvegardées/mises à jour. Un seul relevé par chauffeur et par semaine. Le chauffeur peut télécharger son PDF dans son compte.','ok'); render();
+    const msg = duplicates ? `${saved} relevé(s) sauvegardé(s). ${duplicates} doublon(s) mis en attente de comparaison.` : `${saved} relevé(s) sauvegardé(s)/mis à jour.`;
+    saveImportSummary({saved,createdDrivers:invoiceDrivers.filter(x=>x.missingDriver||x.driverStatus==='pending').length,pdfs:invoiceDrivers.length,duplicates,pendingDrivers:invoiceDrivers.filter(x=>x.missingDriver||x.driverStatus==='pending').length,at:new Date().toISOString()});
+    showMsg(msg,'ok'); render();
   }catch(e){showMsg(humanError(e),'err')}
 };
 
@@ -630,6 +649,64 @@ window.completePendingDriver=async(driverId)=>{
 };
 
 window.markNotificationRead=async(id)=>{ try{ await db.collection('notifications').doc(id).set({read:true,readAt:now()},{merge:true}); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+
+window.openDuplicateCompare=async(notifId, duplicateId)=>{
+  try{
+    if(!duplicateId) return showMsg('Doublon introuvable','err');
+    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    if(!doc.exists) return showMsg('Comparaison introuvable','err');
+    const x=doc.data();
+    const old=x.oldSummary||{}, neu=x.newSummary||{};
+    const row=(label,a,b)=>`<tr><td>${label}</td><td>${fmtMoney(a)}</td><td>${fmtMoney(b)}</td></tr>`;
+    $('content').innerHTML = card(`<h2>⚠️ Comparaison de doublon</h2><div class="notice warn">Un relevé existe déjà pour <b>${safe(x.driverName||x.driverCode)}</b>, semaine <b>${safe(x.week)}</b>. Choisis le bon fichier.</div>
+      <table><tr><th>Élément</th><th>Relevé existant</th><th>Nouveau PDF importé</th></tr>
+        ${row('Total Intelcom', old.totalIntelcom, neu.totalIntelcom)}
+        <tr><td>Colis</td><td>${safe(old.parcels||0)}</td><td>${safe(neu.parcels||0)}</td></tr>
+        <tr><td>Commission %</td><td>${Number(old.commissionPercent||0).toFixed(2)}%</td><td>${Number(neu.commissionPercent||0).toFixed(2)}%</td></tr>
+        ${row('Commission broker', old.commission, neu.commission)}
+        ${row('Frais broker', old.brokerFees, neu.brokerFees)}
+        ${row('Net chauffeur', old.total, neu.total)}
+        <tr><td>Dernière mise à jour</td><td>${safe(old.updatedAt||'')}</td><td>${safe(neu.updatedAt||'')}</td></tr>
+      </table>
+      <div class="row" style="margin-top:16px">
+        <button class="secondary" onclick="keepExistingDuplicate('${duplicateId}','${notifId}')">Garder l’ancien</button>
+        <button class="green" onclick="acceptNewDuplicate('${duplicateId}','${notifId}')">Remplacer par le nouveau</button>
+        <button class="orange" onclick="createSeparateDuplicate('${duplicateId}','${notifId}')">Créer comme version séparée</button>
+        <button class="secondary" onclick="render()">Retour</button>
+      </div>`);
+  }catch(e){showMsg(humanError(e),'err')}
+};
+window.keepExistingDuplicate=async(duplicateId, notifId)=>{
+  try{
+    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'kept_existing',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'kept_existing',readAt:now()},{merge:true});
+    showMsg('Ancien relevé conservé.','ok'); render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
+window.acceptNewDuplicate=async(duplicateId, notifId)=>{
+  try{
+    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    if(!doc.exists) return showMsg('Doublon introuvable','err');
+    const x=doc.data();
+    await db.collection('weeks').doc(x.existingWeekId).set({...x.newWeekPayload, duplicateResolvedAt:now(), duplicateResolution:'replaced_by_new'}, {merge:true});
+    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'accepted_new',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'accepted_new',readAt:now()},{merge:true});
+    showMsg('Nouveau PDF accepté et relevé remplacé.','ok'); render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
+window.createSeparateDuplicate=async(duplicateId, notifId)=>{
+  try{
+    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    if(!doc.exists) return showMsg('Doublon introuvable','err');
+    const x=doc.data();
+    const newId=`${x.existingWeekId}_version_${Date.now()}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
+    await db.collection('weeks').doc(newId).set({...x.newWeekPayload, status:'version_séparée', originalWeekId:x.existingWeekId, createdAsSeparateAt:now()}, {merge:true});
+    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'created_separate',separateWeekId:newId,resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'created_separate',readAt:now()},{merge:true});
+    showMsg('Nouveau PDF créé comme version séparée.','ok'); render();
+  }catch(e){showMsg(humanError(e),'err')}
+};
+
 
 
 function invoiceFromWeekData(w){
