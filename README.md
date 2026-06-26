@@ -1,9 +1,10 @@
-# v27.3 — PDF sans valeurs par défaut codées en dur
+# Intelcom Broker Pay — v27.4 véhicules + dispatch
 
-Corrections :
-- Suppression des valeurs démo dans le PDF : Allaoua Boucheneb, 9486-5482 QUÉBEC INC, Wilfrid-Hamel, etc.
-- Le PDF utilise maintenant les données du broker depuis `brokers/{brokerId}` + `brokers/{brokerId}/settings/company`.
-- Si le broker n’a pas encore rempli ses paramètres, le PDF affiche “Entreprise non configurée” au lieu d’informations fausses.
-- Le téléchargement PDF fonctionne côté broker et chauffeur avec les paramètres de l’entreprise.
+Nouveautés :
+- Page broker **Véhicules** : ajouter/modifier/désactiver/supprimer les véhicules avec type et immatriculation.
+- Page broker **Dispatch** : assigner les véhicules et jours de travail par chauffeur et par semaine.
+- Compte chauffeur **Mon planning** : voir le véhicule prévu, confirmer chaque jour ou signaler un problème.
+- Détection de conflit : si un véhicule est confirmé par un autre chauffeur le même jour, le chauffeur reçoit un avertissement et peut confirmer l'immatriculation; une notification est envoyée au broker.
+- Factures : lors de l'import Intelcom, le dispatch applique automatiquement le type du véhicule par jour pour calculer les frais selon les barèmes.
 
-À faire dans l’app : Paramètres > Entreprise, remplir les coordonnées du broker avant de générer les relevés.
+Structure utilisée : `brokers/{brokerId}/vehicles`, `dispatch`, `dailyVehicles`, `notifications`, `weeks`, `drivers`.
