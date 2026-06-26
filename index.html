@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v25 Pro</title>
+  <title>Broker Intelcom Pay - v25.2 Mobile Pro</title>
   <style>
     :root{
       --bg:#f3f6fb;--bg2:#e9eef7;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
@@ -28,6 +28,79 @@
     ::-webkit-scrollbar{height:10px;width:10px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}::-webkit-scrollbar-track{background:#f1f5f9}
     @media(max-width:900px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column;position:static}.tabs{top:0;position:sticky;overflow-x:auto;flex-wrap:nowrap}.tab{white-space:nowrap}.wide{overflow-x:auto}.wrap{padding:14px 10px 28px}.brand{font-size:24px}.card{padding:14px;border-radius:16px}.summaryBar{grid-template-columns:1fr 1fr}.bracketRow{grid-template-columns:1fr 1fr}.bracketRow button{grid-column:span 2}button{width:auto}th,td{padding:9px 10px;font-size:12px}}
     @media(max-width:520px){.summaryBar{grid-template-columns:1fr}.row{gap:8px}.row button{flex:1}.tabs{margin-left:-2px;margin-right:-2px}.brand{font-size:22px}input,select,textarea{font-size:16px}.card{box-shadow:0 8px 20px rgba(15,23,42,.08)}}
+
+    body.login-mode .top{display:none}
+    body.login-mode .wrap{max-width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(135deg,#f8fafc 0%,#eef4ff 50%,#eaf7ff 100%)}
+    .loginPage{width:100%;max-width:450px}
+    .loginLogo{display:flex;align-items:center;justify-content:center;width:64px;height:64px;margin:0 auto 14px;border-radius:20px;background:linear-gradient(180deg,var(--blue),var(--blue2));color:white;font-size:28px;box-shadow:0 18px 40px rgba(37,99,235,.25)}
+    .loginTitle{text-align:center;font-size:28px;font-weight:950;letter-spacing:-.6px;margin:0;color:#0f172a}
+    .loginSubtitle{text-align:center;color:var(--muted);margin:7px 0 22px;font-size:14px}
+    .loginCard{background:#fff;border:1px solid var(--border);border-radius:24px;padding:22px;box-shadow:0 24px 60px rgba(15,23,42,.12)}
+    .loginCard h2{font-size:19px;text-align:center;margin-bottom:16px}
+    .loginActions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+    .loginActions button{width:100%}
+    .loginLinks{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:12px}
+    .textBtn{background:transparent!important;color:var(--blue)!important;box-shadow:none!important;padding:6px!important;min-height:auto!important;border-radius:8px;font-size:13px}
+    .textBtn:hover{transform:none;text-decoration:underline}
+    .loginPanel{margin-top:12px;border:1px solid var(--border);border-radius:16px;background:#f8fafc;overflow:hidden}
+    .loginPanel summary{cursor:pointer;list-style:none;padding:13px 14px;font-weight:900;color:#334155;display:flex;justify-content:space-between;align-items:center}
+    .loginPanel summary::-webkit-details-marker{display:none}
+    .loginPanel summary:after{content:'+';font-size:18px;color:#64748b}
+    .loginPanel[open] summary:after{content:'−'}
+    .loginPanelBody{padding:0 14px 14px}
+    .loginFoot{text-align:center;color:#94a3b8;font-size:12px;margin-top:14px}
+    body.login-mode #msg{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:min(92vw,520px);z-index:50}
+
+
+
+    /* v25.2 — correction interface mobile/tablette */
+    @media(max-width:900px){
+      .col-3{grid-column:span 6!important}
+      .top{border-radius:18px;padding:12px 14px;margin-bottom:10px}
+      .pill{font-size:12px;padding:7px 10px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+      .tabs{gap:7px;padding:7px;margin:8px -2px 14px;border-radius:16px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+      .tab{padding:10px 13px;min-height:40px;font-size:13px;scroll-snap-align:start}
+      .grid{gap:12px}
+      .feeBox{margin:0;padding:14px;border-radius:16px;min-height:92px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+      .feeBox b{display:block;font-size:13px;line-height:1.18;word-break:normal;hyphens:none}
+      .feeBox .big,.summaryBar .big{font-size:28px!important;line-height:1.05;margin-top:6px;white-space:nowrap}
+      .summaryBar{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+      .sectionTitle{flex-direction:column;align-items:stretch;gap:8px}
+      .search{max-width:none;width:100%}
+      h2{font-size:20px;line-height:1.15}
+      .notice{font-size:14px;line-height:1.35}
+      .wide{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px}
+      .wide table{min-width:760px}
+      .wide:after{content:'← Glisser pour voir tout le tableau →';display:block;padding:7px 10px;color:#64748b;font-size:11px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center}
+    }
+    @media(max-width:560px){
+      body{font-size:14px;background:#f3f6fb}
+      .wrap{padding:10px 10px 86px}
+      .brand{font-size:21px;line-height:1.05}.brand:before{font-size:20px}
+      .sub{font-size:12px}
+      .top{position:static;gap:10px;box-shadow:0 8px 20px rgba(15,23,42,.07)}
+      .tabs{position:sticky;top:0;z-index:25;margin:0 -10px 12px;border-left:0;border-right:0;border-radius:0;background:rgba(255,255,255,.95);box-shadow:0 8px 18px rgba(15,23,42,.08)}
+      .tab{font-size:13px;padding:10px 12px;border-radius:13px;white-space:nowrap}
+      .card{padding:15px;border-radius:18px;box-shadow:0 8px 20px rgba(15,23,42,.07)}
+      .col-3{grid-column:span 6!important}
+      .summaryBar{grid-template-columns:1fr 1fr!important}
+      .summaryBar .feeBox,.grid>.col-3 .feeBox{min-height:98px}
+      .big{font-size:29px}
+      label{font-size:11px;line-height:1.25}
+      button{min-height:42px;padding:10px 13px;border-radius:12px}
+      button.mini,.mini{font-size:12px;min-height:34px;padding:7px 9px}
+      .row{gap:8px}.row button{flex:1 1 auto}
+      input,select,textarea{font-size:16px;border-radius:14px;padding:11px 12px}
+      .loginPage{max-width:430px}.loginCard{padding:20px;border-radius:22px}.loginTitle{font-size:26px}
+    }
+    @media(max-width:390px){
+      .summaryBar{grid-template-columns:1fr!important}
+      .col-3{grid-column:span 12!important}
+      .feeBox{min-height:auto}
+      .tab{padding:9px 10px}
+      h2{font-size:19px}
+    }
+
     @media print{body{background:#fff}.top,.tabs,button{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:1px solid #ddd}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -37,7 +110,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
-<body>
+<body class="login-mode">
 <div class="wrap">
   <div class="top">
     <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v25 Pro — Factures Intelcom, chauffeurs, historique et doublons</div></div>
@@ -45,31 +118,45 @@
   </div>
   <div id="msg"></div>
 
-  <section id="authView" class="grid">
-    <div class="card col-4">
+  <section id="authView" class="loginPage">
+    <div class="loginLogo">📦</div>
+    <h1 class="loginTitle">Intelcom Broker</h1>
+    <div class="loginSubtitle">Gestion des relevés et des chauffeurs</div>
+
+    <div class="loginCard">
       <h2>Connexion</h2>
-      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
-      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
-      <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
-      <div class="notice bluebox">Utilise ce bloc seulement si ton compte existe déjà dans Firebase Auth.</div>
+      <label>Email</label>
+      <input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
+      <label>Mot de passe</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="loginActions">
+        <button id="loginBtn">Se connecter</button>
+      </div>
+      <div class="loginLinks">
+        <button id="resetBtn" class="textBtn">Mot de passe oublié</button>
+      </div>
+
+      <details class="loginPanel">
+        <summary>Créer compte avec invitation</summary>
+        <div class="loginPanelBody">
+          <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
+          <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
+          <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
+          <button id="acceptInviteBtn" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
+        </div>
+      </details>
+
+      <details class="loginPanel">
+        <summary>Créer Super Admin</summary>
+        <div class="loginPanelBody">
+          <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
+          <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
+          <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
+          <button id="createSuperBtn" class="green" style="margin-top:12px;width:100%">Créer Super Admin</button>
+        </div>
+      </details>
     </div>
-    <div class="card col-4">
-      <h2>Créer compte avec invitation</h2>
-      <p class="muted">Pour broker ou chauffeur invité par email. L’invitation doit déjà exister.</p>
-      <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
-      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
-      <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-      <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
-      <div class="notice">Première connexion d’un broker/chauffeur : utiliser ce bloc, pas le bouton Se connecter.</div>
-    </div>
-    <div class="card col-4">
-      <h2>Créer Super Admin</h2>
-      <p class="muted">À faire une seule fois. Autorisé seulement pour tes emails.</p>
-      <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
-      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
-      <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
-      <button id="createSuperBtn" class="green" style="margin-top:12px">Créer Super Admin</button>
-    </div>
+    <div class="loginFoot">Accès sécurisé aux relevés Intelcom</div>
   </section>
 
   <section id="appView" class="hidden">
@@ -132,12 +219,12 @@ async function ensureBrokerActive(p){
 }
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
-  if(!user){ profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
+  if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
   try{
     profile = await getProfile(user.uid);
     if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Pour un invité : utilise Créer compte avec invitation. Pour toi : crée le Super Admin.', 'err'); await auth.signOut(); return; }
     if(!(await ensureBrokerActive(profile))) return;
-    $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
+    document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
   }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
 });
 $('logoutBtn').onclick = () => auth.signOut();
