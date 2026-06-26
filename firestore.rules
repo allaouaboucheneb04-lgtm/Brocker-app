@@ -17,112 +17,125 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return userExists() && userData().role == 'superadmin' && userData().active != false;
+      return userExists()
+        && userData().role == 'superadmin'
+        && userData().active != false;
     }
 
     function isBroker() {
-      return userExists() && userData().role == 'broker' && userData().active != false;
+      return userExists()
+        && userData().role == 'broker'
+        && userData().active != false;
     }
 
     function isDriver() {
-      return userExists() && userData().role == 'driver' && userData().active != false;
+      return userExists()
+        && userData().role == 'driver'
+        && userData().active != false;
     }
 
     function myBrokerId() {
       return userData().brokerId;
     }
 
-    function sameBroker() {
-      return resource.data.brokerId == myBrokerId();
+    function isMyBroker(brokerId) {
+      return isBroker() && brokerId == myBrokerId();
     }
 
-    function newSameBroker() {
-      return request.resource.data.brokerId == myBrokerId();
+    function isBrokerChild(brokerId) {
+      return isSuperAdmin() || isMyBroker(brokerId);
     }
 
+    // Global user index. Superadmin is created manually only.
     match /users/{uid} {
       allow read, write: if isSuperAdmin();
       allow read, update: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
         && request.auth.uid == uid
-        && request.resource.data.role in ['broker', 'driver'];
+        && request.resource.data.role in ['broker', 'driver']
+        && request.resource.data.active != false;
       allow read: if isBroker() && resource.data.brokerId == myBrokerId();
     }
 
+    // Broker root document. Broker can read/update only its root profile.
     match /brokers/{brokerId} {
       allow read, write: if isSuperAdmin();
-      allow read, update: if isBroker() && brokerId == myBrokerId();
+      allow read, update: if isMyBroker(brokerId);
+
+      // Nested broker-owned data.
+      match /drivers/{driverId} {
+        allow read, write: if isBrokerChild(brokerId);
+        allow read, update: if isDriver()
+          && resource.data.uid == request.auth.uid
+          && resource.data.active != false;
+      }
+
+      match /weeks/{weekId} {
+        allow read, write: if isBrokerChild(brokerId);
+        allow read: if isDriver()
+          && resource.data.driverUid == request.auth.uid;
+      }
+
+      match /dailyVehicles/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+        allow read, create, update: if isDriver()
+          && request.resource.data.driverUid == request.auth.uid;
+      }
+
+      match /parcelDetails/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+        allow read: if isDriver()
+          && resource.data.driverUid == request.auth.uid;
+      }
+
+      match /settings/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /notifications/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /duplicateInvoices/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /history/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /stations/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /subscriptions/{docId} {
+        allow read, write: if isSuperAdmin();
+        allow read: if isMyBroker(brokerId);
+      }
+
+      match /reports/{docId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
+
+      match /invitations/{inviteId} {
+        allow read, write: if isBrokerChild(brokerId);
+      }
     }
 
-    match /drivers/{driverId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-      allow read, update: if isDriver() && (driverId == request.auth.uid || resource.data.uid == request.auth.uid);
-    }
-
-    match /weeks/{weekId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-      allow read: if isDriver() && resource.data.driverUid == request.auth.uid;
-    }
-
-    match /dailyVehicles/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-      allow read, create, update: if isDriver() && request.resource.data.driverUid == request.auth.uid;
-    }
-
-    match /parcelDetails/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-      allow read: if isDriver() && resource.data.driverUid == request.auth.uid;
-    }
-
-    match /settings/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-    }
-
+    // Global invitation index by email, required before a new user has brokerId.
+    // It only stores invite metadata and points to brokerId/driverId.
     match /invitations/{inviteId} {
       allow read, write: if isSuperAdmin();
-      allow read: if signedIn() && inviteId == request.auth.token.email;
-      allow update: if signedIn() && inviteId == request.auth.token.email;
+      allow read, update: if signedIn()
+        && inviteId == request.auth.token.email.lower();
       allow read, create, update, delete: if isBroker()
-        && (resource.data.brokerId == myBrokerId() || request.resource.data.brokerId == myBrokerId())
-        && (!('role' in request.resource.data) || request.resource.data.role == 'driver');
+        && request.resource.data.brokerId == myBrokerId()
+        && request.resource.data.role == 'driver';
     }
 
-    match /notifications/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-    }
-
-    match /stats/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read: if isBroker();
-    }
-
-    match /stations/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
-    }
-
-    match /subscriptions/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read: if isBroker() && sameBroker();
-    }
-
-    match /history/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && sameBroker();
-      allow create: if isBroker() && newSameBroker();
+    match /plans/{planId} {
+      allow read: if signedIn();
+      allow write: if isSuperAdmin();
     }
 
     match /{document=**} {

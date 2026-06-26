@@ -1,18 +1,44 @@
-# Intelcom Broker Pay — v25.5 Sécurité
+# Intelcom Broker Pay — v26 Multi-Broker Architecture
 
-Cette version supprime complètement la création de Super Admin depuis l'application.
+Cette version restructure la base de données pour mieux supporter plusieurs brokers.
 
-## Changements
-- Suppression du panneau `Créer Super Admin` de la page login.
-- Suppression du code JavaScript `createSuperBtn` qui créait un rôle `superadmin`.
-- Les invitations ne peuvent créer que des rôles `broker` ou `driver`.
-- Message de connexion corrigé : le Super Admin doit être créé manuellement dans Firebase.
-- Ajout d'un fichier `firestore.rules` plus sécurisé.
+## Nouvelle structure Firestore
 
-## Création du Super Admin
-1. Créer le compte dans Firebase Authentication.
-2. Copier son UID.
-3. Créer le document Firestore `users/{UID}` :
+Les collections globales restent limitées à :
+
+```text
+users/
+brokers/
+invitations/   (index global par email pour accepter une invitation)
+plans/
+```
+
+Toutes les données d'un broker sont maintenant stockées sous son document :
+
+```text
+brokers/{brokerId}/drivers/
+brokers/{brokerId}/weeks/
+brokers/{brokerId}/settings/
+brokers/{brokerId}/notifications/
+brokers/{brokerId}/duplicateInvoices/
+brokers/{brokerId}/dailyVehicles/
+brokers/{brokerId}/parcelDetails/
+brokers/{brokerId}/history/
+brokers/{brokerId}/stations/
+brokers/{brokerId}/subscriptions/
+```
+
+## Pourquoi cette v26
+
+- Isolation plus propre entre brokers.
+- Règles Firestore plus faciles à sécuriser.
+- Suppression plus simple d'un broker et de ses données.
+- Meilleure base pour vendre l'application à plusieurs brokers.
+- Les chauffeurs lisent leurs relevés via `collectionGroup('weeks')`.
+
+## Important
+
+Le Super Admin doit toujours être créé manuellement dans Firebase :
 
 ```json
 {
@@ -23,4 +49,14 @@ Cette version supprime complètement la création de Super Admin depuis l'applic
 }
 ```
 
-Aucun utilisateur ne peut créer un Super Admin depuis l'application.
+Document ID = UID Firebase Auth du Super Admin.
+
+## Notes de migration
+
+Si tu as déjà des données dans les anciennes collections globales (`drivers`, `weeks`, etc.), il faudra les migrer vers :
+
+```text
+brokers/{brokerId}/{collection}/{docId}
+```
+
+La v26 fonctionne avec la nouvelle structure. Les nouvelles données créées depuis l'application seront enregistrées dans les sous-collections du broker.

@@ -168,6 +168,23 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+// ================= v26 MULTI-BROKER DATA ARCHITECTURE =================
+// Global collections kept intentionally: users, brokers, invitations (email index).
+// Broker-owned data is stored under: brokers/{brokerId}/{drivers,weeks,settings,notifications,...}
+function brokerRef(brokerId){ return db.collection('brokers').doc(brokerId || profile?.brokerId || ''); }
+function bcol(name, brokerId){ return brokerRef(brokerId).collection(name); }
+function gInvRef(email){ return db.collection('invitations').doc(emailDocId(email)); }
+function currentBrokerId(){ return profile?.brokerId || window.currentBroker?.brokerId || ''; }
+async function getDocByPath(path){ return db.doc(path).get(); }
+async function deleteSubcollection(ref, name){ await deleteQuery(ref.collection(name)); }
+async function deleteBrokerNestedData(brokerId){
+  const ref = brokerRef(brokerId);
+  for(const name of ['drivers','weeks','dailyVehicles','parcelDetails','settings','notifications','duplicateInvoices','history','reports','stations','subscriptions','invitations']){
+    await deleteSubcollection(ref, name).catch(()=>{});
+  }
+}
+async function legacyCollectionGroup(name){ return db.collectionGroup ? db.collectionGroup(name).get() : db.collection(name).get(); }
+
 if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 let currentUser = null;
 let profile = null;
@@ -242,9 +259,9 @@ $('acceptInviteBtn').onclick = async()=>{
     const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
     await db.collection('users').doc(cred.user.uid).set(userData);
     if(inv.role === 'driver' && inv.driverId){
-      await db.collection('drivers').doc(inv.driverId).set({uid:cred.user.uid, email, emailLower:email, active:true, status:'active', profileCompleted:true, acceptedAt:now()}, {merge:true});
+      await bcol('drivers', inv.brokerId).doc(inv.driverId).set({uid:cred.user.uid, email, emailLower:email, active:true, status:'active', profileCompleted:true, acceptedAt:now()}, {merge:true});
       // Relier automatiquement les anciennes factures importées avant la création du compte chauffeur
-      const oldWeeks = await db.collection('weeks').where('driverId','==',inv.driverId).get().catch(()=>({docs:[]}));
+      const oldWeeks = await bcol('weeks', inv.brokerId).where('driverId','==',inv.driverId).get().catch(()=>({docs:[]}));
       for(const w of oldWeeks.docs){
         await w.ref.set({driverUid:cred.user.uid, driverEmail:email, status: (w.data().status==='waiting_driver_info'?'généré':(w.data().status||'généré')), profileCompleted:true, linkedAt:now()}, {merge:true});
       }
@@ -266,7 +283,7 @@ async function renderSuperAdmin(){
   const c=$('content');
   if(currentTab==='dashboard'){
     const [brokersSnap, usersSnap, invsSnap, driversSnap, weeksSnap] = await Promise.all([
-      db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get(), db.collection('drivers').get(), db.collection('weeks').get().catch(()=>({size:0,docs:[]}))
+      db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get(), db.collectionGroup('drivers').get(), db.collectionGroup('weeks').get().catch(()=>({size:0,docs:[]}))
     ]);
     const brokers=brokersSnap.docs, active=brokers.filter(d=>d.data().active!==false).length, inactive=brokers.length-active;
     const planCounts=countBy(brokersSnap.docs,'plan');
@@ -307,6 +324,7 @@ window.createBroker = async()=>{
     const brokerId = 'broker_' + Date.now(); const temp = $('bTemp').value.trim() || tempPass();
     const data = {companyName:$('bCompany').value.trim(), ownerName:$('bOwner').value.trim(), email, emailLower:email, station:$('bStation').value.trim(), plan:$('bPlan').value, maxDrivers:Number($('bMax').value||planLimit($('bPlan').value)), active:true, tempPassword:temp, createdAt:now(), createdBy:currentUser.uid};
     await db.collection('brokers').doc(brokerId).set(data);
+    await bcol('settings', brokerId).doc('company').set({brokerId, companyName:data.companyName, station:data.station, email:data.email, createdAt:now()}, {merge:true});
     const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:now(), createdBy:currentUser.uid};
     await db.collection('invitations').doc(emailDocId(email)).set(inv);
     showMsg('Broker + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
@@ -316,7 +334,7 @@ window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').do
 window.editBrokerPlan = async(id,current)=>{ const plan=prompt('Plan: free, pro ou enterprise', current||'pro'); if(!plan) return; const max=planLimit(plan); try{ await db.collection('brokers').doc(id).set({plan,maxDrivers:max},{merge:true}); showMsg('Plan modifié','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 function filterRows(tableId,q){ q=normEmail(q); const table=document.getElementById(tableId); if(!table) return; Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr=>{ tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none'; }); };
 async function deleteQuery(q){ const s=await q.get(); const docs=s.docs; for(let i=0;i<docs.length;i+=400){ const batch=db.batch(); docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit(); } }
-window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteQuery(db.collection('drivers').where('brokerId','==',id)); await deleteQuery(db.collection('weeks').where('brokerId','==',id)); await deleteQuery(db.collection('dailyVehicles').where('brokerId','==',id)); await deleteQuery(db.collection('settings').where('brokerId','==',id)); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteBrokerNestedData(id); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
@@ -328,10 +346,10 @@ async function renderBroker(){
   if(currentTab==='factures') return renderBrokerFactures(broker);
   if(currentTab==='dashboard'){
     const [drivers, invs, weeks, notifs] = await Promise.all([
-      db.collection('drivers').where('brokerId','==',brokerId).get(),
+      bcol('drivers', brokerId).get(),
       db.collection('invitations').where('brokerId','==',brokerId).get(),
-      db.collection('weeks').where('brokerId','==',brokerId).get().catch(()=>({size:0,docs:[]})),
-      db.collection('notifications').where('brokerId','==',brokerId).get().catch(()=>({docs:[]}))
+      bcol('weeks', brokerId).get().catch(()=>({size:0,docs:[]})),
+      bcol('notifications', brokerId).get().catch(()=>({docs:[]}))
     ]);
     const activeDrivers=drivers.docs.filter(d=>d.data().active!==false).length;
     const disabledDrivers=drivers.size-activeDrivers;
@@ -349,7 +367,7 @@ async function renderBroker(){
     </div>`;
   }
   if(currentTab==='drivers'){
-    const snap=await db.collection('drivers').where('brokerId','==',brokerId).get();
+    const snap=await bcol('drivers', brokerId).get();
     const canAdd = snap.size < max;
     c.innerHTML=`<div class="grid">
       ${card(`<h2>Ajouter Chauffeur</h2>${canAdd?'':`<div class="notice warn">Limite du plan atteinte (${snap.size}/${max}).</div>`}<label>Nom</label><input id="dName" ${canAdd?'':'disabled'}><label>Code Intelcom</label><input id="dCode" ${canAdd?'':'disabled'}><label>Email</label><input id="dEmail" type="email" ${canAdd?'':'disabled'}><label>Téléphone</label><input id="dPhone" ${canAdd?'':'disabled'}><label>Commission broker personnalisée (%)</label><input id="dCommission" type="number" step="0.01" placeholder="ex: 25" ${canAdd?'':'disabled'}><label>Mot de passe temporaire / suggestion</label><input id="dTemp" placeholder="généré automatiquement si vide" ${canAdd?'':'disabled'}><button class="green" style="margin-top:12px" onclick="createDriverInvite()" ${canAdd?'':'disabled'}>Créer Chauffeur + Invitation</button>`,'col-4')}
@@ -357,9 +375,9 @@ async function renderBroker(){
     </div>`;
   }
   if(currentTab==='weeks'){
-    const snap=await db.collection('weeks').where('brokerId','==',brokerId).get().catch(()=>({docs:[]}));
+    const snap=await bcol('weeks', brokerId).get().catch(()=>({docs:[]}));
     const docs=snap.docs.sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')) || String(a.data().driverName||'').localeCompare(String(b.data().driverName||'')));
-    c.innerHTML=card(`<div class="sectionTitle"><h2>Historique des relevés</h2><input id="brokerWeekSearch" class="search" placeholder="Rechercher chauffeur, code, semaine" oninput="filterRows('brokerWeeksTable', this.value)"></div><div class="notice bluebox">Recherche par chauffeur, code Intelcom ou semaine. Le PDF se génère à la demande sans Storage.</div><div class="wide"><table id="brokerWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Code</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${safe(w.driverCode||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td><td><button class="mini" onclick="downloadDriverWeek('${d.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé importé</td></tr>'}</table></div>`);
+    c.innerHTML=card(`<div class="sectionTitle"><h2>Historique des relevés</h2><input id="brokerWeekSearch" class="search" placeholder="Rechercher chauffeur, code, semaine" oninput="filterRows('brokerWeeksTable', this.value)"></div><div class="notice bluebox">Recherche par chauffeur, code Intelcom ou semaine. Le PDF se génère à la demande sans Storage.</div><div class="wide"><table id="brokerWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Code</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${safe(w.driverCode||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td><td><button class="mini" onclick="downloadDriverWeek('${d.ref?.path || d.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé importé</td></tr>'}</table></div>`);
   }
   if(currentTab==='invitations'){
     const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
@@ -373,11 +391,11 @@ async function renderBroker(){
     </div>`;
   }
 }
-window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await db.collection('drivers').doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
-window.updateDriverCommission = async(id,value)=>{ try{ await db.collection('drivers').doc(id).set({commissionPercent:Number(value||0), updatedAt:now()}, {merge:true}); showMsg('Commission chauffeur mise à jour','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
-window.toggleDriver = async(id,active)=>{ try{ await db.collection('drivers').doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await db.collection('drivers').doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
-window.saveBrokerSettings = async()=>{ try{ await db.collection('brokers').doc(profile.brokerId).set({companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),ownerName:$('setOwner').value.trim(),email:normEmail($('setEmail').value),phone:$('setPhone').value.trim(),paymentMethod:$('setPayment').value.trim(),address:$('setAddress').value.trim()},{merge:true}); showMsg('Paramètres sauvegardés','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await bcol('drivers', brokerId).doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.updateDriverCommission = async(id,value)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({commissionPercent:Number(value||0), updatedAt:now()}, {merge:true}); showMsg('Commission chauffeur mise à jour','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
+window.toggleDriver = async(id,active)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await bcol('drivers', profile.brokerId).doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.saveBrokerSettings = async()=>{ try{ await db.collection('brokers').doc(profile.brokerId).set({companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),ownerName:$('setOwner').value.trim(),email:normEmail($('setEmail').value),phone:$('setPhone').value.trim(),paymentMethod:$('setPayment').value.trim(),address:$('setAddress').value.trim()},{merge:true}); await bcol('settings', profile.brokerId).doc('company').set({brokerId:profile.brokerId,companyName:$('setCompany').value.trim(),station:$('setStation').value.trim(),ownerName:$('setOwner').value.trim(),email:normEmail($('setEmail').value),phone:$('setPhone').value.trim(),paymentMethod:$('setPayment').value.trim(),address:$('setAddress').value.trim(),updatedAt:now()},{merge:true}); showMsg('Paramètres sauvegardés','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 
 
 // ================= MODULE FACTURES INTELCOM v22.2 =================
@@ -402,7 +420,7 @@ function renderImportSummary(){ if(!lastImportSummary) return ''; const s=lastIm
 function bracketFee(vehicle, parcels){ const list=(invoiceSettings.brackets?.[vehicle]||[]).map(r=>({min:Number(r.min)||0,max:Number(r.max)||0,fee:Number(r.fee)||0})); const p=Number(parcels)||0; const row=list.find(r=>p>=r.min && p<=r.max); return row ? {fee:row.fee,label:row.min+'-'+row.max} : {fee:0,label:'aucune'}; }
 function calcInvoice(d){ const commissionBase=Number(d.totalInvoice||d.total||0); const commissionPercent=(d.commissionPercent!==undefined && d.commissionPercent!=='' && d.commissionPercent!==null)?Number(d.commissionPercent):0; const commission=commissionBase*(commissionPercent/100); let fee=0, details=[]; (d.days||[]).forEach(day=>{ if(Number(day.parcels||0)<=0 && Number(day.total||0)<=0) return; if(invoiceSettings.feeMode==='daily_fixed'){ fee += Number(invoiceSettings.fixedFee||0); details.push({date:day.date,parcels:day.parcels,vehicle:day.vehicle||'essence',bracket:'Jour travaillé',fee:Number(invoiceSettings.fixedFee||0)}); } else { const vehicle=day.vehicle||'essence'; const f=bracketFee(vehicle, day.parcels); fee+=f.fee; details.push({date:day.date,parcels:day.parcels,vehicle,bracket:f.label,fee:f.fee}); } }); const deduction=Number(d.deduction||0), advance=Number(d.advance||0); return {commission,commissionPercent,fee,deduction,advance,net:commissionBase-commission-fee-deduction-advance,workedDays:(d.days||[]).filter(x=>Number(x.parcels)>0||Number(x.total)>0).length, feeDetails:details}; }
 async function renderBrokerFactures(broker){
-  const snap=await db.collection('weeks').where('brokerId','==',profile.brokerId).get().catch(()=>({docs:[]}));
+  const snap=await bcol('weeks', profile.brokerId).get().catch(()=>({docs:[]}));
   const totalIntelcom=invoiceDrivers.reduce((a,d)=>a+Number(d.totalInvoice||0),0); const totalCalc=invoiceDrivers.reduce((a,d)=>a+calcInvoice(d).net,0);
   $('content').innerHTML = `<div class="grid">
     ${card(`<h2>📄 Créer factures Intelcom</h2><div class="notice bluebox">Importe les PDF Intelcom ici. L’app détecte les chauffeurs, les semaines, les colis et génère les relevés PDF comme la v13.1, tout en gardant la v22 SaaS.</div>
@@ -602,11 +620,11 @@ window.saveAllInvoicesToFirebase=async()=>{
     for(const d of invoiceDrivers){
       const c=calcInvoice(d);
       const weekId=`${profile.brokerId}_${d.code||'driver'}_${d.week||'week'}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
-      const ref=db.collection('weeks').doc(weekId);
+      const ref=bcol('weeks', profile.brokerId).doc(weekId);
       const waiting = d.missingDriver || d.driverStatus==='pending';
       let driverUid='', driverEmail='';
       if(d.driverId){
-        const drv=await db.collection('drivers').doc(d.driverId).get().catch(()=>null);
+        const drv=await bcol('drivers', profile.brokerId).doc(d.driverId).get().catch(()=>null);
         if(drv && drv.exists){ driverUid=drv.data().uid||''; driverEmail=drv.data().email||''; }
       }
       const weekPayload={
@@ -644,8 +662,8 @@ window.saveAllInvoicesToFirebase=async()=>{
           createdAt:now(),
           createdBy:currentUser.uid
         };
-        batch.set(db.collection('duplicateInvoices').doc(duplicateId), duplicateDoc, {merge:true});
-        batch.set(db.collection('notifications').doc(`notif_${duplicateId}`), {
+        batch.set(bcol('duplicateInvoices', profile.brokerId).doc(duplicateId), duplicateDoc, {merge:true});
+        batch.set(bcol('notifications', profile.brokerId).doc(`notif_${duplicateId}`), {
           brokerId:profile.brokerId,
           type:'duplicate_invoice',
           status:'pending',
@@ -679,7 +697,7 @@ async function ensureDriverForInvoice(inv){
   if(!brokerId) return {driverId:'', status:'unknown', created:false};
   let existing=null;
   if(code){
-    const snap=await db.collection('drivers').where('brokerId','==',brokerId).where('code','==',code).limit(1).get();
+    const snap=await bcol('drivers', brokerId).where('code','==',code).limit(1).get();
     if(!snap.empty) existing=snap.docs[0];
   }
   if(existing){
@@ -689,15 +707,15 @@ async function ensureDriverForInvoice(inv){
   const safeCode=(code||name||('driver_'+Date.now())).replace(/[^a-zA-Z0-9_-]/g,'_');
   const driverId=`pending_${brokerId}_${safeCode}`.replace(/[^a-zA-Z0-9_-]/g,'_');
   const driverData={brokerId,name,code,email:'',phone:'',address:'',paymentType:'',notes:'',active:true,status:'pending',profileCompleted:false,missingInfo:true,createdFrom:'intelcom_pdf',firstWeek:inv.week||'',createdAt:now(),createdBy:currentUser.uid,commissionPercent:0};
-  await db.collection('drivers').doc(driverId).set(driverData,{merge:true});
+  await bcol('drivers', brokerId).doc(driverId).set(driverData,{merge:true});
   const notifId=`missing_${brokerId}_${safeCode}_${inv.week||'week'}`.replace(/[^a-zA-Z0-9_-]/g,'_');
-  await db.collection('notifications').doc(notifId).set({brokerId,type:'missing_driver',driverId,driverName:name,driverCode:code,week:inv.week||'',read:false,message:`Chauffeur à compléter : ${name} (${code||'sans code'}) — semaine ${inv.week||''}`,createdAt:now(),createdBy:currentUser.uid},{merge:true});
+  await bcol('notifications', brokerId).doc(notifId).set({brokerId,type:'missing_driver',driverId,driverName:name,driverCode:code,week:inv.week||'',read:false,message:`Chauffeur à compléter : ${name} (${code||'sans code'}) — semaine ${inv.week||''}`,createdAt:now(),createdBy:currentUser.uid},{merge:true});
   return {driverId,status:'pending',created:true,commissionPercent:0};
 }
 
 window.completePendingDriver=async(driverId)=>{
   try{
-    const doc=await db.collection('drivers').doc(driverId).get();
+    const doc=await bcol('drivers', profile.brokerId).doc(driverId).get();
     if(!doc.exists) return showMsg('Chauffeur introuvable','err');
     const d=doc.data();
     const email=normEmail(prompt('Email du chauffeur', d.email||''));
@@ -707,25 +725,25 @@ window.completePendingDriver=async(driverId)=>{
     const paymentType=prompt('Mode de paiement', d.paymentType||'Virement bancaire')||'';
     const commissionPercent=Number(prompt('Commission broker personnalisée (%)', (d.commissionPercent!==undefined?d.commissionPercent:0))||0);
     const temp=tempPass();
-    await db.collection('drivers').doc(driverId).set({email,emailLower:email,phone,address,paymentType,commissionPercent,status:'active',profileCompleted:true,missingInfo:false,active:true,completedAt:now(),completedBy:currentUser.uid,tempPassword:temp},{merge:true});
+    await bcol('drivers', profile.brokerId).doc(driverId).set({email,emailLower:email,phone,address,paymentType,commissionPercent,status:'active',profileCompleted:true,missingInfo:false,active:true,completedAt:now(),completedBy:currentUser.uid,tempPassword:temp},{merge:true});
     // Relier les factures existantes à l'email du chauffeur. Le UID sera ajouté automatiquement quand il accepte l'invitation.
-    const oldWeeks = await db.collection('weeks').where('driverId','==',driverId).get().catch(()=>({docs:[]}));
+    const oldWeeks = await bcol('weeks', d.brokerId || profile.brokerId).where('driverId','==',driverId).get().catch(()=>({docs:[]}));
     for(const w of oldWeeks.docs){ await w.ref.set({driverEmail:email, status:(w.data().status==='waiting_driver_info'?'généré':(w.data().status||'généré')), profileCompleted:true, linkedEmailAt:now()}, {merge:true}); }
     const inv={email,emailLower:email,name:d.name,role:'driver',brokerId:d.brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid};
     await db.collection('invitations').doc(emailDocId(email)).set(inv,{merge:true});
-    await db.collection('notifications').doc(`completed_${driverId}`).set({brokerId:d.brokerId,type:'driver_completed',driverId,driverName:d.name,read:false,message:`Profil chauffeur complété : ${d.name}`,createdAt:now()},{merge:true});
+    await bcol('notifications', d.brokerId || profile.brokerId).doc(`completed_${driverId}`).set({brokerId:d.brokerId,type:'driver_completed',driverId,driverName:d.name,read:false,message:`Profil chauffeur complété : ${d.name}`,createdAt:now()},{merge:true});
     showMsg('Profil chauffeur complété + invitation créée. Gmail va s’ouvrir.','ok');
     openGmail(inv);
     render();
   }catch(e){ showMsg(humanError(e),'err'); }
 };
 
-window.markNotificationRead=async(id)=>{ try{ await db.collection('notifications').doc(id).set({read:true,readAt:now()},{merge:true}); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.markNotificationRead=async(id)=>{ try{ await bcol('notifications', profile.brokerId).doc(id).set({read:true,readAt:now()},{merge:true}); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 
 window.openDuplicateCompare=async(notifId, duplicateId)=>{
   try{
     if(!duplicateId) return showMsg('Doublon introuvable','err');
-    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    const doc=await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).get();
     if(!doc.exists) return showMsg('Comparaison introuvable','err');
     const x=doc.data();
     const old=x.oldSummary||{}, neu=x.newSummary||{};
@@ -750,31 +768,31 @@ window.openDuplicateCompare=async(notifId, duplicateId)=>{
 };
 window.keepExistingDuplicate=async(duplicateId, notifId)=>{
   try{
-    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'kept_existing',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
-    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'kept_existing',readAt:now()},{merge:true});
+    await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).set({status:'kept_existing',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await bcol('notifications', profile.brokerId).doc(notifId).set({read:true,status:'resolved',resolution:'kept_existing',readAt:now()},{merge:true});
     showMsg('Ancien relevé conservé.','ok'); render();
   }catch(e){showMsg(humanError(e),'err')}
 };
 window.acceptNewDuplicate=async(duplicateId, notifId)=>{
   try{
-    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    const doc=await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).get();
     if(!doc.exists) return showMsg('Doublon introuvable','err');
     const x=doc.data();
-    await db.collection('weeks').doc(x.existingWeekId).set({...x.newWeekPayload, duplicateResolvedAt:now(), duplicateResolution:'replaced_by_new'}, {merge:true});
-    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'accepted_new',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
-    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'accepted_new',readAt:now()},{merge:true});
+    await bcol('weeks', profile.brokerId).doc(x.existingWeekId).set({...x.newWeekPayload, duplicateResolvedAt:now(), duplicateResolution:'replaced_by_new'}, {merge:true});
+    await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).set({status:'accepted_new',resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await bcol('notifications', profile.brokerId).doc(notifId).set({read:true,status:'resolved',resolution:'accepted_new',readAt:now()},{merge:true});
     showMsg('Nouveau PDF accepté et relevé remplacé.','ok'); render();
   }catch(e){showMsg(humanError(e),'err')}
 };
 window.createSeparateDuplicate=async(duplicateId, notifId)=>{
   try{
-    const doc=await db.collection('duplicateInvoices').doc(duplicateId).get();
+    const doc=await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).get();
     if(!doc.exists) return showMsg('Doublon introuvable','err');
     const x=doc.data();
     const newId=`${x.existingWeekId}_version_${Date.now()}`.replace(/[^a-zA-Z0-9_\-]/g,'_');
-    await db.collection('weeks').doc(newId).set({...x.newWeekPayload, status:'version_séparée', originalWeekId:x.existingWeekId, createdAsSeparateAt:now()}, {merge:true});
-    await db.collection('duplicateInvoices').doc(duplicateId).set({status:'created_separate',separateWeekId:newId,resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
-    if(notifId) await db.collection('notifications').doc(notifId).set({read:true,status:'resolved',resolution:'created_separate',readAt:now()},{merge:true});
+    await bcol('weeks', profile.brokerId).doc(newId).set({...x.newWeekPayload, status:'version_séparée', originalWeekId:x.existingWeekId, createdAsSeparateAt:now()}, {merge:true});
+    await bcol('duplicateInvoices', profile.brokerId).doc(duplicateId).set({status:'created_separate',separateWeekId:newId,resolvedAt:now(),resolvedBy:currentUser.uid},{merge:true});
+    if(notifId) await bcol('notifications', profile.brokerId).doc(notifId).set({read:true,status:'resolved',resolution:'created_separate',readAt:now()},{merge:true});
     showMsg('Nouveau PDF créé comme version séparée.','ok'); render();
   }catch(e){showMsg(humanError(e),'err')}
 };
@@ -814,7 +832,7 @@ async function loadBrokerForPdf(brokerId){
 
 window.downloadDriverWeek = async(weekId)=>{
   try{
-    const docSnap = await db.collection('weeks').doc(weekId).get();
+    const docSnap = weekId.includes('/') ? await getDocByPath(weekId) : await db.collectionGroup('weeks').where(firebase.firestore.FieldPath.documentId(),'==',weekId).limit(1).get().then(s=>s.docs[0]||{exists:false});
     if(!docSnap.exists) return showMsg('Relevé introuvable','err');
     const w = docSnap.data();
     const inv = invoiceFromWeekData(w);
@@ -835,16 +853,16 @@ async function renderDriver(){
   if(currentTab==='dashboard'){
     // v23.2 : le relevé peut être lié par driverUid, par ancien driverId, ou par email.
     const queries = await Promise.all([
-      db.collection('weeks').where('driverUid','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('weeks').where('driverEmail','==',normEmail(currentUser.email)).get().catch(()=>({docs:[]}))
+      db.collectionGroup('weeks').where('driverUid','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collectionGroup('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collectionGroup('weeks').where('driverEmail','==',normEmail(currentUser.email)).get().catch(()=>({docs:[]}))
     ]);
     const map = new Map();
-    queries.forEach(q=>q.docs.forEach(d=>map.set(d.id,d)));
+    queries.forEach(q=>q.docs.forEach(d=>map.set(d.ref?.path || d.id,d)));
     const docs = Array.from(map.values()).sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')));
     // Affichage sans doublons : une seule ligne par chauffeur + semaine.
     const byKey = {};
-    docs.forEach(doc=>{ const w=doc.data(); const key=(w.brokerId||profile.brokerId||'')+'_'+(w.driverCode||w.driverId||'')+'_'+(w.week||''); const old=byKey[key]; if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')) byKey[key]={id:doc.id,data:w}; });
+    docs.forEach(doc=>{ const w=doc.data(); const key=(w.brokerId||profile.brokerId||'')+'_'+(w.driverCode||w.driverId||'')+'_'+(w.week||''); const old=byKey[key]; if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')) byKey[key]={id:(doc.ref?.path || doc.id),data:w}; });
     const rows = Object.values(byKey);
     $('content').innerHTML = card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="5">Aucun relevé disponible</td></tr>'}</table></div>`);
   }
