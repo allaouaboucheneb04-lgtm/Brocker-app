@@ -1,4 +1,11 @@
-v23.8.1 — PDF professionnel comme référence + option afficher/cacher les colis détaillés.
+# Broker Intelcom Pay v24
 
+Version basée sur v23.8.2, avec réorganisation demandée :
 
-Correction v23.8.1: téléchargement PDF réparé pour broker et chauffeur (currentBroker remplacé par chargement broker Firestore / override), option afficher/cacher colis conservée.
+- Page **Factures** simplifiée : import PDF, génération, option afficher/cacher colis.
+- **Barèmes Intelcom** déplacés dans **Paramètres**.
+- **Commission broker** retirée des paramètres : elle est maintenant uniquement dans chaque fiche chauffeur.
+- Page **Chauffeurs** conserve la commission personnalisée par chauffeur.
+- PDF conserve l'option détails colis alignés.
+
+Déploiement : envoyer `index.html` sur GitHub Pages.
