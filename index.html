@@ -124,7 +124,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v25 Pro — Factures Intelcom, chauffeurs, historique et doublons</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27 — architecture multi-broker stable</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -179,12 +179,22 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-// ================= v26 MULTI-BROKER DATA ARCHITECTURE =================
+// ================= v27 MULTI-BROKER DATA ARCHITECTURE =================
 // Global collections kept intentionally: users, brokers, invitations (email index).
 // Broker-owned data is stored under: brokers/{brokerId}/{drivers,weeks,settings,notifications,...}
 function brokerRef(brokerId){ return db.collection('brokers').doc(brokerId || profile?.brokerId || ''); }
 function bcol(name, brokerId){ return brokerRef(brokerId).collection(name); }
 function gInvRef(email){ return db.collection('invitations').doc(emailDocId(email)); }
+function brokerInviteRef(brokerId,email){ return bcol('invitations', brokerId).doc(emailDocId(email)); }
+async function saveInvitationIndex(inv){
+  await db.collection('invitations').doc(emailDocId(inv.email)).set(inv,{merge:true});
+  if(inv.brokerId) await brokerInviteRef(inv.brokerId, inv.email).set(inv,{merge:true});
+}
+async function markInvitationUsed(inv, uid){
+  const patch={used:true, usedBy:uid, usedAt:now()};
+  await db.collection('invitations').doc(emailDocId(inv.email)).set(patch,{merge:true});
+  if(inv.brokerId) await brokerInviteRef(inv.brokerId, inv.email).set(patch,{merge:true}).catch(()=>{});
+}
 function currentBrokerId(){ return profile?.brokerId || window.currentBroker?.brokerId || ''; }
 async function getDocByPath(path){ return db.doc(path).get(); }
 async function deleteSubcollection(ref, name){ await deleteQuery(ref.collection(name)); }
@@ -214,7 +224,7 @@ function humanError(e){
   const code = e?.code || '';
   if(code==='auth/invalid-credential') return 'Email ou mot de passe incorrect, ou compte non créé. Si c’est une première connexion, utilise “Créer compte avec invitation”.';
   if(code==='auth/email-already-in-use') return 'Ce compte existe déjà. Utilise “Se connecter” ou “Mot de passe oublié”.';
-  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v21 fournies dans le dossier.';
+  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v27 multi-broker fournies dans le dossier.';
   return e?.message || String(e);
 }
 function gmailUrl(inv){
@@ -278,7 +288,7 @@ $('acceptInviteBtn').onclick = async()=>{
       }
     }
     if(inv.role === 'broker' && inv.brokerId){ await db.collection('brokers').doc(inv.brokerId).set({ownerUid:cred.user.uid, active:true, acceptedAt:now()}, {merge:true}); }
-    await invRef.set({used:true, usedBy:cred.user.uid, usedAt:now()}, {merge:true});
+    await markInvitationUsed(inv, cred.user.uid);
     showMsg('Compte créé avec invitation','ok');
   }catch(e){ if(cred?.user && !profile){ await cred.user.delete().catch(()=>{}); await auth.signOut().catch(()=>{}); } showMsg(humanError(e),'err'); }
 };
@@ -293,8 +303,13 @@ function statsCard(title, value, note, cls='col-3'){ return card(`<h2>${safe(tit
 async function renderSuperAdmin(){
   const c=$('content');
   if(currentTab==='dashboard'){
+    const emptySnap={size:0,docs:[]};
     const [brokersSnap, usersSnap, invsSnap, driversSnap, weeksSnap] = await Promise.all([
-      db.collection('brokers').get(), db.collection('users').get(), db.collection('invitations').get(), db.collectionGroup('drivers').get(), db.collectionGroup('weeks').get().catch(()=>({size:0,docs:[]}))
+      db.collection('brokers').get().catch(e=>{console.warn('brokers denied',e); return emptySnap;}),
+      db.collection('users').get().catch(e=>{console.warn('users denied',e); return emptySnap;}),
+      db.collection('invitations').get().catch(e=>{console.warn('invitations denied',e); return emptySnap;}),
+      db.collectionGroup('drivers').get().catch(e=>{console.warn('drivers group denied',e); return emptySnap;}),
+      db.collectionGroup('weeks').get().catch(e=>{console.warn('weeks group denied',e); return emptySnap;})
     ]);
     const brokers=brokersSnap.docs, active=brokers.filter(d=>d.data().active!==false).length, inactive=brokers.length-active;
     const planCounts=countBy(brokersSnap.docs,'plan');
@@ -337,7 +352,7 @@ window.createBroker = async()=>{
     await db.collection('brokers').doc(brokerId).set(data);
     await bcol('settings', brokerId).doc('company').set({brokerId, companyName:data.companyName, station:data.station, email:data.email, createdAt:now()}, {merge:true});
     const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:now(), createdBy:currentUser.uid};
-    await db.collection('invitations').doc(emailDocId(email)).set(inv);
+    await saveInvitationIndex(inv);
     showMsg('Broker + invitation Firestore créés. Utilise le bouton Gmail pour envoyer le lien.','ok'); render();
   }catch(e){ showMsg(humanError(e),'err'); }
 };
@@ -346,7 +361,7 @@ window.editBrokerPlan = async(id,current)=>{ const plan=prompt('Plan: free, pro 
 function filterRows(tableId,q){ q=normEmail(q); const table=document.getElementById(tableId); if(!table) return; Array.from(table.querySelectorAll('tr')).slice(1).forEach(tr=>{ tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none'; }); };
 async function deleteQuery(q){ const s=await q.get(); const docs=s.docs; for(let i=0;i<docs.length;i+=400){ const batch=db.batch(); docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit(); } }
 window.deleteBroker = async(id)=>{ if(!confirm('Supprimer ce broker et ses données liées ?')) return; try{ await deleteQuery(db.collection('invitations').where('brokerId','==',id)); await deleteBrokerNestedData(id); await db.collection('brokers').doc(id).delete(); showMsg('Broker supprimé','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
-window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
+window.deleteInvitation = async(id)=>{ try{ await db.collection('invitations').doc(id).delete(); if(profile?.brokerId) await bcol('invitations', profile.brokerId).doc(id).delete().catch(()=>{}); showMsg('Invitation supprimée','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
   const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
@@ -391,7 +406,7 @@ async function renderBroker(){
     c.innerHTML=card(`<div class="sectionTitle"><h2>Historique des relevés</h2><input id="brokerWeekSearch" class="search" placeholder="Rechercher chauffeur, code, semaine" oninput="filterRows('brokerWeeksTable', this.value)"></div><div class="notice bluebox">Recherche par chauffeur, code Intelcom ou semaine. Le PDF se génère à la demande sans Storage.</div><div class="wide"><table id="brokerWeeksTable"><tr><th>Semaine</th><th>Chauffeur</th><th>Code</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${docs.map(d=>{const w=d.data(); return `<tr><td>${safe(w.week)}</td><td>${safe(w.driverName||w.driverId)}</td><td>${safe(w.driverCode||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'brouillon')}</td><td><button class="mini" onclick="downloadDriverWeek('${d.ref?.path || d.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé importé</td></tr>'}</table></div>`);
   }
   if(currentTab==='invitations'){
-    const snap=await db.collection('invitations').where('brokerId','==',brokerId).get();
+    const snap=await bcol('invitations', brokerId).get().catch(()=>db.collection('invitations').where('brokerId','==',brokerId).get());
     c.innerHTML=card(`<div class="sectionTitle"><h2>Invitations</h2><input class="search" placeholder="Rechercher" oninput="filterRows('brokerInvTable', this.value)"></div><div class="wide"><table id="brokerInvTable"><tr><th>Email</th><th>Rôle</th><th>Utilisée</th><th>Actions</th></tr>${snap.docs.map(d=>inviteRow(d.id,d.data())).join('')}</table></div>`);
   }
   if(currentTab==='settings'){
@@ -402,7 +417,7 @@ async function renderBroker(){
     </div>`;
   }
 }
-window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await bcol('drivers', brokerId).doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Utilise le bouton Gmail pour envoyer le lien.','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await bcol('drivers', brokerId).doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await saveInvitationIndex(inv); showMsg('Chauffeur + invitation Firestore créés. Utilise le bouton Gmail pour envoyer le lien.','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 window.updateDriverCommission = async(id,value)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({commissionPercent:Number(value||0), updatedAt:now()}, {merge:true}); showMsg('Commission chauffeur mise à jour','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 window.toggleDriver = async(id,active)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await bcol('drivers', profile.brokerId).doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
