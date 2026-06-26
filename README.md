@@ -1,62 +1,22 @@
-# Intelcom Broker Pay — v26 Multi-Broker Architecture
+# Intelcom Broker Pay — v26.2 Application Web (PWA)
 
-Cette version restructure la base de données pour mieux supporter plusieurs brokers.
+Cette version transforme la v26.1 en application web installable.
 
-## Nouvelle structure Firestore
+## Inclus
+- `index.html` : application principale
+- `manifest.webmanifest` : configuration PWA
+- `service-worker.js` : cache local de l'application
+- `icon-192.png` et `icon-512.png` : icônes d'installation
+- `firestore.rules` : règles Firestore multi-broker
 
-Les collections globales restent limitées à :
+## Installation sur iPhone
+1. Publier les fichiers sur GitHub Pages.
+2. Ouvrir le lien dans Safari.
+3. Appuyer sur Partager.
+4. Choisir **Ajouter à l’écran d’accueil**.
 
-```text
-users/
-brokers/
-invitations/   (index global par email pour accepter une invitation)
-plans/
-```
+## Installation sur Android / Chrome
+Un bouton **Installer l’application** apparaît automatiquement lorsque Chrome détecte la PWA.
 
-Toutes les données d'un broker sont maintenant stockées sous son document :
-
-```text
-brokers/{brokerId}/drivers/
-brokers/{brokerId}/weeks/
-brokers/{brokerId}/settings/
-brokers/{brokerId}/notifications/
-brokers/{brokerId}/duplicateInvoices/
-brokers/{brokerId}/dailyVehicles/
-brokers/{brokerId}/parcelDetails/
-brokers/{brokerId}/history/
-brokers/{brokerId}/stations/
-brokers/{brokerId}/subscriptions/
-```
-
-## Pourquoi cette v26
-
-- Isolation plus propre entre brokers.
-- Règles Firestore plus faciles à sécuriser.
-- Suppression plus simple d'un broker et de ses données.
-- Meilleure base pour vendre l'application à plusieurs brokers.
-- Les chauffeurs lisent leurs relevés via `collectionGroup('weeks')`.
-
-## Important
-
-Le Super Admin doit toujours être créé manuellement dans Firebase :
-
-```json
-{
-  "name": "Allaoua Boucheneb",
-  "email": "allaouaboucheneb04@gmail.com",
-  "role": "superadmin",
-  "active": true
-}
-```
-
-Document ID = UID Firebase Auth du Super Admin.
-
-## Notes de migration
-
-Si tu as déjà des données dans les anciennes collections globales (`drivers`, `weeks`, etc.), il faudra les migrer vers :
-
-```text
-brokers/{brokerId}/{collection}/{docId}
-```
-
-La v26 fonctionne avec la nouvelle structure. Les nouvelles données créées depuis l'application seront enregistrées dans les sous-collections du broker.
+## Firebase
+Garde le domaine GitHub Pages dans Firebase Authentication > Authorized domains.

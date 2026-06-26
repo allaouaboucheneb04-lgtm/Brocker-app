@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Broker Intelcom Pay - v25.2 Mobile Pro</title>
+  <title>Intelcom Broker Pay</title>
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Broker Pay" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <style>
     :root{
       --bg:#f3f6fb;--bg2:#e9eef7;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
@@ -102,6 +108,11 @@
     }
 
     @media print{body{background:#fff}.top,.tabs,button{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:1px solid #ddd}}
+
+    .pwa-install-btn{position:fixed;right:18px;bottom:18px;z-index:9999;background:#2563eb;color:#fff;border:none;border-radius:999px;padding:12px 16px;font-weight:800;box-shadow:0 12px 28px rgba(37,99,235,.28);display:none}
+    .pwa-install-btn.show{display:inline-flex;align-items:center;gap:8px}
+    @media(max-width:720px){.pwa-install-btn{left:16px;right:16px;justify-content:center}}
+
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -327,7 +338,7 @@ window.createBroker = async()=>{
     await bcol('settings', brokerId).doc('company').set({brokerId, companyName:data.companyName, station:data.station, email:data.email, createdAt:now()}, {merge:true});
     const inv = {email, emailLower:email, name:data.ownerName, role:'broker', brokerId, brokerName:data.companyName, tempPassword:temp, used:false, createdAt:now(), createdBy:currentUser.uid};
     await db.collection('invitations').doc(emailDocId(email)).set(inv);
-    showMsg('Broker + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render();
+    showMsg('Broker + invitation Firestore créés. Utilise le bouton Gmail pour envoyer le lien.','ok'); render();
   }catch(e){ showMsg(humanError(e),'err'); }
 };
 window.toggleBroker = async(id,active)=>{ try{ await db.collection('brokers').doc(id).set({active}, {merge:true}); showMsg(active?'Broker réactivé':'Broker désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
@@ -391,7 +402,7 @@ async function renderBroker(){
     </div>`;
   }
 }
-window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await bcol('drivers', brokerId).doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Gmail va s’ouvrir.','ok'); openGmail(inv); render(); }catch(e){ showMsg(humanError(e),'err'); } };
+window.createDriverInvite = async()=>{ try{ const brokerId=profile.brokerId; const email=normEmail($('dEmail').value); if(!email) return showMsg('Email chauffeur obligatoire','err'); const driverId='driver_'+Date.now(); const temp=$('dTemp').value.trim()||tempPass(); const commissionPercent=Number($('dCommission')?.value || 0); const data={brokerId,name:$('dName').value.trim(),code:$('dCode').value.trim(),email,emailLower:email,phone:$('dPhone').value.trim(),commissionPercent,tempPassword:temp,active:true,createdAt:now(),createdBy:currentUser.uid}; await bcol('drivers', brokerId).doc(driverId).set(data); const inv={email,emailLower:email,name:data.name,role:'driver',brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid}; await db.collection('invitations').doc(emailDocId(email)).set(inv); showMsg('Chauffeur + invitation Firestore créés. Utilise le bouton Gmail pour envoyer le lien.','ok'); render(); }catch(e){ showMsg(humanError(e),'err'); } };
 window.updateDriverCommission = async(id,value)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({commissionPercent:Number(value||0), updatedAt:now()}, {merge:true}); showMsg('Commission chauffeur mise à jour','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 window.toggleDriver = async(id,active)=>{ try{ await bcol('drivers', profile.brokerId).doc(id).set({active}, {merge:true}); showMsg(active?'Chauffeur réactivé':'Chauffeur désactivé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
 window.deleteDriver = async(id)=>{ if(!confirm('Supprimer ce chauffeur ?')) return; try{ await bcol('drivers', profile.brokerId).doc(id).delete(); showMsg('Chauffeur supprimé','ok'); render(); }catch(e){showMsg(humanError(e),'err')} };
@@ -732,8 +743,7 @@ window.completePendingDriver=async(driverId)=>{
     const inv={email,emailLower:email,name:d.name,role:'driver',brokerId:d.brokerId,driverId,tempPassword:temp,used:false,createdAt:now(),createdBy:currentUser.uid};
     await db.collection('invitations').doc(emailDocId(email)).set(inv,{merge:true});
     await bcol('notifications', d.brokerId || profile.brokerId).doc(`completed_${driverId}`).set({brokerId:d.brokerId,type:'driver_completed',driverId,driverName:d.name,read:false,message:`Profil chauffeur complété : ${d.name}`,createdAt:now()},{merge:true});
-    showMsg('Profil chauffeur complété + invitation créée. Gmail va s’ouvrir.','ok');
-    openGmail(inv);
+    showMsg('Profil chauffeur complété + invitation créée. Utilise le bouton Gmail pour envoyer le lien.','ok');
     render();
   }catch(e){ showMsg(humanError(e),'err'); }
 };
@@ -874,5 +884,36 @@ async function renderDriver(){
   }
 }
 </script>
+
+<button id="pwaInstallBtn" class="pwa-install-btn" type="button">Installer l’application</button>
+<script>
+(function(){
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('./service-worker.js').catch(function(err){ console.warn('SW error', err); });
+    });
+  }
+  var deferredPrompt = null;
+  var installBtn = document.getElementById('pwaInstallBtn');
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.classList.add('show');
+  });
+  if (installBtn) {
+    installBtn.addEventListener('click', async function(){
+      if (!deferredPrompt) {
+        alert('Sur iPhone : appuie sur Partager puis Ajouter à l’écran d’accueil.');
+        return;
+      }
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.classList.remove('show');
+    });
+  }
+})();
+</script>
+
 </body>
 </html>
