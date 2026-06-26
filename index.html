@@ -124,7 +124,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27.2 — import PDF corrigé multi-broker</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27.3 — import PDF corrigé multi-broker</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -224,7 +224,7 @@ function humanError(e){
   const code = e?.code || '';
   if(code==='auth/invalid-credential') return 'Email ou mot de passe incorrect, ou compte non créé. Si c’est une première connexion, utilise “Créer compte avec invitation”.';
   if(code==='auth/email-already-in-use') return 'Ce compte existe déjà. Utilise “Se connecter” ou “Mot de passe oublié”.';
-  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v27.2 multi-broker fournies dans le dossier.';
+  if(code==='permission-denied') return 'Permission refusée Firestore. Vérifie les rules v27.3 multi-broker fournies dans le dossier.';
   return e?.message || String(e);
 }
 function gmailUrl(inv){
@@ -429,8 +429,10 @@ async function renderBroker(){
   const c=$('content'); const brokerId=profile.brokerId;
   const brokerDoc = await db.collection('brokers').doc(brokerId).get().catch(()=>null);
   const broker = brokerDoc?.exists ? brokerDoc.data() : {};
-  // v23.8.1: garder les paramètres broker disponibles pour la génération PDF, même depuis Historique.
-  window.currentBroker = {...broker, brokerId};
+  const companyDoc = await bcol('settings', brokerId).doc('company').get().catch(()=>null);
+  const companySettings = companyDoc?.exists ? companyDoc.data() : {};
+  // Les informations PDF viennent des paramètres du broker, jamais de valeurs démo codées en dur.
+  window.currentBroker = {...broker, ...companySettings, brokerId};
   const max = broker.maxDrivers || planLimit(broker.plan || 'pro');
   if(currentTab==='factures') return renderBrokerFactures(broker);
   if(currentTab==='dashboard'){
@@ -535,13 +537,14 @@ window.importIntelcomPDFs=async()=>{ try{ const files=Array.from($('invoicePdfFi
 function getPdfCompany(){
   // v23.8 : priorité aux paramètres du broker, puis override quand un chauffeur télécharge un ancien relevé.
   const b = window.pdfCompanyOverride || (typeof window.currentBroker !== 'undefined' ? window.currentBroker : null) || profile || {};
+  const configured = !!(b.companyName || b.address || b.ownerName || b.phone || b.email || b.paymentMethod);
   return {
-    companyName:b.companyName||'STATION HICK, INTELCOM',
-    address:b.address||'9486-5482 QUÉBEC INC\n7245-A Boul Wilfrid-Hamel\nQuébec\nG2G 1B8',
-    ownerName:b.ownerName||profile?.name||'',
-    email:b.email||currentUser?.email||'',
-    phone:b.phone||'',
-    paymentMethod:b.paymentMethod||'Par virement bancaire'
+    companyName: b.companyName || (configured ? '' : 'Entreprise non configurée'),
+    address: b.address || '',
+    ownerName: b.ownerName || '',
+    email: b.email || '',
+    phone: b.phone || '',
+    paymentMethod: b.paymentMethod || ''
   };
 }
 function drawInvoiceDoc(d){
@@ -911,7 +914,10 @@ async function loadBrokerForPdf(brokerId){
   if(!brokerId) return null;
   try{
     const snap = await db.collection('brokers').doc(brokerId).get();
-    return snap.exists ? {...snap.data(), brokerId} : null;
+    const rootData = snap.exists ? snap.data() : {};
+    const companySnap = await bcol('settings', brokerId).doc('company').get().catch(()=>null);
+    const companyData = companySnap?.exists ? companySnap.data() : {};
+    return {...rootData, ...companyData, brokerId};
   }catch(e){
     console.warn('Broker PDF non chargé', e);
     return null;

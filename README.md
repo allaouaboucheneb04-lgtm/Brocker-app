@@ -1,13 +1,9 @@
-# Broker Intelcom Pay v27.2
+# v27.3 — PDF sans valeurs par défaut codées en dur
 
-Correction de l'import PDF avec architecture multi-broker.
+Corrections :
+- Suppression des valeurs démo dans le PDF : Allaoua Boucheneb, 9486-5482 QUÉBEC INC, Wilfrid-Hamel, etc.
+- Le PDF utilise maintenant les données du broker depuis `brokers/{brokerId}` + `brokers/{brokerId}/settings/company`.
+- Si le broker n’a pas encore rempli ses paramètres, le PDF affiche “Entreprise non configurée” au lieu d’informations fausses.
+- Le téléchargement PDF fonctionne côté broker et chauffeur avec les paramètres de l’entreprise.
 
-## Changements
-- Import PDF conserve les écritures dans `brokers/{brokerId}/...`.
-- Création automatique de chauffeur inconnu dans `brokers/{brokerId}/drivers`.
-- Notification chauffeur manquant dans `brokers/{brokerId}/notifications` sans bloquer l'import si une règle est incomplète.
-- Rules v27.2 incluses avec accès broker complet à ses sous-collections.
-- Version PWA conservée.
-
-## Important
-Publier `firestore.rules` dans Firebase avant de tester.
+À faire dans l’app : Paramètres > Entreprise, remplir les coordonnées du broker avant de générer les relevés.
