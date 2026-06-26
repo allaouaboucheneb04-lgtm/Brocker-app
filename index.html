@@ -5,10 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Broker Intelcom Pay - v24 Factures propres</title>
   <style>
-    :root{--bg:#07111f;--card:#111827;--card2:#162033;--text:#f8fafc;--muted:#94a3b8;--blue:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#f59e0b;--border:#334155;--cyan:#0ea5e9}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#07111f,#111827 55%,#1e293b);color:var(--text)}
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}.brand{font-size:28px;font-weight:950;letter-spacing:-.5px}.sub{color:var(--muted);line-height:1.35}.pill{background:#0b1220;border:1px solid var(--border);padding:8px 12px;border-radius:999px;color:#cbd5e1;font-size:13px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}.card{background:rgba(17,24,39,.95);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 18px 48px rgba(0,0,0,.28)}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}@media(max-width:850px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column}.wide{overflow-x:auto}.wrap{padding:18px 14px}.brand{font-size:24px}}
-    h1,h2,h3{margin:0 0 12px} label{font-size:13px;color:var(--muted);display:block;margin:10px 0 5px} input,select,textarea{width:100%;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:12px;padding:12px;outline:none;font-size:15px} button{border:0;border-radius:12px;padding:11px 14px;font-weight:850;color:white;background:var(--blue);cursor:pointer}button.secondary{background:#334155}button.green{background:var(--green)}button.red{background:var(--red)}button.orange{background:var(--orange);color:#111827}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.muted{color:var(--muted)}.hidden{display:none!important}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.tab{background:#0b1220;border:1px solid var(--border)}.tab.active{background:var(--blue)} table{width:100%;border-collapse:collapse;background:#0b1220;border-radius:12px;overflow:hidden}th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left;font-size:13px;white-space:nowrap}th{color:#cbd5e1;background:#111827}.notice{padding:12px;border-radius:12px;background:#082f49;border:1px solid #075985;color:#e0f2fe;margin:10px 0}.err{background:#450a0a;border-color:#991b1b;color:#fee2e2}.ok{background:#052e16;border-color:#15803d;color:#dcfce7}.warn{background:#451a03;border-color:#c2410c;color:#ffedd5}.hr{height:1px;background:var(--border);margin:14px 0}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--border);font-size:12px;color:#cbd5e1}.small{font-size:12px}.big{font-size:30px;font-weight:950}.mini{padding:7px 10px;border-radius:10px;font-size:12px}.linkbox{font-size:12px;color:#cbd5e1;background:#0b1220;border:1px dashed var(--border);padding:10px;border-radius:12px;word-break:break-all}.right{text-align:right}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px}.disabled{opacity:.55}.kbd{background:#0b1220;border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:#e2e8f0}.bluebox{background:#062842;border-color:#0ea5e9;color:#e0f2fe}.stat{border-left:4px solid var(--blue)}.plan{font-weight:950;text-transform:uppercase}.search{max-width:340px}.dangerText{color:#fca5a5}.successText{color:#86efac}.nowrap{white-space:nowrap}.soft{background:#f8fafc;color:#0f172a}.feeBox{border:1px solid var(--border);border-radius:14px;padding:12px;background:#0b1220;margin:10px 0}.bracketRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:6px 0}.summaryBar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}@media(max-width:850px){.summaryBar{grid-template-columns:1fr}}
+    :root{
+      --bg:#f3f6fb;--bg2:#e9eef7;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
+      --blue:#2563eb;--blue2:#1d4ed8;--green:#16a34a;--green2:#15803d;--red:#dc2626;--red2:#b91c1c;
+      --orange:#f59e0b;--orange2:#d97706;--border:#dbe3ef;--border2:#cbd5e1;--cyan:#0ea5e9;
+      --shadow:0 14px 35px rgba(15,23,42,.08);--shadow2:0 8px 18px rgba(15,23,42,.08);--radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:linear-gradient(180deg,#f8fafc 0%,#eef3fb 48%,#e8eef7 100%);color:var(--text);min-height:100vh;font-size:15px}
+    body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 12% 4%,rgba(37,99,235,.12),transparent 32%),radial-gradient(circle at 88% 0%,rgba(14,165,233,.10),transparent 28%);pointer-events:none;z-index:-1}
+    .wrap{max-width:1240px;margin:0 auto;padding:24px 18px 44px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;background:rgba(255,255,255,.78);border:1px solid rgba(219,227,239,.9);border-radius:22px;padding:16px 18px;box-shadow:var(--shadow);backdrop-filter:blur(14px);position:sticky;top:10px;z-index:20}
+    .brand{font-size:29px;font-weight:950;letter-spacing:-.7px;color:#0f172a;line-height:1.05}.brand:before{content:"📦 ";font-size:26px}.sub{color:var(--muted);line-height:1.35;margin-top:5px;font-size:13px}.pill{background:#eff6ff;border:1px solid #bfdbfe;padding:9px 13px;border-radius:999px;color:#1e40af;font-size:13px;font-weight:800;box-shadow:0 4px 12px rgba(37,99,235,.08)}
+    .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}.card:hover{box-shadow:0 18px 42px rgba(15,23,42,.10);border-color:#cbd5e1}.col-4{grid-column:span 4}.col-5{grid-column:span 5}.col-6{grid-column:span 6}.col-7{grid-column:span 7}.col-8{grid-column:span 8}.col-12{grid-column:span 12}
+    h1,h2,h3{margin:0 0 12px;color:#0f172a;letter-spacing:-.25px}h2{font-size:21px}h3{font-size:17px}.sectionTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.muted{color:var(--muted)}.small{font-size:12px}.big{font-size:31px;font-weight:950;letter-spacing:-.6px}.right{text-align:right}.nowrap{white-space:nowrap}.hidden{display:none!important}.disabled{opacity:.55;filter:grayscale(.2)}
+    label{font-size:12px;color:#475569;display:block;margin:11px 0 6px;font-weight:850;text-transform:uppercase;letter-spacing:.35px}input,select,textarea{width:100%;border:1px solid var(--border2);background:#fff;color:var(--text);border-radius:13px;padding:12px 13px;outline:none;font-size:15px;transition:border .16s,box-shadow .16s,background .16s}input:focus,select:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 4px rgba(37,99,235,.12);background:#fff}textarea{min-height:84px;resize:vertical}input::placeholder,textarea::placeholder{color:#94a3b8}
+    button{border:0;border-radius:13px;padding:11px 15px;font-weight:900;color:white;background:linear-gradient(180deg,var(--blue),var(--blue2));cursor:pointer;box-shadow:0 8px 18px rgba(37,99,235,.18);transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;min-height:42px}button:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(37,99,235,.23)}button:active{transform:translateY(0);filter:brightness(.96)}button.secondary{background:linear-gradient(180deg,#64748b,#475569);box-shadow:0 8px 18px rgba(71,85,105,.16)}button.green{background:linear-gradient(180deg,var(--green),var(--green2));box-shadow:0 8px 18px rgba(22,163,74,.18)}button.red{background:linear-gradient(180deg,var(--red),var(--red2));box-shadow:0 8px 18px rgba(220,38,38,.18)}button.orange{background:linear-gradient(180deg,#fbbf24,var(--orange2));color:#111827;box-shadow:0 8px 18px rgba(245,158,11,.20)}button.mini,.mini{padding:7px 10px;border-radius:10px;font-size:12px;min-height:32px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .tabs{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0 18px;background:rgba(255,255,255,.76);border:1px solid var(--border);border-radius:18px;padding:8px;box-shadow:var(--shadow2);position:sticky;top:96px;z-index:15;backdrop-filter:blur(14px)}.tab{background:#fff;border:1px solid var(--border);color:#334155;box-shadow:none}.tab:hover{box-shadow:var(--shadow2)}.tab.active{background:linear-gradient(180deg,var(--blue),var(--blue2));color:#fff;border-color:transparent;box-shadow:0 9px 20px rgba(37,99,235,.22)}
+    .wide{width:100%;overflow-x:auto;border-radius:14px;border:1px solid var(--border);background:#fff}table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;overflow:hidden}th,td{border-bottom:1px solid #edf2f7;padding:11px 12px;text-align:left;font-size:13px;white-space:nowrap;vertical-align:middle}th{color:#334155;background:#f1f5f9;font-weight:950;text-transform:uppercase;font-size:11px;letter-spacing:.38px}tr:last-child td{border-bottom:0}tbody tr:hover td{background:#f8fbff}
+    .notice{padding:13px 14px;border-radius:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;margin:10px 0;font-weight:650}.err{background:#fef2f2;border-color:#fecaca;color:#991b1b}.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}.warn{background:#fffbeb;border-color:#fed7aa;color:#9a3412}.bluebox{background:#eff6ff;border-color:#7dd3fc;color:#075985}.hr{height:1px;background:var(--border);margin:15px 0}.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#f1f5f9;border:1px solid #dbe3ef;font-size:12px;color:#334155;font-weight:850}.badge.ok,.successText{color:#166534;background:#f0fdf4;border-color:#bbf7d0}.badge.warn{color:#9a3412;background:#fffbeb;border-color:#fed7aa}.badge.err,.dangerText{color:#991b1b;background:#fef2f2;border-color:#fecaca}.kbd{background:#f8fafc;border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:#0f172a;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.soft{background:#f8fafc;color:#0f172a}.linkbox{font-size:12px;color:#334155;background:#f8fafc;border:1px dashed #94a3b8;padding:11px;border-radius:13px;word-break:break-all}.search{max-width:360px}.stat{border-left:5px solid var(--blue);position:relative;overflow:hidden}.stat:after{content:"";position:absolute;right:-36px;top:-36px;width:100px;height:100px;background:rgba(37,99,235,.07);border-radius:999px}.plan{font-weight:950;text-transform:uppercase}.feeBox{border:1px solid var(--border);border-radius:16px;padding:13px;background:#f8fafc;margin:10px 0}.bracketRow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:7px 0}.summaryBar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.summaryBar .card{padding:14px}.summaryBar .big{font-size:25px}.sectionTitle + .muted{margin-top:-4px}.card .notice:last-child{margin-bottom:0}
+    ::-webkit-scrollbar{height:10px;width:10px}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}::-webkit-scrollbar-track{background:#f1f5f9}
+    @media(max-width:900px){.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}.top{align-items:flex-start;flex-direction:column;position:static}.tabs{top:0;position:sticky;overflow-x:auto;flex-wrap:nowrap}.tab{white-space:nowrap}.wide{overflow-x:auto}.wrap{padding:14px 10px 28px}.brand{font-size:24px}.card{padding:14px;border-radius:16px}.summaryBar{grid-template-columns:1fr 1fr}.bracketRow{grid-template-columns:1fr 1fr}.bracketRow button{grid-column:span 2}button{width:auto}th,td{padding:9px 10px;font-size:12px}}
+    @media(max-width:520px){.summaryBar{grid-template-columns:1fr}.row{gap:8px}.row button{flex:1}.tabs{margin-left:-2px;margin-right:-2px}.brand{font-size:22px}input,select,textarea{font-size:16px}.card{box-shadow:0 8px 20px rgba(15,23,42,.08)}}
+
+    /* Login simplifié */
+    #authView{min-height:calc(100vh - 120px);display:flex;align-items:center;justify-content:center;padding:28px 0}
+    .loginShell{width:100%;max-width:430px;margin:auto}
+    .loginCard{padding:28px;border-radius:24px;box-shadow:0 24px 70px rgba(15,23,42,.12)}
+    .loginLogo{width:62px;height:62px;border-radius:18px;background:linear-gradient(135deg,#2563eb,#0ea5e9);color:white;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;box-shadow:0 14px 30px rgba(37,99,235,.25)}
+    .loginTitle{text-align:center;font-size:27px;font-weight:950;letter-spacing:-.6px;margin:0}
+    .loginSubtitle{text-align:center;color:var(--muted);margin:7px 0 22px;font-size:14px}
+    .loginPrimary{width:100%;margin-top:14px}
+    .loginLinks{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:14px;font-size:13px}
+    .textBtn{background:none!important;color:#2563eb!important;box-shadow:none!important;padding:0!important;min-height:auto!important;border-radius:0!important;font-weight:850}
+    .textBtn:hover{transform:none!important;text-decoration:underline;box-shadow:none!important}
+    .invitePanel{margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
+    .hiddenSetup{display:none!important}
+    @media print{body{background:#fff}.top,.tabs,button{display:none!important}.wrap{max-width:none;padding:0}.card{box-shadow:none;border:1px solid #ddd}}
   </style>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -20,35 +54,44 @@
 <body>
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v24 — Factures au centre, barèmes dans Paramètres, commission par chauffeur</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Gestion des relevés et des chauffeurs</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
 
-  <section id="authView" class="grid">
-    <div class="card col-4">
-      <h2>Connexion</h2>
-      <label>Email</label><input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
-      <label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
-      <div class="row" style="margin-top:12px"><button id="loginBtn">Se connecter</button><button id="resetBtn" class="secondary">Mot de passe oublié</button></div>
-      <div class="notice bluebox">Utilise ce bloc seulement si ton compte existe déjà dans Firebase Auth.</div>
-    </div>
-    <div class="card col-4">
-      <h2>Créer compte avec invitation</h2>
-      <p class="muted">Pour broker ou chauffeur invité par email. L’invitation doit déjà exister.</p>
-      <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
-      <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
-      <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-      <button id="acceptInviteBtn" class="green" style="margin-top:12px">Créer mon compte invité</button>
-      <div class="notice">Première connexion d’un broker/chauffeur : utiliser ce bloc, pas le bouton Se connecter.</div>
-    </div>
-    <div class="card col-4">
-      <h2>Créer Super Admin</h2>
-      <p class="muted">À faire une seule fois. Autorisé seulement pour tes emails.</p>
-      <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
-      <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
-      <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
-      <button id="createSuperBtn" class="green" style="margin-top:12px">Créer Super Admin</button>
+  <section id="authView">
+    <div class="loginShell">
+      <div class="card loginCard">
+        <div class="loginLogo">📦</div>
+        <h1 class="loginTitle">Intelcom Broker</h1>
+        <div class="loginSubtitle">Gestion des relevés et des chauffeurs</div>
+
+        <label>Email</label>
+        <input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
+        <label>Mot de passe</label>
+        <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+        <button id="loginBtn" class="loginPrimary">Se connecter</button>
+
+        <div class="loginLinks">
+          <button id="resetBtn" class="textBtn" type="button">Mot de passe oublié</button>
+          <button id="showInviteBtn" class="textBtn" type="button">Créer un compte avec invitation</button>
+        </div>
+
+        <div id="invitePanel" class="invitePanel hidden">
+          <h3>Créer compte avec invitation</h3>
+          <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
+          <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
+          <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
+          <button id="acceptInviteBtn" class="green" style="width:100%;margin-top:12px">Créer mon compte</button>
+        </div>
+      </div>
+
+      <div class="hiddenSetup">
+        <input id="saName" value="Allaoua Boucheneb">
+        <input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
+        <input id="saPass" type="password">
+        <button id="createSuperBtn" type="button"></button>
+      </div>
     </div>
   </section>
 
@@ -110,6 +153,9 @@ async function ensureBrokerActive(p){
   if(!b.exists || b.data().active === false){ showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err'); await auth.signOut(); return false; }
   return true;
 }
+$('showInviteBtn').onclick = () => {
+  $('invitePanel').classList.toggle('hidden');
+};
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
   if(!user){ profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
