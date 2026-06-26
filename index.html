@@ -145,16 +145,6 @@
           <button id="acceptInviteBtn" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
         </div>
       </details>
-
-      <details class="loginPanel">
-        <summary>Créer Super Admin</summary>
-        <div class="loginPanelBody">
-          <label>Nom</label><input id="saName" value="Allaoua Boucheneb">
-          <label>Email Super Admin</label><input id="saEmail" type="email" value="allaouaboucheneb04@gmail.com">
-          <label>Mot de passe</label><input id="saPass" type="password" placeholder="minimum 6 caractères">
-          <button id="createSuperBtn" class="green" style="margin-top:12px;width:100%">Créer Super Admin</button>
-        </div>
-      </details>
     </div>
     <div class="loginFoot">Accès sécurisé aux relevés Intelcom</div>
   </section>
@@ -182,7 +172,6 @@ if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.clo
 let currentUser = null;
 let profile = null;
 let currentTab = 'dashboard';
-const SUPER_EMAILS = ['allaouaboucheneb04@gmail.com','allaouaboucheneb06@gmail.com'];
 const $ = id => document.getElementById(id);
 function showMsg(text, type='notice'){$('msg').innerHTML = `<div class="notice ${type}">${safe(text)}</div>`; setTimeout(()=>{$('msg').innerHTML=''}, 9000)}
 function safe(v){return String(v??'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -222,7 +211,7 @@ auth.onAuthStateChanged(async user=>{
   if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
   try{
     profile = await getProfile(user.uid);
-    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Pour un invité : utilise Créer compte avec invitation. Pour toi : crée le Super Admin.', 'err'); await auth.signOut(); return; }
+    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err'); await auth.signOut(); return; }
     if(!(await ensureBrokerActive(profile))) return;
     document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
   }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
@@ -230,15 +219,6 @@ auth.onAuthStateChanged(async user=>{
 $('logoutBtn').onclick = () => auth.signOut();
 $('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
 $('resetBtn').onclick = async()=>{ try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
-$('createSuperBtn').onclick = async()=>{
-  try{
-    const email=normEmail($('saEmail').value), pass=$('saPass').value, name=$('saName').value.trim();
-    if(!SUPER_EMAILS.includes(email)) return showMsg('Cet email n’est pas autorisé comme Super Admin dans cette version.', 'err');
-    const cred = await auth.createUserWithEmailAndPassword(email, pass);
-    await db.collection('users').doc(cred.user.uid).set({name,email,emailLower:email,role:'superadmin',active:true,createdAt:now()});
-    showMsg('Super Admin créé','ok');
-  }catch(e){ showMsg(humanError(e),'err'); }
-};
 $('acceptInviteBtn').onclick = async()=>{
   let cred = null;
   try{
@@ -254,6 +234,11 @@ $('acceptInviteBtn').onclick = async()=>{
     }
     const inv = invDoc.data();
     if(normEmail(inv.email) !== email){ throw new Error('Invitation invalide pour cet email.'); }
+    if(!['broker','driver'].includes(inv.role)){
+      await cred.user.delete().catch(()=>{});
+      await auth.signOut().catch(()=>{});
+      return showMsg('Invitation invalide : rôle non autorisé.', 'err');
+    }
     const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
     await db.collection('users').doc(cred.user.uid).set(userData);
     if(inv.role === 'driver' && inv.driverId){
