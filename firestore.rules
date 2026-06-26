@@ -36,58 +36,46 @@ service cloud.firestore {
       return userData().driverId;
     }
 
-    // Profil utilisateur global. Le Super Admin est créé MANUELLEMENT dans Firestore.
+    // Global users. Super admin is created manually only.
     match /users/{uid} {
       allow read, write: if isSuperAdmin();
-
-      allow read, update: if signedIn()
-        && request.auth.uid == uid;
-
+      allow read, update: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.role != "superadmin";
     }
 
-    // Index global des invitations par email, nécessaire avant que le profil app existe.
+    // Global invitation email index, used before app profile exists.
     match /invitations/{inviteId} {
       allow read, write: if isSuperAdmin();
-
-      allow create, update: if isBroker()
-        && request.resource.data.brokerId == myBrokerId();
-
-      allow read: if signedIn()
+      allow read, create, update, delete: if isBroker()
+        && (request.resource.data.brokerId == myBrokerId() || resource.data.brokerId == myBrokerId());
+      allow read, update: if signedIn()
         && resource.data.emailLower == request.auth.token.email.lower();
-
-      allow update: if signedIn()
-        && resource.data.emailLower == request.auth.token.email.lower()
-        && request.resource.data.used == true;
     }
 
-    // Document principal du broker.
+    // Broker main document.
     match /brokers/{brokerId} {
       allow read, write: if isSuperAdmin();
-
-      allow read, update: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId();
+      allow read, update: if isBroker() && brokerId == myBrokerId();
+      allow read: if isDriver() && brokerId == myBrokerId();
+      // Invited broker can finalize the broker profile before users/{uid} exists.
+      allow read, update: if signedIn()
+        && resource.data.emailLower == request.auth.token.email.lower();
     }
 
-    // Toutes les données appartenant à un broker.
+    // All data owned by a broker: drivers, weeks, notifications, duplicateInvoices,
+    // settings, parcelDetails, history, rates, vehicles, stations, invitations, etc.
     match /brokers/{brokerId}/{document=**} {
       allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId();
-
-      // Le chauffeur peut mettre à jour ses propres journées/véhicules si le document indique son driverId.
+      allow read, write: if isBroker() && brokerId == myBrokerId();
+      allow read: if isDriver() && brokerId == myBrokerId();
       allow create, update: if isDriver()
         && brokerId == myBrokerId()
         && request.resource.data.driverId == myDriverId();
+      // Invited users can read/update their own invitation inside a broker.
+      allow read, update: if signedIn()
+        && resource.data.emailLower == request.auth.token.email.lower();
     }
 
     match /{document=**} {

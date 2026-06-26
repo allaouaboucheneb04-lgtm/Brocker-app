@@ -1,11 +1,13 @@
-# Intelcom Pay App v27.1
+# Broker Intelcom Pay v27.2
 
-Corrections :
-- Invitations non utilisées : bouton Supprimer (suppression définitive).
-- Invitations utilisées / compte créé : bouton Archiver au lieu de supprimer.
-- Archivage d'une invitation broker : désactive/archive le broker lié.
-- Archivage d'une invitation chauffeur : désactive/archive le chauffeur lié.
-- Bouton Restaurer pour les invitations archivées.
-- Gmail reste une action manuelle uniquement.
+Correction de l'import PDF avec architecture multi-broker.
 
-Super admin créé uniquement manuellement dans Firebase.
+## Changements
+- Import PDF conserve les écritures dans `brokers/{brokerId}/...`.
+- Création automatique de chauffeur inconnu dans `brokers/{brokerId}/drivers`.
+- Notification chauffeur manquant dans `brokers/{brokerId}/notifications` sans bloquer l'import si une règle est incomplète.
+- Rules v27.2 incluses avec accès broker complet à ses sous-collections.
+- Version PWA conservée.
+
+## Important
+Publier `firestore.rules` dans Firebase avant de tester.
