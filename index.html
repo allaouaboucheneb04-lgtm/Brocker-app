@@ -136,7 +136,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Dispatch stable v2 Debug 3 — Firebase initialisé</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Dispatch stable v2.1 — doublons corrigés</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -945,7 +945,7 @@ window.saveAllInvoicesToFirebase=async()=>{
           newSummary:{
             totalIntelcom:Number(weekPayload.totalIntelcom||0),parcels:Number(weekPayload.parcels||0),commissionPercent:Number(weekPayload.commissionPercent||0),commission:Number(weekPayload.commission||0),brokerFees:Number(weekPayload.brokerFees||0),total:Number(weekPayload.total||0),updatedAt:weekPayload.updatedAt||''
           },
-          newWeekPayload,
+          newWeekPayload: weekPayload,
           createdAt:now(),
           createdBy:currentUser.uid
         };
