@@ -114,12 +114,26 @@
     @media(max-width:720px){.pwa-install-btn{left:16px;right:16px;justify-content:center}}
 
   </style>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    // v28.1 — détecte l'échec de chargement d'une librairie externe (réseau, bloqueur de pub, CDN indisponible)
+    // pour éviter un écran de connexion silencieusement mort.
+    window.__criticalLibFailed = false;
+    window.__onLibError = function(libName){
+      return function(){
+        window.__criticalLibFailed = true;
+        var box = document.getElementById('msg');
+        if(box){
+          box.innerHTML = '<div class="notice err"><b>Chargement impossible.</b><br>La librairie "'+libName+'" n\'a pas pu être chargée (connexion internet instable, bloqueur de publicité ou pare-feu). Vérifie ta connexion puis recharge la page.</div>';
+        }
+      };
+    };
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" onerror="window.__onLibError('firebase-app')()"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js" onerror="window.__onLibError('firebase-auth')()"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js" onerror="window.__onLibError('firebase-firestore')()"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" onerror="window.__onLibError('pdf.js')()"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="window.__onLibError('jsPDF')()"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" onerror="window.__onLibError('JSZip')()"></script>
 </head>
 <body class="login-mode">
 <div class="wrap">
@@ -167,6 +181,10 @@
 </div>
 
 <script>
+try{
+if (window.__criticalLibFailed || typeof firebase === 'undefined') {
+  throw new Error("Une librairie essentielle (Firebase) n'a pas pu être chargée. Vérifie ta connexion internet puis recharge la page.");
+}
 const firebaseConfig = {
   apiKey: "AIzaSyC8N0FYmFplqOdaZGzk-fxbqxX3kr3mmDQ",
   authDomain: "brocker-intel.firebaseapp.com",
@@ -1159,6 +1177,13 @@ async function renderDriver(){
   }
   if(currentTab==='profile'){
     $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`);
+  }
+}
+}catch(__fatalErr){
+  console.error('Erreur fatale au chargement de l\'application', __fatalErr);
+  var __msgBox = document.getElementById('msg');
+  if(__msgBox){
+    __msgBox.innerHTML = '<div class="notice err"><b>L\'application n\'a pas pu démarrer.</b><br>'+(__fatalErr && __fatalErr.message ? __fatalErr.message.replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}) : 'Erreur inconnue')+'<br><span class="muted">Essaie de recharger la page. Si le problème persiste, vérifie ta connexion internet.</span></div>';
   }
 }
 </script>
