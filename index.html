@@ -124,7 +124,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27.6 — finances broker et chauffeur</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v28 — stable finances et authentification</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -246,13 +246,45 @@ async function ensureBrokerActive(p){
 }
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
-  if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
+  if(!user){
+    document.body.classList.add('login-mode');
+    profile=null;
+    $('authView').classList.remove('hidden');
+    $('appView').classList.add('hidden');
+    $('logoutBtn').classList.add('hidden');
+    $('userPill').textContent='Non connecté';
+    return;
+  }
+
   try{
     profile = await getProfile(user.uid);
-    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err'); await auth.signOut(); return; }
+    if(!profile){
+      showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err');
+      await auth.signOut();
+      return;
+    }
     if(!(await ensureBrokerActive(profile))) return;
-    document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
-  }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
+  }catch(e){
+    console.error('Erreur authentification/profil', e);
+    showMsg(humanError(e), 'err');
+    await auth.signOut();
+    return;
+  }
+
+  document.body.classList.remove('login-mode');
+  $('authView').classList.add('hidden');
+  $('appView').classList.remove('hidden');
+  $('logoutBtn').classList.remove('hidden');
+  $('userPill').textContent = `${profile.role} — ${user.email}`;
+  renderTabs();
+
+  try{
+    await render();
+  }catch(e){
+    console.error('Erreur rendu application', e);
+    $('content').innerHTML = `<div class="notice warn"><b>Connexion réussie.</b><br>Une section de l’application n’a pas pu être chargée : ${safe(humanError(e))}</div>`;
+    showMsg('Connexion réussie, mais une section contient une erreur.', 'err');
+  }
 });
 $('logoutBtn').onclick = () => auth.signOut();
 $('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
@@ -538,14 +570,24 @@ function weekPlainLabel(week, from='', to=''){ if(from&&to) return `${fmtDateFr(
 
 function currentMonthValue(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
 function currentYearValue(){ return String(new Date().getFullYear()); }
-function weekStartDateValue(w){
-  const raw=w.from||w.periodFrom||w.weekStart||'';
-  if(raw) return String(raw).slice(0,10);
-  try{return weekPeriodFromWeek(w.week||'').start||'';}catch(e){return '';}
+function dateValueToIso(raw){
+  if(!raw) return '';
+  if(typeof raw === 'string') return raw.slice(0,10);
+  if(raw?.toDate instanceof Function){
+    const d=raw.toDate();
+    return Number.isNaN(d.getTime()) ? '' : toIsoDateLocal(d);
+  }
+  if(raw instanceof Date) return Number.isNaN(raw.getTime()) ? '' : toIsoDateLocal(raw);
+  return '';
+}
+function weekStartDateValue(w={}){
+  const direct=dateValueToIso(w.from||w.periodFrom||w.weekStart||w.startDate||w.dateFrom);
+  if(direct) return direct;
+  try{return weekPeriodFromWeek(String(w.week||'')).start||'';}catch(e){return '';}
 }
 function financialPeriodMatch(w, mode, value){
   if(mode==='all') return true;
-  const d=weekStartDateValue(w);
+  const d=weekStartDateValue(w||{});
   if(!d) return false;
   if(mode==='year') return d.slice(0,4)===String(value||currentYearValue());
   return d.slice(0,7)===String(value||currentMonthValue());
@@ -576,14 +618,32 @@ function getFinancialFilter(prefix){
   if(!value) value=mode==='year'?currentYearValue():currentMonthValue();
   return {mode,value};
 }
-function weekFinancialValues(w){
-  const gross=Number(w.totalIntelcom ?? w.subtotalIntelcom ?? w.totalInvoice ?? w.gross ?? 0);
-  const commission=Number(w.commission ?? w.commissionAmount ?? 0);
-  const fees=Number(w.brokerFees ?? w.fees ?? 0);
-  const deduction=Number(w.deduction ?? 0);
-  const advance=Number(w.advance ?? 0);
-  const net=Number(w.total ?? w.totalNet ?? (gross-commission-fees-deduction-advance));
-  return {gross,commission,fees,deduction,advance,net,brokerProfit:commission+fees};
+function finiteMoney(...values){
+  for(const value of values){
+    if(value === null || value === undefined || value === '') continue;
+    const parsed = typeof value === 'number' ? value : parseAmount(value);
+    if(Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+function weekFinancialValues(w={}){
+  const gross=finiteMoney(w.totalIntelcom,w.subtotalIntelcom,w.totalInvoice,w.gross,w.amountIntelcom);
+  const commission=finiteMoney(w.commission,w.commissionAmount,w.brokerCommission);
+  const fees=finiteMoney(w.brokerFees,w.fees,w.feeTotal);
+  const deduction=finiteMoney(w.deduction,w.deductions);
+  const advance=finiteMoney(w.advance,w.advances);
+  const storedNet=finiteMoney(w.total,w.totalNet,w.net,w.driverNet);
+  const calculatedNet=gross-commission-fees-deduction-advance;
+  const net=(w.total!==undefined||w.totalNet!==undefined||w.net!==undefined||w.driverNet!==undefined) ? storedNet : calculatedNet;
+  return {
+    gross:Number.isFinite(gross)?gross:0,
+    commission:Number.isFinite(commission)?commission:0,
+    fees:Number.isFinite(fees)?fees:0,
+    deduction:Number.isFinite(deduction)?deduction:0,
+    advance:Number.isFinite(advance)?advance:0,
+    net:Number.isFinite(net)?net:0,
+    brokerProfit:Number.isFinite(commission+fees)?commission+fees:0
+  };
 }
 
 function dispatchDayHeader(dateStr){ const d=new Date(String(dateStr)+'T12:00:00'); const day=d.toLocaleDateString('fr-CA',{weekday:'short'}).replace('.',''); return `${day.charAt(0).toUpperCase()+day.slice(1)}<br>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
