@@ -1,8 +1,11 @@
-# Dispatch stable v2 — connexion réellement corrigée
+# Dispatch stable v2 — Debug
 
-- Base stable conservée.
-- Liaison chauffeur par driverId conservée.
-- Ancien cache PWA supprimé automatiquement.
-- Service worker sans cache pendant la stabilisation.
-- Connexion avec message réel et délai maximal de 20 secondes.
-- Aucun message générique « erreur de chargement » ajouté.
+Cette version ajoute une console de diagnostic visible dans l’application.
+
+- Bouton **🛠 Console** en bas à droite
+- Logs Firebase Auth et Firestore
+- Erreurs JavaScript globales et promesses rejetées
+- Bouton **Copier** pour partager les logs
+- Aucun mot de passe n’est enregistré dans les logs
+
+Publier tous les fichiers du dossier sur GitHub Pages.
