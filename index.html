@@ -1149,20 +1149,83 @@ window.reportVehicleIssue=async(week,date)=>{ try{ const brokerId=profile.broker
 
 async function renderDriver(){
   if(currentTab==='dashboard'){
-    // v23.2 : le relevé peut être lié par driverUid, par ancien driverId, ou par email.
-    const queries = await Promise.all([
-      db.collectionGroup('weeks').where('driverUid','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collectionGroup('weeks').where('driverId','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collectionGroup('weeks').where('driverEmail','==',normEmail(currentUser.email)).get().catch(()=>({docs:[]}))
-    ]);
-    const map = new Map();
-    queries.forEach(q=>q.docs.forEach(d=>map.set(d.ref?.path || d.id,d)));
-    const docs = Array.from(map.values()).sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')));
-    // Affichage sans doublons : une seule ligne par chauffeur + semaine.
+    const brokerId = profile?.brokerId || '';
+    const email = normEmail(currentUser?.email || profile?.email || '');
+    let driverId = profile?.driverId || '';
+    let driverCode = profile?.code || '';
+
+    // Retrouve la fiche chauffeur même pour les anciens comptes où driverId/code manquaient.
+    if(brokerId && (!driverId || !driverCode)){
+      try{
+        let drv = null;
+        if(driverId){
+          const snap = await bcol('drivers', brokerId).doc(driverId).get();
+          if(snap.exists) drv = {id:snap.id, ...snap.data()};
+        }
+        if(!drv){
+          const byUid = await bcol('drivers', brokerId).where('uid','==',currentUser.uid).limit(1).get().catch(()=>({docs:[]}));
+          if(byUid.docs.length) drv = {id:byUid.docs[0].id, ...byUid.docs[0].data()};
+        }
+        if(!drv && email){
+          const byEmail = await bcol('drivers', brokerId).where('emailLower','==',email).limit(1).get().catch(()=>({docs:[]}));
+          if(byEmail.docs.length) drv = {id:byEmail.docs[0].id, ...byEmail.docs[0].data()};
+        }
+        if(drv){
+          driverId = driverId || drv.id;
+          driverCode = driverCode || drv.code || '';
+          if(profile.driverId !== driverId || (!profile.code && driverCode)){
+            const patch = {driverId, brokerId};
+            if(driverCode) patch.code = driverCode;
+            await db.collection('users').doc(currentUser.uid).set(patch,{merge:true}).catch(()=>{});
+            profile = {...profile, ...patch};
+          }
+        }
+      }catch(e){ console.warn('Résolution fiche chauffeur', e); }
+    }
+
+    // Lecture uniquement dans le broker du chauffeur. Cela évite collectionGroup
+    // et reconnaît les anciens relevés par UID, driverId, code ou email.
+    const found = new Map();
+    const addDocs = snap => (snap?.docs||[]).forEach(d=>found.set(d.ref?.path || d.id,d));
+    const weekCol = brokerId ? bcol('weeks', brokerId) : null;
+    if(weekCol){
+      const queries = [];
+      queries.push(weekCol.where('driverUid','==',currentUser.uid).get().catch(()=>({docs:[]})));
+      if(driverId){
+        queries.push(weekCol.where('driverId','==',driverId).get().catch(()=>({docs:[]})));
+        queries.push(weekCol.where('driverDocId','==',driverId).get().catch(()=>({docs:[]})));
+      }
+      if(driverCode) queries.push(weekCol.where('driverCode','==',driverCode).get().catch(()=>({docs:[]})));
+      if(email) queries.push(weekCol.where('driverEmail','==',email).get().catch(()=>({docs:[]})));
+      (await Promise.all(queries)).forEach(addDocs);
+
+      // Repli pour les anciens relevés dont les champs de liaison sont incomplets.
+      if(found.size===0){
+        const all = await weekCol.get().catch(()=>({docs:[]}));
+        (all.docs||[]).forEach(d=>{
+          const w=d.data();
+          const same =
+            (driverId && (w.driverId===driverId || w.driverDocId===driverId)) ||
+            (driverCode && String(w.driverCode||'').toUpperCase()===String(driverCode).toUpperCase()) ||
+            (email && normEmail(w.driverEmail||'')===email) ||
+            w.driverUid===currentUser.uid;
+          if(same) found.set(d.ref?.path || d.id,d);
+        });
+      }
+    }
+
+    const docs = Array.from(found.values()).sort((a,b)=>String(b.data().week||'').localeCompare(String(a.data().week||'')));
     const byKey = {};
-    docs.forEach(doc=>{ const w=doc.data(); const key=(w.brokerId||profile.brokerId||'')+'_'+(w.driverCode||w.driverId||'')+'_'+(w.week||''); const old=byKey[key]; if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')) byKey[key]={id:(doc.ref?.path || doc.id),data:w}; });
+    docs.forEach(doc=>{
+      const w=doc.data();
+      const key=(w.brokerId||brokerId||'')+'_'+(w.driverCode||w.driverId||driverId||'')+'_'+(w.week||'');
+      const old=byKey[key];
+      if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')){
+        byKey[key]={id:(doc.ref?.path || doc.id),data:w};
+      }
+    });
     const rows = Object.values(byKey);
-    $('content').innerHTML = card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Période</th><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${weekLabel(w.week,w.from,w.to)}</td><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé disponible</td></tr>'}</table></div>`);
+    $('content').innerHTML = card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Période</th><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${weekLabel(w.week,w.from,w.to)}</td><td>${safe(w.week)}</td><td>${safe(w.driverName||profile.name||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé disponible</td></tr>'}</table></div>`);
   }
   if(currentTab==='vehicles'){
     const brokerId=profile.brokerId; const driverId=profile.driverId || currentUser.uid; const week=localStorage.getItem('driver_week')||currentIsoWeek();
