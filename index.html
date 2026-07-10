@@ -436,11 +436,12 @@ async function renderBroker(){
   const max = broker.maxDrivers || planLimit(broker.plan || 'pro');
   if(currentTab==='factures') return renderBrokerFactures(broker);
   if(currentTab==='dashboard'){
+    const emptySnap = { size: 0, docs: [] };
     const [drivers, invs, weeks, notifs] = await Promise.all([
-      bcol('drivers', brokerId).get(),
-      db.collection('invitations').where('brokerId','==',brokerId).get(),
-      bcol('weeks', brokerId).get().catch(()=>({size:0,docs:[]})),
-      bcol('notifications', brokerId).get().catch(()=>({docs:[]}))
+      bcol('drivers', brokerId).get().catch((e)=>{ console.warn('drivers dashboard', e); return emptySnap; }),
+      bcol('invitations', brokerId).get().catch((e)=>{ console.warn('invitations dashboard', e); return emptySnap; }),
+      bcol('weeks', brokerId).get().catch((e)=>{ console.warn('weeks dashboard', e); return emptySnap; }),
+      bcol('notifications', brokerId).get().catch((e)=>{ console.warn('notifications dashboard', e); return emptySnap; })
     ]);
     const activeDrivers=drivers.docs.filter(d=>d.data().active!==false).length;
     const disabledDrivers=drivers.size-activeDrivers;
