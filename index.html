@@ -136,7 +136,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Dispatch stable v2 Debug 2 — console visible</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Dispatch stable v2 Debug 3 — Firebase initialisé</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -193,6 +193,23 @@
 </div>
 
 <script>
+// Journal de démarrage disponible avant l'initialisation Firebase.
+window.__earlyDebugLogs = window.__earlyDebugLogs || [];
+function dbg(level, ...args) {
+  try {
+    const d = window.appDebug;
+    if (d && typeof d === 'object') {
+      const method = level === 'error' ? 'error' : level === 'warn' ? 'warn' : level === 'ok' ? 'ok' : 'log';
+      if (typeof d[method] === 'function') { d[method](...args); return; }
+    }
+    window.__earlyDebugLogs.push([level, ...args]);
+    const method = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
+    if (window.console && typeof console[method] === 'function') console[method]('[APP]', ...args);
+  } catch (_) {}
+}
+</script>
+
+<script>
 // Nettoyage des anciens caches/PWA qui pouvaient servir une version cassée.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister())).catch(()=>{});
@@ -209,13 +226,13 @@ const firebaseConfig = {
   appId: "1:641968934387:web:be779857dc0eb93a7bd686",
   measurementId: "G-L0MKXG2MS6"
 };
-appDebug('info','Initialisation Firebase...', {projectId:firebaseConfig.projectId,authDomain:firebaseConfig.authDomain});
+dbg('info','Initialisation Firebase...', {projectId:firebaseConfig.projectId,authDomain:firebaseConfig.authDomain});
 firebase.initializeApp(firebaseConfig);
-appDebug('info','Firebase initialisé');
+dbg('info','Firebase initialisé');
 const auth = firebase.auth();
-appDebug('info','Firebase Auth prêt');
+dbg('info','Firebase Auth prêt');
 const db = firebase.firestore();
-appDebug('info','Firestore prêt');
+dbg('info','Firestore prêt');
 // ================= v27 MULTI-BROKER DATA ARCHITECTURE =================
 // Global collections kept intentionally: users, brokers, invitations (email index).
 // Broker-owned data is stored under: brokers/{brokerId}/{drivers,weeks,settings,notifications,...}
@@ -274,10 +291,10 @@ function copyInvite(inv){
   const txt = `Invitation ${inv.role}\nLien : ${appUrl()}\nEmail : ${inv.email}\nMot de passe temporaire : ${inv.tempPassword||''}\n\nPremière connexion : cliquer sur Créer compte avec invitation.`;
   navigator.clipboard?.writeText(txt).then(()=>showMsg('Invitation copiée','ok')).catch(()=>showMsg('Copie impossible','err'));
 }
-async function getProfile(uid){ appDebug('info','Lecture profil users/'+uid); const d = await db.collection('users').doc(uid).get(); appDebug('info','Profil lu',{exists:d.exists,role:d.exists?d.data().role:null,brokerId:d.exists?d.data().brokerId:null,driverId:d.exists?d.data().driverId:null}); return d.exists ? d.data() : null; }
+async function getProfile(uid){ dbg('info','Lecture profil users/'+uid); const d = await db.collection('users').doc(uid).get(); dbg('info','Profil lu',{exists:d.exists,role:d.exists?d.data().role:null,brokerId:d.exists?d.data().brokerId:null,driverId:d.exists?d.data().driverId:null}); return d.exists ? d.data() : null; }
 
 async function recoverProfileFromInvitation(user){
-  appDebug('warn','Profil absent: tentative de récupération par invitation',user?.email||'');
+  dbg('warn','Profil absent: tentative de récupération par invitation',user?.email||'');
   const email = normEmail(user?.email);
   if(!email) return null;
   const invDoc = await gInvRef(email).get().catch(()=>null);
@@ -302,7 +319,7 @@ async function recoverProfileFromInvitation(user){
 }
 
 async function ensureDriverIdentity(user,p){
-  appDebug('info','Vérification liaison chauffeur',{role:p?.role,driverId:p?.driverId,brokerId:p?.brokerId});
+  dbg('info','Vérification liaison chauffeur',{role:p?.role,driverId:p?.driverId,brokerId:p?.brokerId});
   if(!p || p.role !== 'driver' || p.driverId) return p;
   const email = normEmail(user?.email || p.email);
   let driverId = '';
@@ -330,31 +347,31 @@ async function ensureDriverIdentity(user,p){
 }
 
 async function ensureBrokerActive(p){
-  appDebug('info','Vérification statut broker',{role:p?.role,brokerId:p?.brokerId});
+  dbg('info','Vérification statut broker',{role:p?.role,brokerId:p?.brokerId});
   if(p.role !== 'broker') return true;
   const b = await db.collection('brokers').doc(p.brokerId).get();
   if(!b.exists || b.data().active === false){ showMsg('Compte broker désactivé. Contacte le Super Admin.', 'err'); await auth.signOut(); return false; }
   return true;
 }
 auth.onAuthStateChanged(async user=>{
-  appDebug('info','onAuthStateChanged',{connected:!!user,uid:user?.uid||null,email:user?.email||null});
+  dbg('info','onAuthStateChanged',{connected:!!user,uid:user?.uid||null,email:user?.email||null});
   currentUser = user;
   if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
   try{
-    appDebug('info','Début chargement session utilisateur');
+    dbg('info','Début chargement session utilisateur');
     profile = await getProfile(user.uid);
     if(!profile) profile = await recoverProfileFromInvitation(user);
     if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Demande au broker de recréer ou vérifier ton invitation.', 'err'); await auth.signOut(); return; }
     profile = await ensureDriverIdentity(user, profile);
     if(profile.role === 'driver' && !profile.driverId){ showMsg('Compte chauffeur trouvé, mais il n’est pas lié à une fiche chauffeur. Contacte ton broker.', 'err'); await auth.signOut(); return; }
     if(!(await ensureBrokerActive(profile))) return;
-    appDebug('info','Session prête',{role:profile.role,brokerId:profile.brokerId,driverId:profile.driverId});
+    dbg('info','Session prête',{role:profile.role,brokerId:profile.brokerId,driverId:profile.driverId});
     document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
-  }catch(e){ appDebug('error','Erreur chargement session:',e); showMsg(humanError(e), 'err'); await auth.signOut(); }
+  }catch(e){ dbg('error','Erreur chargement session:',e); showMsg(humanError(e), 'err'); await auth.signOut(); }
 });
 $('logoutBtn').onclick = () => auth.signOut();
 async function handleLogin(){
-  appDebug('info','Clic sur Se connecter');
+  dbg('info','Clic sur Se connecter');
   const btn=$('loginBtn');
   const email=normEmail($('loginEmail').value);
   const password=$('loginPass').value;
@@ -364,11 +381,11 @@ async function handleLogin(){
   btn.textContent='Connexion…';
   try{
     const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('La connexion prend trop de temps. Vérifie Internet puis recharge la page.')),20000));
-    appDebug('info','Envoi authentification Firebase',{email});
+    dbg('info','Envoi authentification Firebase',{email});
     const credential=await Promise.race([auth.signInWithEmailAndPassword(email,password),timeout]);
-    appDebug('info','Authentification Firebase réussie',{uid:credential?.user?.uid,email:credential?.user?.email});
+    dbg('info','Authentification Firebase réussie',{uid:credential?.user?.uid,email:credential?.user?.email});
   }catch(e){
-    appDebug('error','Erreur connexion Firebase:',e);
+    dbg('error','Erreur connexion Firebase:',e);
     console.error('Erreur connexion:',e);
     showMsg(humanError(e),'err');
   }finally{
@@ -1228,6 +1245,18 @@ async function renderDriver(){
       }
     }
   };
+
+  // Rejoue les logs produits avant que la console visuelle soit prête.
+  try {
+    (window.__earlyDebugLogs || []).forEach(function(entry){
+      var level=entry[0], args=entry.slice(1);
+      if(level==='error') window.appDebug.error.apply(null,args);
+      else if(level==='warn') window.appDebug.warn.apply(null,args);
+      else if(level==='ok') window.appDebug.ok.apply(null,args);
+      else window.appDebug.log.apply(null,args);
+    });
+    window.__earlyDebugLogs=[];
+  } catch(e) {}
 
   function bind(){
     var t=toggle(), c=document.getElementById('debugClose'), cp=document.getElementById('debugCopy'), cl=document.getElementById('debugClear');
