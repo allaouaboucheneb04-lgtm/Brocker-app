@@ -124,7 +124,7 @@
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27.3 — import PDF corrigé multi-broker</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">Dispatch stable v2 — connexion et chauffeur corrigés</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -141,10 +141,10 @@
       <label>Mot de passe</label>
       <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
       <div class="loginActions">
-        <button id="loginBtn" type="button">Se connecter</button>
+        <button id="loginBtn">Se connecter</button>
       </div>
       <div class="loginLinks">
-        <button id="resetBtn" type="button" class="textBtn">Mot de passe oublié</button>
+        <button id="resetBtn" class="textBtn">Mot de passe oublié</button>
       </div>
 
       <details class="loginPanel">
@@ -153,7 +153,7 @@
           <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
           <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
           <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-          <button id="acceptInviteBtn" type="button" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
+          <button id="acceptInviteBtn" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
         </div>
       </details>
     </div>
@@ -167,6 +167,13 @@
 </div>
 
 <script>
+// Nettoyage des anciens caches/PWA qui pouvaient servir une version cassée.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister())).catch(()=>{});
+}
+if ('caches' in window) {
+  caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});
+}
 const firebaseConfig = {
   apiKey: "AIzaSyC8N0FYmFplqOdaZGzk-fxbqxX3kr3mmDQ",
   authDomain: "brocker-intel.firebaseapp.com",
@@ -176,13 +183,6 @@ const firebaseConfig = {
   appId: "1:641968934387:web:be779857dc0eb93a7bd686",
   measurementId: "G-L0MKXG2MS6"
 };
-if (typeof window.firebase === 'undefined') {
-  const msg = document.getElementById('msg');
-  if (msg) msg.innerHTML = '<div class="notice err">Le module Firebase ne s’est pas chargé. Recharge la page avec Internet activé.</div>';
-  const btn = document.getElementById('loginBtn');
-  if (btn) btn.onclick = () => alert('Firebase ne s’est pas chargé. Recharge la page.');
-  throw new Error('Firebase SDK non chargé');
-}
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -318,26 +318,27 @@ auth.onAuthStateChanged(async user=>{
 });
 $('logoutBtn').onclick = () => auth.signOut();
 async function handleLogin(){
-  const btn = $('loginBtn');
-  const email = normEmail($('loginEmail').value);
-  const password = $('loginPass').value;
-  if(!email || !password){ showMsg('Entre ton email et ton mot de passe.', 'err'); return; }
-  btn.disabled = true;
-  const oldText = btn.textContent;
-  btn.textContent = 'Connexion…';
+  const btn=$('loginBtn');
+  const email=normEmail($('loginEmail').value);
+  const password=$('loginPass').value;
+  if(!email || !password){ showMsg('Entre ton email et ton mot de passe.','err'); return; }
+  btn.disabled=true;
+  const initial=btn.textContent;
+  btn.textContent='Connexion…';
   try{
-    await auth.signInWithEmailAndPassword(email, password);
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('La connexion prend trop de temps. Vérifie Internet puis recharge la page.')),20000));
+    await Promise.race([auth.signInWithEmailAndPassword(email,password),timeout]);
   }catch(e){
-    console.error('Erreur connexion Firebase:', e);
-    showMsg(humanError(e), 'err');
+    console.error('Erreur connexion:',e);
+    showMsg(humanError(e),'err');
   }finally{
-    btn.disabled = false;
-    btn.textContent = oldText;
+    btn.disabled=false;
+    btn.textContent=initial;
   }
 }
-$('loginBtn').onclick = handleLogin;
-$('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
-$('loginEmail').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
+$('loginBtn').onclick=handleLogin;
+$('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter') handleLogin();});
+$('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter') handleLogin();});
 $('resetBtn').onclick = async()=>{ try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 $('acceptInviteBtn').onclick = async()=>{
   let cred = null;
@@ -1122,43 +1123,15 @@ async function renderDriver(){
     $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`);
   }
 }
-
-window.addEventListener('error', function(e){
-  console.error('Erreur JavaScript globale:', e.error || e.message);
-  const box=document.getElementById('msg');
-  if(box && !box.innerText.trim()) box.innerHTML='<div class="notice err">Erreur de chargement de l’application. Recharge la page.</div>';
-});
-window.addEventListener('unhandledrejection', function(e){ console.error('Promesse rejetée:', e.reason); });
 </script>
 
 <button id="pwaInstallBtn" class="pwa-install-btn" type="button">Installer l’application</button>
 <script>
 (function(){
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function(){
-      navigator.serviceWorker.register('./service-worker.js?v=driver-login-fix-2').then(function(reg){ reg.update(); }).catch(function(err){ console.warn('SW error', err); });
-    });
-  }
-  var deferredPrompt = null;
-  var installBtn = document.getElementById('pwaInstallBtn');
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.classList.add('show');
-  });
-  if (installBtn) {
-    installBtn.addEventListener('click', async function(){
-      if (!deferredPrompt) {
-        alert('Sur iPhone : appuie sur Partager puis Ajouter à l’écran d’accueil.');
-        return;
-      }
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.classList.remove('show');
-    });
-  }
-})();
+  // PWA temporairement sans cache pour garantir que GitHub Pages charge toujours le dernier code.
+  var installBtn=document.getElementById('pwaInstallBtn');
+  if(installBtn) installBtn.style.display='none';
+})();;
 </script>
 
 </body>

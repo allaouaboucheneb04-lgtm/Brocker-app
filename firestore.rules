@@ -8,227 +8,76 @@ service cloud.firestore {
     }
 
     function userExists() {
-      return signedIn() &&
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
-    function me() {
+    function userData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
     function isSuperAdmin() {
-      return userExists() &&
-        me().role == "superadmin" &&
-        me().active != false;
+      return userExists() && userData().role == "superadmin";
     }
 
     function isBroker() {
-      return userExists() &&
-        me().role == "broker" &&
-        me().active != false;
+      return userExists() && userData().role == "broker";
     }
 
     function isDriver() {
-      return userExists() &&
-        me().role == "driver" &&
-        me().active != false;
+      return userExists() && userData().role == "driver";
     }
 
     function myBrokerId() {
-      return me().brokerId;
+      return userData().brokerId;
     }
 
     function myDriverId() {
-      return me().driverId;
+      return userData().driverId;
     }
 
-    // ================= USERS =================
+    // Global users. Super admin is created manually only.
     match /users/{uid} {
+      allow read, write: if isSuperAdmin();
+      allow read, update: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn()
         && request.auth.uid == uid
         && request.resource.data.role != "superadmin";
-
-      allow read: if signedIn()
-        && (request.auth.uid == uid || isSuperAdmin());
-
-      allow update: if signedIn()
-        && (request.auth.uid == uid || isSuperAdmin());
-
-      allow delete: if isSuperAdmin();
     }
 
-    // ================= INVITATIONS GLOBALES =================
+    // Global invitation email index, used before app profile exists.
     match /invitations/{inviteId} {
       allow read, write: if isSuperAdmin();
-
-      allow create: if isBroker()
-        && request.resource.data.brokerId == myBrokerId();
-
-      allow read: if isBroker()
-        && resource.data.brokerId == myBrokerId();
-
-      allow update, delete: if isBroker()
-        && resource.data.brokerId == myBrokerId();
-
+      allow read, create, update, delete: if isBroker()
+        && (request.resource.data.brokerId == myBrokerId() || resource.data.brokerId == myBrokerId());
       allow read, update: if signedIn()
-        && resource.data.email == request.auth.token.email;
+        && resource.data.emailLower == request.auth.token.email.lower();
     }
 
-    // ================= BROKER =================
+    // Broker main document.
     match /brokers/{brokerId} {
       allow read, write: if isSuperAdmin();
-
-      allow read, update: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId();
-    }
-
-    // ================= DRIVERS =================
-    match /brokers/{brokerId}/drivers/{driverId} {
-      allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read, update: if isDriver()
-        && brokerId == myBrokerId()
-        && (
-          driverId == myDriverId()
-          || resource.data.uid == request.auth.uid
-        );
-
-      // Première liaison du compte chauffeur à sa fiche.
+      allow read, update: if isBroker() && brokerId == myBrokerId();
+      allow read: if isDriver() && brokerId == myBrokerId();
+      // Invited broker can finalize the broker profile before users/{uid} exists.
       allow read, update: if signedIn()
-        && resource.data.email == request.auth.token.email;
+        && resource.data.emailLower == request.auth.token.email.lower();
     }
 
-    // ================= RELEVÉS =================
-    match /brokers/{brokerId}/weeks/{weekId} {
+    // All data owned by a broker: drivers, weeks, notifications, duplicateInvoices,
+    // settings, parcelDetails, history, rates, vehicles, stations, invitations, etc.
+    match /brokers/{brokerId}/{document=**} {
       allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId()
-        && (
-          resource.data.driverUid == request.auth.uid
-          || resource.data.driverId == myDriverId()
-        );
-    }
-
-    // ================= VÉHICULES =================
-    match /brokers/{brokerId}/vehicles/{vehicleId} {
-      allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId();
-    }
-
-    // ================= DISPATCH =================
-    match /brokers/{brokerId}/dispatch/{dispatchId} {
-      allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId()
-        && resource.data.driverId == myDriverId();
-    }
-
-    // ================= DAILY VEHICLES =================
-    match /brokers/{brokerId}/dailyVehicles/{docId} {
-      allow read, write: if isSuperAdmin();
-
-      allow read, write: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow read: if isDriver()
-        && brokerId == myBrokerId()
-        && resource.data.driverId == myDriverId();
-
-      allow create: if isDriver()
+      allow read, write: if isBroker() && brokerId == myBrokerId();
+      allow read: if isDriver() && brokerId == myBrokerId();
+      allow create, update: if isDriver()
         && brokerId == myBrokerId()
         && request.resource.data.driverId == myDriverId();
-
-      allow update: if isDriver()
-        && brokerId == myBrokerId()
-        && resource.data.driverId == myDriverId()
-        && request.resource.data.driverId == resource.data.driverId;
-    }
-
-    // ================= NOTIFICATIONS =================
-    match /brokers/{brokerId}/notifications/{docId} {
-      allow read, write: if isSuperAdmin();
-
-      allow read, update, delete: if isBroker()
-        && brokerId == myBrokerId();
-
-      allow create: if isDriver()
-        && brokerId == myBrokerId()
-        && request.resource.data.driverId == myDriverId();
-    }
-
-    // ================= PARAMÈTRES / BARÈMES =================
-    match /brokers/{brokerId}/settings/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-      allow read: if isDriver() && brokerId == myBrokerId();
-    }
-
-    match /brokers/{brokerId}/rates/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-      allow read: if isDriver() && brokerId == myBrokerId();
-    }
-
-    match /brokers/{brokerId}/parcelDetails/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-      allow read: if isDriver()
-        && brokerId == myBrokerId()
-        && (
-          resource.data.driverUid == request.auth.uid
-          || resource.data.driverId == myDriverId()
-        );
-    }
-
-    match /brokers/{brokerId}/history/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-      allow read: if isDriver()
-        && brokerId == myBrokerId()
-        && (
-          resource.data.driverUid == request.auth.uid
-          || resource.data.driverId == myDriverId()
-        );
-    }
-
-    match /brokers/{brokerId}/invitations/{inviteId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
+      // Invited users can read/update their own invitation inside a broker.
       allow read, update: if signedIn()
-        && resource.data.email == request.auth.token.email;
+        && resource.data.emailLower == request.auth.token.email.lower();
     }
 
-    match /brokers/{brokerId}/duplicateInvoices/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-    }
-
-    match /brokers/{brokerId}/stations/{docId} {
-      allow read, write: if isSuperAdmin();
-      allow read, write: if isBroker() && brokerId == myBrokerId();
-      allow read: if isDriver() && brokerId == myBrokerId();
-    }
-
-    // ================= BLOCAGE =================
     match /{document=**} {
       allow read, write: if false;
     }

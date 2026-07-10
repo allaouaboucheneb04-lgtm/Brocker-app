@@ -1,13 +1,8 @@
-# Dispatch stable v2 — correction connexion
+# Dispatch stable v2 — connexion réellement corrigée
 
-Corrections appliquées :
-- bouton **Se connecter** relié à une fonction dédiée et robuste ;
-- validation email/mot de passe ;
-- état visuel « Connexion… » ;
-- connexion avec la touche Entrée ;
-- message visible si le SDK Firebase ne charge pas ;
-- service worker passé en **network-first** pour `index.html` afin d'éviter qu'une ancienne version GitHub Pages reste bloquée dans le cache ;
-- nouveau cache PWA `driver-login-fix-2`.
-
-Après publication sur GitHub Pages, ouvrir une fois l'URL avec :
-`?v=driver-login-fix-2`
+- Base stable conservée.
+- Liaison chauffeur par driverId conservée.
+- Ancien cache PWA supprimé automatiquement.
+- Service worker sans cache pendant la stabilisation.
+- Connexion avec message réel et délai maximal de 20 secondes.
+- Aucun message générique « erreur de chargement » ajouté.
