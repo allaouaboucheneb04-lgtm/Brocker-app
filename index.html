@@ -238,6 +238,58 @@ function copyInvite(inv){
   navigator.clipboard?.writeText(txt).then(()=>showMsg('Invitation copiée','ok')).catch(()=>showMsg('Copie impossible','err'));
 }
 async function getProfile(uid){ const d = await db.collection('users').doc(uid).get(); return d.exists ? d.data() : null; }
+
+async function recoverProfileFromInvitation(user){
+  const email = normEmail(user?.email);
+  if(!email) return null;
+  const invDoc = await gInvRef(email).get().catch(()=>null);
+  if(!invDoc || !invDoc.exists) return null;
+  const inv = invDoc.data() || {};
+  if(!['broker','driver'].includes(inv.role)) return null;
+  const recovered = cleanObj({
+    name: inv.name || user.displayName || '',
+    email,
+    emailLower: email,
+    role: inv.role,
+    brokerId: inv.brokerId || '',
+    driverId: inv.role === 'driver' ? (inv.driverId || '') : '',
+    active: true,
+    recoveredAt: now()
+  });
+  await db.collection('users').doc(user.uid).set(recovered,{merge:true});
+  if(inv.role === 'driver' && inv.brokerId && inv.driverId){
+    await bcol('drivers',inv.brokerId).doc(inv.driverId).set({uid:user.uid,email,emailLower:email,active:true,status:'active',profileCompleted:true,recoveredAt:now()},{merge:true});
+  }
+  return recovered;
+}
+
+async function ensureDriverIdentity(user,p){
+  if(!p || p.role !== 'driver' || p.driverId) return p;
+  const email = normEmail(user?.email || p.email);
+  let driverId = '';
+  let brokerId = p.brokerId || '';
+  const invDoc = email ? await gInvRef(email).get().catch(()=>null) : null;
+  if(invDoc && invDoc.exists){
+    const inv = invDoc.data() || {};
+    driverId = inv.driverId || '';
+    brokerId = brokerId || inv.brokerId || '';
+  }
+  if(!driverId && brokerId){
+    const byUid = await bcol('drivers',brokerId).where('uid','==',user.uid).limit(1).get().catch(()=>({docs:[]}));
+    if(byUid.docs.length) driverId = byUid.docs[0].id;
+  }
+  if(!driverId && brokerId && email){
+    const byEmail = await bcol('drivers',brokerId).where('emailLower','==',email).limit(1).get().catch(()=>({docs:[]}));
+    if(byEmail.docs.length) driverId = byEmail.docs[0].id;
+  }
+  if(driverId){
+    const patch={driverId,brokerId,active:p.active!==false};
+    await db.collection('users').doc(user.uid).set(patch,{merge:true});
+    return {...p,...patch};
+  }
+  return p;
+}
+
 async function ensureBrokerActive(p){
   if(p.role !== 'broker') return true;
   const b = await db.collection('brokers').doc(p.brokerId).get();
@@ -249,7 +301,10 @@ auth.onAuthStateChanged(async user=>{
   if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
   try{
     profile = await getProfile(user.uid);
-    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err'); await auth.signOut(); return; }
+    if(!profile) profile = await recoverProfileFromInvitation(user);
+    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Demande au broker de recréer ou vérifier ton invitation.', 'err'); await auth.signOut(); return; }
+    profile = await ensureDriverIdentity(user, profile);
+    if(profile.role === 'driver' && !profile.driverId){ showMsg('Compte chauffeur trouvé, mais il n’est pas lié à une fiche chauffeur. Contacte ton broker.', 'err'); await auth.signOut(); return; }
     if(!(await ensureBrokerActive(profile))) return;
     document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
   }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
@@ -277,7 +332,7 @@ $('acceptInviteBtn').onclick = async()=>{
       await auth.signOut().catch(()=>{});
       return showMsg('Invitation invalide : rôle non autorisé.', 'err');
     }
-    const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', active:true, createdAt:now()});
+    const userData = cleanObj({name:name || inv.name || '', email, emailLower:email, role:inv.role, brokerId:inv.brokerId || '', driverId:inv.role === 'driver' ? (inv.driverId || '') : '', active:true, createdAt:now()});
     await db.collection('users').doc(cred.user.uid).set(userData);
     if(inv.role === 'driver' && inv.driverId){
       await bcol('drivers', inv.brokerId).doc(inv.driverId).set({uid:cred.user.uid, email, emailLower:email, active:true, status:'active', profileCompleted:true, acceptedAt:now()}, {merge:true});

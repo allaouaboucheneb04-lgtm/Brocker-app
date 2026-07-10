@@ -1,4 +1,4 @@
-const CACHE_NAME = 'intelcom-broker-pay-v26-2';
+const CACHE_NAME = 'intelcom-broker-pay-dispatch-stable-v2-driver-fix-1';
 const APP_SHELL = [
   './',
   './index.html',
