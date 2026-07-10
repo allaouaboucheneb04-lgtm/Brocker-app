@@ -141,10 +141,10 @@
       <label>Mot de passe</label>
       <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
       <div class="loginActions">
-        <button id="loginBtn">Se connecter</button>
+        <button id="loginBtn" type="button">Se connecter</button>
       </div>
       <div class="loginLinks">
-        <button id="resetBtn" class="textBtn">Mot de passe oublié</button>
+        <button id="resetBtn" type="button" class="textBtn">Mot de passe oublié</button>
       </div>
 
       <details class="loginPanel">
@@ -153,7 +153,7 @@
           <label>Nom</label><input id="invName" placeholder="Nom complet" autocomplete="name">
           <label>Email invité</label><input id="invEmail" type="email" placeholder="email invité" autocomplete="email">
           <label>Mot de passe à créer</label><input id="invPass" type="password" placeholder="minimum 6 caractères" autocomplete="new-password">
-          <button id="acceptInviteBtn" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
+          <button id="acceptInviteBtn" type="button" class="green" style="margin-top:12px;width:100%">Créer mon compte</button>
         </div>
       </details>
     </div>
@@ -176,6 +176,13 @@ const firebaseConfig = {
   appId: "1:641968934387:web:be779857dc0eb93a7bd686",
   measurementId: "G-L0MKXG2MS6"
 };
+if (typeof window.firebase === 'undefined') {
+  const msg = document.getElementById('msg');
+  if (msg) msg.innerHTML = '<div class="notice err">Le module Firebase ne s’est pas chargé. Recharge la page avec Internet activé.</div>';
+  const btn = document.getElementById('loginBtn');
+  if (btn) btn.onclick = () => alert('Firebase ne s’est pas chargé. Recharge la page.');
+  throw new Error('Firebase SDK non chargé');
+}
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -310,7 +317,27 @@ auth.onAuthStateChanged(async user=>{
   }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
 });
 $('logoutBtn').onclick = () => auth.signOut();
-$('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
+async function handleLogin(){
+  const btn = $('loginBtn');
+  const email = normEmail($('loginEmail').value);
+  const password = $('loginPass').value;
+  if(!email || !password){ showMsg('Entre ton email et ton mot de passe.', 'err'); return; }
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = 'Connexion…';
+  try{
+    await auth.signInWithEmailAndPassword(email, password);
+  }catch(e){
+    console.error('Erreur connexion Firebase:', e);
+    showMsg(humanError(e), 'err');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+$('loginBtn').onclick = handleLogin;
+$('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
+$('loginEmail').addEventListener('keydown', e=>{ if(e.key==='Enter') handleLogin(); });
 $('resetBtn').onclick = async()=>{ try{ const email=normEmail($('loginEmail').value); if(!email) return showMsg('Entre ton email','err'); await auth.sendPasswordResetEmail(email); showMsg('Email de réinitialisation envoyé','ok'); }catch(e){ showMsg(humanError(e),'err'); } };
 $('acceptInviteBtn').onclick = async()=>{
   let cred = null;
@@ -1095,6 +1122,13 @@ async function renderDriver(){
     $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`);
   }
 }
+
+window.addEventListener('error', function(e){
+  console.error('Erreur JavaScript globale:', e.error || e.message);
+  const box=document.getElementById('msg');
+  if(box && !box.innerText.trim()) box.innerHTML='<div class="notice err">Erreur de chargement de l’application. Recharge la page.</div>';
+});
+window.addEventListener('unhandledrejection', function(e){ console.error('Promesse rejetée:', e.reason); });
 </script>
 
 <button id="pwaInstallBtn" class="pwa-install-btn" type="button">Installer l’application</button>
@@ -1102,7 +1136,7 @@ async function renderDriver(){
 (function(){
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function(){
-      navigator.serviceWorker.register('./service-worker.js').catch(function(err){ console.warn('SW error', err); });
+      navigator.serviceWorker.register('./service-worker.js?v=driver-login-fix-2').then(function(reg){ reg.update(); }).catch(function(err){ console.warn('SW error', err); });
     });
   }
   var deferredPrompt = null;
