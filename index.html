@@ -114,31 +114,17 @@
     @media(max-width:720px){.pwa-install-btn{left:16px;right:16px;justify-content:center}}
 
   </style>
-  <script>
-    // v28.1 — détecte l'échec de chargement d'une librairie externe (réseau, bloqueur de pub, CDN indisponible)
-    // pour éviter un écran de connexion silencieusement mort.
-    window.__criticalLibFailed = false;
-    window.__onLibError = function(libName){
-      return function(){
-        window.__criticalLibFailed = true;
-        var box = document.getElementById('msg');
-        if(box){
-          box.innerHTML = '<div class="notice err"><b>Chargement impossible.</b><br>La librairie "'+libName+'" n\'a pas pu être chargée (connexion internet instable, bloqueur de publicité ou pare-feu). Vérifie ta connexion puis recharge la page.</div>';
-        }
-      };
-    };
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" onerror="window.__onLibError('firebase-app')()"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js" onerror="window.__onLibError('firebase-auth')()"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js" onerror="window.__onLibError('firebase-firestore')()"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" onerror="window.__onLibError('pdf.js')()"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="window.__onLibError('jsPDF')()"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" onerror="window.__onLibError('JSZip')()"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="login-mode">
 <div class="wrap">
   <div class="top">
-    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v28 — stable finances et authentification</div></div>
+    <div><div class="brand">Broker Intelcom Pay</div><div class="sub">v27.3 — import PDF corrigé multi-broker</div></div>
     <div class="row"><span id="userPill" class="pill">Non connecté</span><button id="logoutBtn" class="secondary hidden">Déconnexion</button></div>
   </div>
   <div id="msg"></div>
@@ -181,10 +167,6 @@
 </div>
 
 <script>
-try{
-if (window.__criticalLibFailed || typeof firebase === 'undefined') {
-  throw new Error("Une librairie essentielle (Firebase) n'a pas pu être chargée. Vérifie ta connexion internet puis recharge la page.");
-}
 const firebaseConfig = {
   apiKey: "AIzaSyC8N0FYmFplqOdaZGzk-fxbqxX3kr3mmDQ",
   authDomain: "brocker-intel.firebaseapp.com",
@@ -264,45 +246,13 @@ async function ensureBrokerActive(p){
 }
 auth.onAuthStateChanged(async user=>{
   currentUser = user;
-  if(!user){
-    document.body.classList.add('login-mode');
-    profile=null;
-    $('authView').classList.remove('hidden');
-    $('appView').classList.add('hidden');
-    $('logoutBtn').classList.add('hidden');
-    $('userPill').textContent='Non connecté';
-    return;
-  }
-
+  if(!user){ document.body.classList.add('login-mode'); profile=null; $('authView').classList.remove('hidden'); $('appView').classList.add('hidden'); $('logoutBtn').classList.add('hidden'); $('userPill').textContent='Non connecté'; return; }
   try{
     profile = await getProfile(user.uid);
-    if(!profile){
-      showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err');
-      await auth.signOut();
-      return;
-    }
+    if(!profile){ showMsg('Compte Auth trouvé, mais profil app manquant. Si tu as une invitation, utilise Créer compte avec invitation. Sinon contacte l’administrateur.', 'err'); await auth.signOut(); return; }
     if(!(await ensureBrokerActive(profile))) return;
-  }catch(e){
-    console.error('Erreur authentification/profil', e);
-    showMsg(humanError(e), 'err');
-    await auth.signOut();
-    return;
-  }
-
-  document.body.classList.remove('login-mode');
-  $('authView').classList.add('hidden');
-  $('appView').classList.remove('hidden');
-  $('logoutBtn').classList.remove('hidden');
-  $('userPill').textContent = `${profile.role} — ${user.email}`;
-  renderTabs();
-
-  try{
-    await render();
-  }catch(e){
-    console.error('Erreur rendu application', e);
-    $('content').innerHTML = `<div class="notice warn"><b>Connexion réussie.</b><br>Une section de l’application n’a pas pu être chargée : ${safe(humanError(e))}</div>`;
-    showMsg('Connexion réussie, mais une section contient une erreur.', 'err');
-  }
+    document.body.classList.remove('login-mode'); $('authView').classList.add('hidden'); $('appView').classList.remove('hidden'); $('logoutBtn').classList.remove('hidden'); $('userPill').textContent = `${profile.role} — ${user.email}`; renderTabs(); render();
+  }catch(e){ showMsg(humanError(e), 'err'); await auth.signOut(); }
 });
 $('logoutBtn').onclick = () => auth.signOut();
 $('loginBtn').onclick = async()=>{ try{ await auth.signInWithEmailAndPassword(normEmail($('loginEmail').value), $('loginPass').value); }catch(e){ showMsg(humanError(e), 'err'); } };
@@ -497,11 +447,7 @@ async function renderBroker(){
     const disabledDrivers=drivers.size-activeDrivers;
     const pendingDrivers=drivers.docs.filter(d=>d.data().status==='pending' || d.data().profileCompleted===false);
     const unreadNotifs=notifs.docs.filter(d=>d.data().read!==true);
-    const financeFilter=getFinancialFilter('broker');
-    const financeWeeks=weeks.docs.map(d=>({id:d.id,...d.data()})).filter(w=>financialPeriodMatch(w,financeFilter.mode,financeFilter.value));
-    const financeTotals=financeWeeks.reduce((a,w)=>{const v=weekFinancialValues(w); a.gross+=v.gross;a.commission+=v.commission;a.fees+=v.fees;a.profit+=v.brokerProfit;a.driverNet+=v.net;return a;},{gross:0,commission:0,fees:0,profit:0,driverNet:0});
     c.innerHTML = `<div class="grid">
-      ${card(`<div class="sectionTitle"><h2>💰 Bénéfice broker</h2></div>${financialFilterControls('broker',financeFilter.mode,financeFilter.value)}<div class="summaryBar"><div class="feeBox"><b>Bénéfice brut</b><div class="big">${money(financeTotals.profit)}</div></div><div class="feeBox"><b>Commissions</b><div class="big">${money(financeTotals.commission)}</div></div><div class="feeBox"><b>Frais broker</b><div class="big">${money(financeTotals.fees)}</div></div><div class="feeBox"><b>Versé aux chauffeurs</b><div class="big">${money(financeTotals.driverNet)}</div></div></div><p class="muted">Calcul : commissions + frais broker. ${financeWeeks.length} relevé(s) dans la période.</p>`,'col-12')}
       ${statsCard('Chauffeurs', `${activeDrivers}/${max}`, `Actifs (${disabledDrivers} désactivés)`, 'col-3')}
       ${statsCard('À compléter', pendingDrivers.length, 'Chauffeurs importés depuis PDF', 'col-3')}
       ${statsCard('Notifications', unreadNotifs.length, 'Non lues', 'col-3')}
@@ -585,85 +531,6 @@ function fmtDateFr(dateStr, opts={}){ const d=new Date(String(dateStr||'')+'T12:
 function weekPeriodFromWeek(week){ const ds=weekDatesFromWeek(week); return {start:ds[0], end:ds[6], label:`${fmtDateFr(ds[0],{long:true,year:true})} au ${fmtDateFr(ds[6],{long:true,year:true})}`, short:`${fmtDateFr(ds[0])} → ${fmtDateFr(ds[6])}`}; }
 function weekLabel(week, from='', to=''){ if(from&&to) return `${fmtDateFr(from,{long:false,year:true})} → ${fmtDateFr(to,{long:false,year:true})}<br><span class="muted">Semaine ${safe(week||isoWeekFromDateString(from))}</span>`; const p=weekPeriodFromWeek(week); return `${p.short}<br><span class="muted">Semaine ${safe(week)}</span>`; }
 function weekPlainLabel(week, from='', to=''){ if(from&&to) return `${fmtDateFr(from,{long:true,year:true})} au ${fmtDateFr(to,{long:true,year:true})} — semaine ${week||isoWeekFromDateString(from)}`; const p=weekPeriodFromWeek(week); return `${p.label} — semaine ${week}`; }
-
-function currentMonthValue(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
-function currentYearValue(){ return String(new Date().getFullYear()); }
-function dateValueToIso(raw){
-  if(!raw) return '';
-  if(typeof raw === 'string') return raw.slice(0,10);
-  if(raw?.toDate instanceof Function){
-    const d=raw.toDate();
-    return Number.isNaN(d.getTime()) ? '' : toIsoDateLocal(d);
-  }
-  if(raw instanceof Date) return Number.isNaN(raw.getTime()) ? '' : toIsoDateLocal(raw);
-  return '';
-}
-function weekStartDateValue(w={}){
-  const direct=dateValueToIso(w.from||w.periodFrom||w.weekStart||w.startDate||w.dateFrom);
-  if(direct) return direct;
-  try{return weekPeriodFromWeek(String(w.week||'')).start||'';}catch(e){return '';}
-}
-function financialPeriodMatch(w, mode, value){
-  if(mode==='all') return true;
-  const d=weekStartDateValue(w||{});
-  if(!d) return false;
-  if(mode==='year') return d.slice(0,4)===String(value||currentYearValue());
-  return d.slice(0,7)===String(value||currentMonthValue());
-}
-function financialFilterControls(prefix, mode, value){
-  const isMonth=mode==='month', isYear=mode==='year';
-  return `<div class="row" style="align-items:end;margin:8px 0 14px">
-    <div style="min-width:170px"><label>Période</label><select onchange="setFinancialFilter('${prefix}','mode',this.value)">
-      <option value="month" ${isMonth?'selected':''}>Par mois</option>
-      <option value="year" ${isYear?'selected':''}>Par année</option>
-      <option value="all" ${mode==='all'?'selected':''}>Toutes les périodes</option>
-    </select></div>
-    ${isMonth?`<div style="min-width:170px"><label>Mois</label><input type="month" value="${safe(value||currentMonthValue())}" onchange="setFinancialFilter('${prefix}','value',this.value)"></div>`:''}
-    ${isYear?`<div style="min-width:130px"><label>Année</label><input type="number" min="2020" max="2100" value="${safe(value||currentYearValue())}" onchange="setFinancialFilter('${prefix}','value',this.value)"></div>`:''}
-  </div>`;
-}
-window.setFinancialFilter=(prefix,key,value)=>{
-  localStorage.setItem(prefix+'_finance_'+key,value);
-  if(key==='mode'){
-    if(value==='month') localStorage.setItem(prefix+'_finance_value',currentMonthValue());
-    if(value==='year') localStorage.setItem(prefix+'_finance_value',currentYearValue());
-  }
-  render();
-};
-function getFinancialFilter(prefix){
-  const mode=localStorage.getItem(prefix+'_finance_mode')||'month';
-  let value=localStorage.getItem(prefix+'_finance_value')||'';
-  if(!value) value=mode==='year'?currentYearValue():currentMonthValue();
-  return {mode,value};
-}
-function finiteMoney(...values){
-  for(const value of values){
-    if(value === null || value === undefined || value === '') continue;
-    const parsed = typeof value === 'number' ? value : parseAmount(value);
-    if(Number.isFinite(parsed)) return parsed;
-  }
-  return 0;
-}
-function weekFinancialValues(w={}){
-  const gross=finiteMoney(w.totalIntelcom,w.subtotalIntelcom,w.totalInvoice,w.gross,w.amountIntelcom);
-  const commission=finiteMoney(w.commission,w.commissionAmount,w.brokerCommission);
-  const fees=finiteMoney(w.brokerFees,w.fees,w.feeTotal);
-  const deduction=finiteMoney(w.deduction,w.deductions);
-  const advance=finiteMoney(w.advance,w.advances);
-  const storedNet=finiteMoney(w.total,w.totalNet,w.net,w.driverNet);
-  const calculatedNet=gross-commission-fees-deduction-advance;
-  const net=(w.total!==undefined||w.totalNet!==undefined||w.net!==undefined||w.driverNet!==undefined) ? storedNet : calculatedNet;
-  return {
-    gross:Number.isFinite(gross)?gross:0,
-    commission:Number.isFinite(commission)?commission:0,
-    fees:Number.isFinite(fees)?fees:0,
-    deduction:Number.isFinite(deduction)?deduction:0,
-    advance:Number.isFinite(advance)?advance:0,
-    net:Number.isFinite(net)?net:0,
-    brokerProfit:Number.isFinite(commission+fees)?commission+fees:0
-  };
-}
-
 function dispatchDayHeader(dateStr){ const d=new Date(String(dateStr)+'T12:00:00'); const day=d.toLocaleDateString('fr-CA',{weekday:'short'}).replace('.',''); return `${day.charAt(0).toUpperCase()+day.slice(1)}<br>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`; }
 function dispatchSelectHtml(driverId,date,vehicles){ const id=`disp_${driverId}_${date}`.replace(/[^A-Za-z0-9_]/g,'_'); return `<select id="${id}"><option value="rest">Repos</option>${vehicles.map(v=>`<option value="${v.id}|${safe(v.name)}|${safe(v.plate)}|${v.type}">${safe(v.name)} — ${safe(v.plate)} (${VEHICLE_LABEL[v.type]||v.type})</option>`).join('')}</select>`; }
 window.saveDispatchForDriver=async(driverId)=>{ try{ const brokerId=profile.brokerId; const week=$('dispatchWeek').value.trim()||currentIsoWeek(); const driverDoc=await bcol('drivers',brokerId).doc(driverId).get(); const driver=driverDoc.exists?driverDoc.data():{}; const days={}; for(const date of weekDatesFromWeek(week)){ const el=$(`disp_${driverId}_${date}`.replace(/[^A-Za-z0-9_]/g,'_')); const val=el?.value||'rest'; if(val==='rest'){ days[date]={working:false,vehicleId:null,vehicleName:'Repos',plate:'',vehicleType:''}; } else { const [vehicleId,vehicleName,plate,vehicleType]=val.split('|'); days[date]={working:true,vehicleId,vehicleName,plate,vehicleType,confirmedByDriver:false,conflictConfirmed:false}; } } await bcol('dispatch',brokerId).doc(`${week}_${driverId}`).set({brokerId,week,driverId,driverName:driver.name||'',driverCode:driver.code||'',days,updatedAt:now(),updatedBy:currentUser.uid},{merge:true}); showMsg('Dispatch sauvegardé pour '+(driver.name||driverId),'ok'); }catch(e){ showMsg(humanError(e),'err'); } };
@@ -1155,13 +1022,7 @@ async function renderDriver(){
     const byKey = {};
     docs.forEach(doc=>{ const w=doc.data(); const key=(w.brokerId||profile.brokerId||'')+'_'+(w.driverCode||w.driverId||'')+'_'+(w.week||''); const old=byKey[key]; if(!old || String(w.updatedAt||w.createdAt||'') > String(old.data.updatedAt||old.data.createdAt||'')) byKey[key]={id:(doc.ref?.path || doc.id),data:w}; });
     const rows = Object.values(byKey);
-    const financeFilter=getFinancialFilter('driver');
-    const filteredRows=rows.filter(o=>financialPeriodMatch(o.data,financeFilter.mode,financeFilter.value));
-    const totals=filteredRows.reduce((a,o)=>{const v=weekFinancialValues(o.data);a.gross+=v.gross;a.commission+=v.commission;a.fees+=v.fees;a.deduction+=v.deduction;a.advance+=v.advance;a.expenses+=v.commission+v.fees+v.deduction+v.advance;a.net+=v.net;return a;},{gross:0,commission:0,fees:0,deduction:0,advance:0,expenses:0,net:0});
-    $('content').innerHTML = `<div class="grid">
-      ${card(`<div class="sectionTitle"><h2>💰 Mes revenus et dépenses</h2></div>${financialFilterControls('driver',financeFilter.mode,financeFilter.value)}<div class="summaryBar"><div class="feeBox"><b>Montant Intelcom</b><div class="big">${money(totals.gross)}</div></div><div class="feeBox"><b>Dépenses totales</b><div class="big">${money(totals.expenses)}</div></div><div class="feeBox"><b>Net reçu</b><div class="big">${money(totals.net)}</div></div><div class="feeBox"><b>Relevés</b><div class="big">${filteredRows.length}</div></div></div><div class="wide"><table><tr><th>Commission broker</th><th>Frais broker</th><th>Déductions</th><th>Avances</th></tr><tr><td>${money(totals.commission)}</td><td>${money(totals.fees)}</td><td>${money(totals.deduction)}</td><td>${money(totals.advance)}</td></tr></table></div>`,'col-12')}
-      ${card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Période</th><th>Semaine</th><th>Montant Intelcom</th><th>Dépenses</th><th>Net</th><th>Statut</th><th>PDF</th></tr>${filteredRows.map(o=>{const w=o.data;const v=weekFinancialValues(w);return `<tr><td>${weekLabel(w.week,w.from,w.to)}</td><td>${safe(w.week)}</td><td>${money(v.gross)}</td><td>${money(v.commission+v.fees+v.deduction+v.advance)}</td><td><b>${money(v.net)}</b></td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="7">Aucun relevé pour cette période</td></tr>'}</table></div>`,'col-12')}
-    </div>`;
+    $('content').innerHTML = card(`<div class="sectionTitle"><h2>Mes relevés</h2><input id="driverWeekSearch" class="search" placeholder="Rechercher semaine ou chauffeur" oninput="filterRows('driverWeeksTable', this.value)"></div><p>Connecté : ${safe(profile.name || currentUser.email)}</p><div class="notice bluebox">Clique sur <b>Télécharger PDF</b> pour générer ton relevé directement, sans demander au broker.</div><div class="wide"><table id="driverWeeksTable"><tr><th>Période</th><th>Semaine</th><th>Chauffeur</th><th>Total</th><th>Statut</th><th>PDF</th></tr>${rows.map(o=>{const w=o.data;return `<tr><td>${weekLabel(w.week,w.from,w.to)}</td><td>${safe(w.week)}</td><td>${safe(w.driverName||'')}</td><td>${money(w.total)}</td><td>${safe(w.status||'disponible')}</td><td><button class="mini" onclick="downloadDriverWeek('${o.id}')">Télécharger PDF</button></td></tr>`}).join('')||'<tr><td colspan="6">Aucun relevé disponible</td></tr>'}</table></div>`);
   }
   if(currentTab==='vehicles'){
     const brokerId=profile.brokerId; const driverId=profile.driverId || currentUser.uid; const week=localStorage.getItem('driver_week')||currentIsoWeek();
@@ -1177,13 +1038,6 @@ async function renderDriver(){
   }
   if(currentTab==='profile'){
     $('content').innerHTML=card(`<h2>Profil</h2><p>Nom : ${safe(profile.name||'')}</p><p>Email : ${safe(currentUser.email)}</p><p>Rôle : Chauffeur</p>`);
-  }
-}
-}catch(__fatalErr){
-  console.error('Erreur fatale au chargement de l\'application', __fatalErr);
-  var __msgBox = document.getElementById('msg');
-  if(__msgBox){
-    __msgBox.innerHTML = '<div class="notice err"><b>L\'application n\'a pas pu démarrer.</b><br>'+(__fatalErr && __fatalErr.message ? __fatalErr.message.replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}) : 'Erreur inconnue')+'<br><span class="muted">Essaie de recharger la page. Si le problème persiste, vérifie ta connexion internet.</span></div>';
   }
 }
 </script>
